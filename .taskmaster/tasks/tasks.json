@@ -1,0 +1,1239 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Design Article Firestore Schema",
+        "description": "Create DB_SCHEMA.md documenting the Firestore schema for articles collection with all required fields including thumbnailURL, createdAt, and isUserArticle flag",
+        "details": "Create `backend/docs/DB_SCHEMA.md` with schema definition:\n\n```\narticles/{docId}\n├── id: string (auto-generated)\n├── author: string (required)\n├── title: string (required)\n├── description: string\n├── url: string?\n├── publishedAt: timestamp (required)\n├── content: string (required)\n├── thumbnailURL: string (Cloud Storage path: media/articles/{filename})\n├── createdAt: timestamp (required)\n└── isUserArticle: boolean (true for user uploads)\n```\nInclude field types, descriptions, nullability, and validation rules. Reference Cloud Storage path format exactly as `media/articles/{uuid}.{ext}`",
+        "testStrategy": "Verify file exists with all required fields documented. Manually validate schema matches ArticleEntity extension requirements. Check thumbnailURL path format references correct Storage folder structure.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create DB_SCHEMA.md file structure",
+            "description": "Initialize the backend/docs/DB_SCHEMA.md file with the articles collection tree structure and basic field list",
+            "dependencies": [],
+            "details": "Create file at backend/docs/DB_SCHEMA.md. Add markdown header # Articles Collection Schema. Include the tree structure: articles/{docId} with all 10 fields listed exactly as specified: id, author, title, description, url, publishedAt, content, thumbnailURL, createdAt, isUserArticle.",
+            "status": "pending",
+            "testStrategy": "Verify file exists at correct path with proper markdown header and complete tree structure matching specification"
+          },
+          {
+            "id": 2,
+            "title": "Document field types and nullability",
+            "description": "Add detailed field specifications including exact Firestore data types, nullability indicators, and basic descriptions for each field",
+            "dependencies": [
+              1
+            ],
+            "details": "For each field, specify: type (string/timestamp/boolean), nullability (required or optional with ? notation), and brief purpose. Use table format with columns: Field, Type, Required, Description. Match types exactly: string for id/author/title/etc., timestamp for publishedAt/createdAt, boolean for isUserArticle.",
+            "status": "pending",
+            "testStrategy": "Validate table contains all 10 fields with correct types (string/timestamp/boolean) and nullability matching spec (5 required fields)"
+          },
+          {
+            "id": 3,
+            "title": "Add field descriptions and validation rules",
+            "description": "Expand each field documentation with comprehensive descriptions, validation rules, and business logic explanations",
+            "dependencies": [
+              2
+            ],
+            "details": "author: User ID or display name; title: Article headline (max 200 chars); description: Summary (max 500 chars); url: External source link; publishedAt: Article publication date; content: Full article text; thumbnailURL: Cloud Storage path format; createdAt: Document creation timestamp; isUserArticle: true for user-generated content.",
+            "status": "pending",
+            "testStrategy": "Check descriptions explain business purpose. Verify validation rules specify character limits and data constraints where applicable"
+          },
+          {
+            "id": 4,
+            "title": "Specify thumbnailURL Cloud Storage format",
+            "description": "Document exact Cloud Storage path format for thumbnailURL field with example and validation requirements",
+            "dependencies": [
+              3
+            ],
+            "details": "Update thumbnailURL field to specify exact format: media/articles/{uuid}.{ext} where uuid is auto-generated unique identifier and ext is image extension (jpg/png/webp). Include validation: must match regex pattern, reference Storage bucket structure.",
+            "status": "pending",
+            "testStrategy": "Verify thumbnailURL section contains exact path format media/articles/{uuid}.{ext} with regex validation example and Storage reference"
+          },
+          {
+            "id": 5,
+            "title": "Add schema best practices and indexes",
+            "description": "Include Firestore best practices section, recommended indexes, and usage guidelines for the articles collection",
+            "dependencies": [
+              4
+            ],
+            "details": "Add ## Best Practices section covering: document size limits (<20KB), indexing for common queries (author, createdAt, isUserArticle), query patterns to avoid full collection scans. Recommend composite indexes for publishedAt+isUserArticle. Reference ArticleEntity mapping.",
+            "status": "pending",
+            "testStrategy": "Confirm Best Practices section exists with index recommendations and query optimization guidance matching Firestore best practices"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Setup Firebase Project and Local Emulator",
+        "description": "Create Firebase project, enable Firestore and Storage, setup Local Emulator Suite with correct ports, initialize articles collection structure",
+        "details": "Run `firebase login`, `firebase projects:create symmetry-news-[unique]`, enable Firestore (production mode) and Storage. Configure `.firebaserc` with project ID. Install Firebase CLI v13.0+ and run `firebase init emulators` with ports: Firestore=8080, Storage=9199. Create `media/articles/` folder structure in Storage rules. Test: `firebase emulators:start --only firestore,storage`. Verify emulator accessible at localhost:4000",
+        "testStrategy": "`firebase emulators:start` runs without port conflicts. Access http://localhost:4000 shows emulator dashboard. Create test document in articles collection via console. Verify media/articles/ folder exists in Storage emulator.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Login to Firebase CLI and Create Project",
+            "description": "Authenticate with Firebase CLI and create new project named symmetry-news-[unique identifier]",
+            "dependencies": [],
+            "details": "Run `firebase login` to authenticate. Execute `firebase projects:create symmetry-news-[unique]` using a unique suffix like current timestamp or random string. Note the generated project ID for later steps.",
+            "status": "pending",
+            "testStrategy": "Verify login successful with `firebase projects:list` shows account. Confirm project creation by checking Firebase console or `firebase projects:list` output contains new project."
+          },
+          {
+            "id": 2,
+            "title": "Enable Firestore and Storage Services",
+            "description": "Navigate to Firebase console and enable Firestore database in production mode and Cloud Storage",
+            "dependencies": [
+              1
+            ],
+            "details": "Go to Firebase Console > project overview. Select Firestore Database > Create database (start in production mode, choose default location). Enable Storage via Storage dashboard. Verify both services show as active.",
+            "status": "pending",
+            "testStrategy": "Firestore console shows 'Production mode' active. Storage bucket listed as gs://symmetry-news-[id].appspot.com without errors."
+          },
+          {
+            "id": 3,
+            "title": "Configure Firebase CLI Project and Install Emulators",
+            "description": "Set project in .firebaserc and install/configure Firebase Emulator Suite with specified ports",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Run `firebase use symmetry-news-[id]` or manually edit `.firebaserc` with project ID. Ensure Firebase CLI v13.0+ via `firebase --version`. Execute `firebase init emulators` selecting Firestore (port 8080) and Storage (port 9199).",
+            "status": "pending",
+            "testStrategy": "`.firebaserc` contains correct projectId. `firebase emulators:list` shows Firestore:8080, Storage:9199 configured without errors."
+          },
+          {
+            "id": 4,
+            "title": "Setup Storage Rules for Articles Folder Structure",
+            "description": "Configure Firebase Storage security rules to create media/articles/ folder structure",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Edit `storage.rules`: allow read, write: if request.auth != null; for path media/articles/{allPaths=**}. Deploy rules with `firebase deploy --only storage`. Create initial folder structure via Storage emulator or console.",
+            "status": "pending",
+            "testStrategy": "Storage rules deploy successfully. Emulator Storage UI shows media/articles/ folder accessible. Test authenticated write to folder path."
+          },
+          {
+            "id": 5,
+            "title": "Test Local Emulator Suite Startup and Dashboard",
+            "description": "Start Firebase emulators and verify Firestore/Storage accessibility with articles collection init",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Run `firebase emulators:start --only firestore,storage`. Access http://localhost:4000 dashboard. Create test document in 'articles' collection via emulator UI. Verify media/articles/ folder in Storage emulator.",
+            "status": "pending",
+            "testStrategy": "`firebase emulators:start` runs without port conflicts. Dashboard loads at localhost:4000. Test article document queryable. Storage folder visible and writable."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Firestore and Storage Security Rules",
+        "description": "Write and deploy security rules for Firestore (public read, auth write, field validation) and Storage (public read, auth write, 10MB image limit)",
+        "details": "**Firestore rules (`backend/firestore.rules`):\n```\nrules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /articles/{doc} {\n      allow read: if true;\n      allow create, update, delete: if request.auth != null &&\n        request.resource.data.keys().hasAll(['title', 'content', 'author', 'thumbnailURL', 'publishedAt', 'createdAt']) &&\n        request.resource.data.thumbnailURL is string && request.resource.data.thumbnailURL.size() > 0;\n    }\n  }\n}\n```\n**Storage rules (`backend/storage.rules`):\n```\nrules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /media/articles/{allPaths=**} {\n      allow read: if true;\n      allow write: if request.auth != null &&\n        request.resource.size < 10 * 1024 * 1024 &&\n        request.resource.contentType.matches('image/.*');\n    }\n  }\n}\n```\nDeploy: `firebase deploy --only firestore:rules,storage:rules`",
+        "testStrategy": "Test rules in Firebase console Rules Playground: verify unauth writes blocked, required fields validated, 10MB+ files rejected, non-image uploads rejected, public reads allowed.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review and Refine Firestore Security Rules",
+            "description": "Analyze existing Firestore rules for articles collection, verify public read access, authenticated writes, and field validation requirements.",
+            "dependencies": [],
+            "details": "Check rules_version='2', match /articles/{doc}, allow read: if true, allow create/update/delete: if request.auth != null && required fields present (title, content, author, thumbnailURL, publishedAt, createdAt) && thumbnailURL is non-empty string. Fix any syntax issues like missing closing braces.",
+            "status": "pending",
+            "testStrategy": "Use Firebase Console Rules Playground: Test unauthenticated read (should pass), unauth write (fail), auth write missing fields (fail), auth write with all fields (pass)"
+          },
+          {
+            "id": 2,
+            "title": "Review and Refine Storage Security Rules",
+            "description": "Validate existing Storage rules for media/articles path, ensure public read, authenticated writes with 10MB limit and image content type.",
+            "dependencies": [],
+            "details": "Verify match /media/articles/{allPaths=**}, allow read: if true, allow write: if request.auth != null && request.resource.size < 10*1024*1024 && request.resource.contentType.matches('image/.*'). Ensure rules_version='2'.",
+            "status": "pending",
+            "testStrategy": "Rules Playground: Test public read (pass), unauth write (fail), auth write >10MB image (fail), auth write non-image (fail), auth write <10MB image (pass)"
+          },
+          {
+            "id": 3,
+            "title": "Update Rules Files in Project",
+            "description": "Ensure Firestore rules are saved in backend/firestore.rules and Storage rules in backend/storage.rules with all refinements applied.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Copy provided rule content to respective files, format properly, ensure no syntax errors. Verify file paths match deploy command expectations.",
+            "status": "pending",
+            "testStrategy": "Validate syntax in Firebase Console by pasting rules - should show no errors. Local linting if available."
+          },
+          {
+            "id": 4,
+            "title": "Deploy Security Rules to Firebase",
+            "description": "Execute Firebase CLI deploy command for both Firestore and Storage rules simultaneously.",
+            "dependencies": [
+              3
+            ],
+            "details": "Run `firebase deploy --only firestore:rules,storage:rules` from project root. Monitor output for success/failure. Note propagation may take up to 10 minutes.",
+            "status": "pending",
+            "testStrategy": "Verify deployment success in CLI output and Firebase Console (Firestore/Storage > Rules tab shows updated rules and last deploy time)"
+          },
+          {
+            "id": 5,
+            "title": "Test Deployed Rules End-to-End",
+            "description": "Comprehensive testing using Rules Playground and client-side integration to validate all security scenarios.",
+            "dependencies": [
+              4
+            ],
+            "details": "Test all scenarios from test strategies in steps 1-2. Integration test: Use app with auth to upload article+image, verify thumbnail uploads first then article doc creates successfully. Test unauth public read.",
+            "status": "pending",
+            "testStrategy": "Rules Playground full coverage + client integration: successful auth upload flow, public read articles list, blocked unauth writes, validation failures. Monitor Firebase logs for violations."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Firebase Flutter Integration Setup",
+        "description": "Configure FlutterFire CLI, generate firebase_options.dart, initialize Firebase in main.dart, verify no connection errors",
+        "details": "Run `dart pub global activate flutterfire_cli`, `flutterfire configure --project=symmetry-news-[id] --platforms=android,ios,web`. Add to `main.dart`:\n```dart\nimport 'package:firebase_core/firebase_core.dart';\nimport 'firebase_options.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);\n  runApp(MyApp());\n}\n```\nUpdate `pubspec.yaml` dependencies: `firebase_core: ^3.2.0`, `cloud_firestore: ^5.1.0`, `firebase_storage: ^12.1.1`. Run `flutter pub get`. Update `backend/.firebaserc` project ID.",
+        "testStrategy": "`flutter run` completes without Firebase init errors. Check logs for successful Firebase connection. Verify `lib/firebase_options.dart` generated correctly.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Activate FlutterFire CLI",
+            "description": "Run the command to globally activate the FlutterFire CLI tool required for Firebase configuration in Flutter projects.",
+            "dependencies": [],
+            "details": "Execute `dart pub global activate flutterfire_cli` from the terminal. Verify installation by running `flutterfire --version` to ensure the CLI is accessible without path issues.",
+            "status": "pending",
+            "testStrategy": "Run `flutterfire --version` and confirm it outputs a version number without 'command not found' errors."
+          },
+          {
+            "id": 2,
+            "title": "Configure Firebase Project and Generate firebase_options.dart",
+            "description": "Use FlutterFire CLI to configure the specific Firebase project and generate platform-specific configuration file.",
+            "dependencies": [
+              1
+            ],
+            "details": "From the Flutter project root, run `flutterfire configure --project=symmetry-news-[id] --platforms=android,ios,web`. Select the project when prompted and confirm platforms. This creates `lib/firebase_options.dart`.",
+            "status": "pending",
+            "testStrategy": "Verify `lib/firebase_options.dart` exists and contains `DefaultFirebaseOptions.currentPlatform` with correct project ID for android, ios, web platforms."
+          },
+          {
+            "id": 3,
+            "title": "Update pubspec.yaml with Firebase Dependencies",
+            "description": "Add required Firebase packages to pubspec.yaml and fetch dependencies to enable core Firebase functionality.",
+            "dependencies": [
+              2
+            ],
+            "details": "In `pubspec.yaml` under dependencies, add: `firebase_core: ^3.2.0`, `cloud_firestore: ^5.1.0`, `firebase_storage: ^12.1.1`. Then run `flutter pub get` to install packages.",
+            "status": "pending",
+            "testStrategy": "Run `flutter pub get` without errors. Check `pubspec.lock` contains the specified Firebase package versions."
+          },
+          {
+            "id": 4,
+            "title": "Initialize Firebase in main.dart",
+            "description": "Modify the main.dart file to properly import and initialize Firebase before running the app.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Add imports: `import 'package:firebase_core/firebase_core.dart'; import 'firebase_options.dart';`. Update `main()`: `WidgetsFlutterBinding.ensureInitialized(); await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform); runApp(MyApp());`. Ensure `main()` is async.",
+            "status": "pending",
+            "testStrategy": "Verify imports and initialization code match exactly. Run `flutter analyze` to check for syntax errors in main.dart."
+          },
+          {
+            "id": 5,
+            "title": "Update Firebase Config and Verify Integration",
+            "description": "Update backend Firebase config file and test the complete Firebase initialization without connection errors.",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Update `backend/.firebaserc` with the correct project ID from Firebase console. Run `flutter run` on all platforms (android/ios/web) and check logs for successful Firebase initialization.",
+            "status": "pending",
+            "testStrategy": "`flutter run` completes without Firebase initialization errors. Console logs show 'Firebase App initialized' or no connection failures. Test on emulator/device."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Extend Domain Layer - ArticleEntity and Repository",
+        "description": "Extend ArticleEntity with new fields, add repository interface methods for uploadArticle, uploadArticleThumbnail, getUserArticles",
+        "details": "**ArticleEntity** (`domain/entities/article.dart`):\n```dart\nclass ArticleEntity {\n  // existing fields...\n  final String? thumbnailURL;\n  final bool isUserArticle;\n  final String? createdAt;\n\n  const ArticleEntity({\n    // existing...\n    this.thumbnailURL,\n    this.isUserArticle = false,\n    this.createdAt,\n  });\n\n  ArticleEntity copyWith({\n    String? thumbnailURL,\n    bool? isUserArticle,\n    String? createdAt,\n  }) => ArticleEntity(\n    // copy existing + new fields\n  );\n}\n```\n**Repository** (`domain/repository/article_repository.dart`):\n```dart\nabstract class ArticleRepository {\n  // existing...\n  Future<DataState<void>> uploadArticle(ArticleEntity article);\n  Future<DataState<String>> uploadArticleThumbnail(String filePath);\n  Future<DataState<List<ArticleEntity>>> getUserArticles();\n}\n```",
+        "testStrategy": "Unit test ArticleEntity copyWith preserves new fields. Verify repository interface compiles with new abstract methods. Ensure pure Dart (no Firebase imports).",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add new fields to ArticleEntity class",
+            "description": "Extend the ArticleEntity constructor and all existing fields with thumbnailURL, isUserArticle, and createdAt properties.",
+            "dependencies": [],
+            "details": "Update domain/entities/article.dart: Add final String? thumbnailURL, final bool isUserArticle, final String? createdAt fields. Ensure const constructor includes these with proper defaults (isUserArticle = false).",
+            "status": "pending",
+            "testStrategy": "Unit test: Create ArticleEntity with new fields, verify values are set correctly via getters."
+          },
+          {
+            "id": 2,
+            "title": "Implement ArticleEntity copyWith method",
+            "description": "Add copyWith method to ArticleEntity that handles all existing fields plus the three new fields.",
+            "dependencies": [
+              1
+            ],
+            "details": "In domain/entities/article.dart, implement copyWith({String? thumbnailURL, bool? isUserArticle, String? createdAt}) that returns new ArticleEntity instance with updated fields while preserving unchanged ones.",
+            "status": "pending",
+            "testStrategy": "Unit test: Verify copyWith preserves existing fields when null params passed, correctly updates new fields when provided, handles null safety."
+          },
+          {
+            "id": 3,
+            "title": "Add uploadArticle method to repository interface",
+            "description": "Declare abstract Future<DataState<void>> uploadArticle(ArticleEntity article) in ArticleRepository.",
+            "dependencies": [
+              1
+            ],
+            "details": "Update domain/repository/article_repository.dart: Add the abstract method signature exactly as specified. Ensure DataState import is present.",
+            "status": "pending",
+            "testStrategy": "Compilation test: Verify Dart analyzer accepts the new abstract method without errors."
+          },
+          {
+            "id": 4,
+            "title": "Add uploadArticleThumbnail method to repository",
+            "description": "Declare abstract Future<DataState<String>> uploadArticleThumbnail(String filePath) in ArticleRepository.",
+            "dependencies": [
+              3
+            ],
+            "details": "In domain/repository/article_repository.dart: Add method signature returning DataState<String> for thumbnail upload file path to URL.",
+            "status": "pending",
+            "testStrategy": "Compilation test: Ensure interface compiles cleanly with proper return type and parameter."
+          },
+          {
+            "id": 5,
+            "title": "Add getUserArticles method to repository interface",
+            "description": "Declare abstract Future<DataState<List<ArticleEntity>>> getUserArticles() in ArticleRepository.",
+            "dependencies": [
+              4
+            ],
+            "details": "Complete domain/repository/article_repository.dart by adding parameterless method returning list of user articles wrapped in DataState.",
+            "status": "pending",
+            "testStrategy": "Unit test verification: Mock interface compiles; test preserves pure Dart (no external dependencies); verify all three new methods present."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement Domain Use Cases",
+        "description": "Create UploadArticleUseCase, UploadArticleThumbnailUseCase, GetUserArticlesUseCase following UseCase base class pattern",
+        "details": "**UploadArticleUseCase** (`domain/use_cases/upload_article.dart`):\n```dart\nclass UploadArticleUseCase implements UseCase<void, UploadArticleParams> {\n  final ArticleRepository repository;\n  UploadArticleUseCase(this.repository);\n  @override\n  Future<DataState<void>> call(UploadArticleParams params) =>\n      repository.uploadArticle(params.article);\n}\nclass UploadArticleParams extends Params {\n  final ArticleEntity article;\n  UploadArticleParams(this.article);\n}\n```\n**UploadArticleThumbnailUseCase**:\n```dart\nclass UploadArticleThumbnailUseCase implements UseCase<String, UploadThumbnailParams> {\n  final ArticleRepository repository;\n  @override\n  Future<DataState<String>> call(UploadThumbnailParams params) =>\n      repository.uploadArticleThumbnail(params.filePath);\n}\n```\n**GetUserArticlesUseCase**:\n```dart\nclass GetUserArticlesUseCase implements UseCase<List<ArticleEntity>, NoParams> {\n  final ArticleRepository repository;\n  @override\n  Future<DataState<List<ArticleEntity>>> call(NoParams params) =>\n      repository.getUserArticles();\n}\n```",
+        "testStrategy": "Unit tests verify each use case calls correct repository method with correct params. Mock repository returns expected DataState. Verify single responsibility principle.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Complete UploadArticleUseCase Implementation",
+            "description": "Finish UploadArticleUseCase class with proper constructor, Params class, and file organization in domain/use_cases/upload_article.dart",
+            "dependencies": [],
+            "details": "Add missing constructor initialization for repository dependency. Ensure UploadArticleParams properly extends Params base class. Follow UseCase base class pattern with DataState<void> return type. Place in specified file path.",
+            "status": "pending",
+            "testStrategy": "Unit test verifies constructor initializes repository, call() method passes ArticleEntity to repository.uploadArticle(), and handles DataState wrapping correctly."
+          },
+          {
+            "id": 2,
+            "title": "Complete UploadArticleThumbnailUseCase Implementation",
+            "description": "Implement UploadArticleThumbnailUseCase with constructor, complete Params class, following UseCase pattern",
+            "dependencies": [],
+            "details": "Add constructor for ArticleRepository dependency injection. Create UploadThumbnailParams class extending Params with filePath field. Ensure returns DataState<String> from repository method. Use consistent naming and structure.",
+            "status": "pending",
+            "testStrategy": "Unit test mocks repository, verifies call() passes correct filePath to uploadArticleThumbnail(), and returns expected DataState<String> thumbnail URL."
+          },
+          {
+            "id": 3,
+            "title": "Complete GetUserArticlesUseCase Implementation",
+            "description": "Finalize GetUserArticlesUseCase with proper constructor and NoParams handling in domain layer",
+            "dependencies": [],
+            "details": "Implement constructor injecting ArticleRepository. Ensure call() method correctly invokes repository.getUserArticles() with NoParams. Return type must be DataState<List<ArticleEntity>> following UseCase pattern.",
+            "status": "pending",
+            "testStrategy": "Unit test confirms repository.getUserArticles() called once with NoParams, verifies DataState<List<ArticleEntity>> returned successfully or with failure states."
+          },
+          {
+            "id": 4,
+            "title": "Add Use Cases to Dependency Injection Container",
+            "description": "Register all three use cases in GetIt DI container for injection into BLoC/Cubits",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Register UploadArticleUseCase, UploadArticleThumbnailUseCase, and GetUserArticlesUseCase as singletons or factories in service_locator.dart. Use GetIt.registerLazySingleton() pattern with repository dependencies.",
+            "status": "pending",
+            "testStrategy": "Integration test verifies GetIt can resolve each use case instance and they receive correct mocked repository dependencies."
+          },
+          {
+            "id": 5,
+            "title": "Write Comprehensive Unit Tests for All Use Cases",
+            "description": "Create unit tests verifying single responsibility, correct parameter passing, and DataState handling",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Test each use case independently with mockito. Verify constructor injection, single repository call per use case, correct parameter mapping, and DataState success/failure paths. Follow test strategy from parent task.",
+            "status": "pending",
+            "testStrategy": "100% code coverage. Mock repository returns DataSuccess/DataFailed. Verify no side effects, single method call, correct params passed. Test error propagation from repository layer."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Data Sources - Firestore and Storage",
+        "description": "Create FirestoreArticleDataSource and FirebaseStorageDataSource implementations with Firebase SDK imports only in data layer",
+        "details": "**FirestoreArticleDataSourceImpl**:\n```dart\nimport 'package:cloud_firestore/cloud_firestore.dart';\n\nclass FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {\n  final FirebaseFirestore firestore = FirebaseFirestore.instance;\n\n  @override\n  Future<void> uploadArticle(ArticleModel article) async {\n    await firestore.collection('articles').add(article.toFirestore());\n  }\n\n  @override\n  Future<List<ArticleModel>> getUserArticles() async {\n    final snapshot = await firestore\n        .collection('articles')\n        .where('isUserArticle', isEqualTo: true)\n        .orderBy('createdAt', descending: true)\n        .get();\n    return snapshot.docs.map((doc) => ArticleModel.fromFirestore(doc)).toList();\n  }\n}\n```\n**FirebaseStorageDataSourceImpl**:\n```dart\nimport 'package:firebase_storage/firebase_storage.dart';\nimport 'package:path/path.dart' as path;\nimport 'package:uuid/uuid.dart';\n\nclass FirebaseStorageDataSourceImpl implements FirebaseStorageDataSource {\n  final FirebaseStorage storage = FirebaseStorage.instance;\n\n  @override\n  Future<String> uploadThumbnail(String filePath) async {\n    final fileName = '${Uuid().v4()}${path.extension(filePath)}';\n    final ref = storage.ref().child('media/articles/$fileName');\n    final uploadTask = ref.putFile(File(filePath));\n    final snapshot = await uploadTask;\n    return await snapshot.ref.getDownloadURL();\n  }\n}\n```",
+        "testStrategy": "Integration tests with Firebase emulator: verify article upload creates document with correct fields, getUserArticles returns only isUserArticle=true docs ordered by createdAt desc, thumbnail upload generates UUID filename in media/articles/, returns valid downloadURL.",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Complete FirestoreArticleDataSource interface definition",
+            "description": "Define the FirestoreArticleDataSource abstract class with uploadArticle and getUserArticles method signatures in the data layer.",
+            "dependencies": [],
+            "details": "Create data/datasources/firestore_article_data_source.dart with abstract class implementing the two Future methods matching the existing impl signatures. Ensure no Firebase imports in interface.",
+            "status": "pending",
+            "testStrategy": "Unit tests verify interface contract with mock impl. Integration tests confirm method signatures match implementation."
+          },
+          {
+            "id": 2,
+            "title": "Fix FirebaseStorageDataSourceImpl missing import and File",
+            "description": "Add missing dart:io File import and complete the uploadThumbnail method in FirebaseStorageDataSourceImpl.",
+            "dependencies": [],
+            "details": "Import 'dart:io' for File class. Ensure uploadTask completes properly and getDownloadURL is called correctly on the ref after upload.",
+            "status": "pending",
+            "testStrategy": "Unit test mocks FirebaseStorage, verifies UUID filename generation, putFile call with correct path, and downloadURL return."
+          },
+          {
+            "id": 3,
+            "title": "Define FirebaseStorageDataSource interface",
+            "description": "Create FirebaseStorageDataSource abstract class with uploadThumbnail method signature.",
+            "dependencies": [],
+            "details": "In data/datasources/firebase_storage_data_source.dart, define abstract class with Future<String> uploadThumbnail(String filePath). No Firebase imports here.",
+            "status": "pending",
+            "testStrategy": "Unit tests confirm interface matches impl. Mock interface for repository tests."
+          },
+          {
+            "id": 4,
+            "title": "Add error handling to FirestoreArticleDataSourceImpl",
+            "description": "Implement try-catch for FirebaseExceptions in both uploadArticle and getUserArticles methods.",
+            "dependencies": [
+              1
+            ],
+            "details": "Wrap Firestore operations in try-catch, rethrow FirebaseException or convert to custom AppException. Add logging for debugging.",
+            "status": "pending",
+            "testStrategy": "Integration tests with Firebase emulator verify error paths: network failure, permission denied, document conversion errors."
+          },
+          {
+            "id": 5,
+            "title": "Write integration tests for both data sources",
+            "description": "Create comprehensive integration tests using Firebase emulators as specified in test strategy.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Test/test_data_sources/firestore_article_test.dart and storage_test.dart. Verify article upload creates doc with correct fields, getUserArticles filters isUserArticle=true and orders by createdAt desc, thumbnail uses UUID in media/articles/ path.",
+            "status": "pending",
+            "testStrategy": "Firebase emulator suite: verify document creation with all ArticleModel fields, query filtering/ordering, storage path structure and downloadURL validity."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Extend ArticleModel with Firestore Serialization",
+        "description": "Add fromFirestore, toFirestore, toEntity methods to ArticleModel handling new fields",
+        "details": "**ArticleModel** extensions:\n```dart\nfactory ArticleModel.fromFirestore(DocumentSnapshot doc) {\n  final data = doc.data() as Map<String, dynamic>;\n  return ArticleModel(\n    // existing fields...\n    thumbnailURL: data['thumbnailURL'],\n    isUserArticle: data['isUserArticle'] ?? false,\n    createdAt: data['createdAt'],\n  );\n}\n\nMap<String, dynamic> toFirestore() => {\n  // existing...\n  'thumbnailURL': thumbnailURL,\n  'isUserArticle': isUserArticle,\n  'createdAt': createdAt ?? FieldValue.serverTimestamp(),\n};\n\n@override\nArticleEntity toEntity() => ArticleEntity(\n  // map all fields including new ones\n);\n```",
+        "testStrategy": "Unit tests: roundtrip serialization (entity→model→firestore→model→entity) preserves all fields including new ones. Verify serverTimestamp used for createdAt. Test null safety for optional fields.",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update fromFirestore factory with all Article fields",
+            "description": "Extend ArticleModel.fromFirestore to deserialize all existing fields plus new fields: thumbnailURL, isUserArticle, createdAt from DocumentSnapshot data map",
+            "dependencies": [],
+            "details": "Handle null safety with defaults (isUserArticle ?? false), cast data as Map<String, dynamic>, ensure Timestamp fields convert properly to String for createdAt",
+            "status": "pending",
+            "testStrategy": "Unit test: create mock DocumentSnapshot with all fields including nulls, verify ArticleModel reconstructs correctly matching input values"
+          },
+          {
+            "id": 2,
+            "title": "Implement complete toFirestore serialization method",
+            "description": "Create ArticleModel.toFirestore() returning Map<String, dynamic> with all existing fields plus new fields, using FieldValue.serverTimestamp() for createdAt if null",
+            "dependencies": [],
+            "details": "Include thumbnailURL as-is, isUserArticle as bool, createdAt with null coalescing to server timestamp; ensure no extra fields or missing required ones",
+            "status": "pending",
+            "testStrategy": "Unit test: verify output map contains all expected keys/values, confirm createdAt becomes FieldValue.serverTimestamp() when null"
+          },
+          {
+            "id": 3,
+            "title": "Add fromEntity factory constructor to ArticleModel",
+            "description": "Implement ArticleModel.fromEntity(ArticleEntity entity) constructor mapping all fields from domain entity to model including new thumbnailURL, isUserArticle, createdAt",
+            "dependencies": [],
+            "details": "Match field types exactly (String? for thumbnailURL/createdAt, bool for isUserArticle), handle entity defaults properly; place in same file as other serialization methods",
+            "status": "pending",
+            "testStrategy": "Unit test: create ArticleEntity with various field combinations, verify fromEntity produces identical ArticleModel field values"
+          },
+          {
+            "id": 4,
+            "title": "Complete toEntity method mapping all model fields",
+            "description": "Override ArticleModel.toEntity() to create ArticleEntity with complete field mapping including existing fields plus new thumbnailURL, isUserArticle, createdAt",
+            "dependencies": [],
+            "details": "Use named constructor parameters for ArticleEntity, direct field-to-field mapping, ensure nullability preserved (String? fields stay nullable)",
+            "status": "pending",
+            "testStrategy": "Unit test: create ArticleModel instances, call toEntity(), assert resulting ArticleEntity fields match exactly"
+          },
+          {
+            "id": 5,
+            "title": "Add comprehensive roundtrip serialization unit tests",
+            "description": "Write unit tests verifying entity→model→firestore map→model→entity roundtrip preserves all fields including new ones with proper null/serverTimestamp handling",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Test cases: full fields, null thumbnailURL, missing createdAt (uses serverTimestamp), isUserArticle true/false; mock DocumentSnapshot for deserialization tests",
+            "status": "pending",
+            "testStrategy": "Integration-style unit tests using real serialization flow; assert field equality before/after roundtrip; verify FieldValue.serverTimestamp() in toFirestore output"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement ArticleRepositoryImpl with New Methods",
+        "description": "Extend repository implementation to delegate to data sources, wrap exceptions in DataFailed",
+        "details": "**ArticleRepositoryImpl** extensions:\n```dart\nclass ArticleRepositoryImpl implements ArticleRepository {\n  final FirestoreArticleDataSource firestoreDataSource;\n  final FirebaseStorageDataSource storageDataSource;\n\n  @override\n  Future<DataState<void>> uploadArticle(ArticleEntity article) async {\n    try {\n      final model = ArticleModel.fromEntity(article);\n      await firestoreDataSource.uploadArticle(model);\n      return const DataSuccess(null);\n    } on FirebaseException catch (e) {\n      return DataFailed(e.message ?? 'Upload failed');\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n\n  @override\n  Future<DataState<String>> uploadArticleThumbnail(String filePath) async {\n    try {\n      final url = await storageDataSource.uploadThumbnail(filePath);\n      return DataSuccess(url);\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n\n  @override\n  Future<DataState<List<ArticleEntity>>> getUserArticles() async {\n    try {\n      final models = await firestoreDataSource.getUserArticles();\n      final entities = models.map((m) => m.toEntity()).toList();\n      return DataSuccess(entities);\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n}\n```",
+        "testStrategy": "Unit tests with mocked data sources verify correct delegation and DataState wrapping. Integration tests confirm end-to-end flow: local file → Storage URL → Firestore doc creation.",
+        "priority": "high",
+        "dependencies": [
+          6,
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add Constructor and Dependencies to ArticleRepositoryImpl",
+            "description": "Implement the constructor with required data source dependencies and ensure proper initialization.",
+            "dependencies": [],
+            "details": "Add constructor parameters for FirestoreArticleDataSource and FirebaseStorageDataSource. Use final keywords and required named parameters following clean architecture DI patterns. Ensure class implements ArticleRepository interface.",
+            "status": "pending",
+            "testStrategy": "Unit test verifies constructor initializes dependencies correctly without null values."
+          },
+          {
+            "id": 2,
+            "title": "Implement uploadArticle Method with Exception Wrapping",
+            "description": "Complete the uploadArticle method to convert ArticleEntity to model, delegate to Firestore data source, and wrap FirebaseException in DataFailed.",
+            "dependencies": [
+              1
+            ],
+            "details": "Convert ArticleEntity to ArticleModel using fromEntity(). Call firestoreDataSource.uploadArticle(model). Catch FirebaseException first with specific message handling, then general catch for DataFailed(e.toString()). Return DataSuccess(null) on success.",
+            "status": "pending",
+            "testStrategy": "Mock firestoreDataSource to test success path returns DataSuccess, FirebaseException path returns DataFailed with message, and general exception path."
+          },
+          {
+            "id": 3,
+            "title": "Implement uploadArticleThumbnail Method",
+            "description": "Add uploadArticleThumbnail method to delegate thumbnail upload to storage data source and handle exceptions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Call storageDataSource.uploadThumbnail(filePath) and return DataSuccess(url). Wrap all exceptions in DataFailed(e.toString()) using try-catch block. Ensure method returns Future<DataState<String>>.",
+            "status": "pending",
+            "testStrategy": "Unit tests mock storageDataSource for success returning URL in DataSuccess and failure returning DataFailed."
+          },
+          {
+            "id": 4,
+            "title": "Implement getUserArticles Method with Model-to-Entity Conversion",
+            "description": "Complete getUserArticles to fetch from Firestore data source, convert models to entities, and wrap exceptions.",
+            "dependencies": [
+              1
+            ],
+            "details": "Call firestoreDataSource.getUserArticles() to get List<ArticleModel>. Use map((m) => m.toEntity()).toList() for conversion. Return DataSuccess(entities) on success, DataFailed(e.toString()) on exceptions.",
+            "status": "pending",
+            "testStrategy": "Mock data source to test successful conversion of multiple models to entities and error path returns DataFailed."
+          },
+          {
+            "id": 5,
+            "title": "Write Unit Tests for ArticleRepositoryImpl Methods",
+            "description": "Create comprehensive unit tests verifying delegation, conversion, and DataState wrapping for all three methods.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Use mockito to mock FirestoreArticleDataSource and FirebaseStorageDataSource. Test success paths, FirebaseException handling, general exceptions, and entity/model conversions. Verify correct DataState returns.",
+            "status": "pending",
+            "testStrategy": "Run tests with 100% coverage on happy path, FirebaseException path, generic exception path, and edge cases like empty article lists."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Dependency Injection Setup",
+        "description": "Register all new dependencies in injection_container.dart including data sources, use cases, and cubits",
+        "details": "**injection_container.dart** updates:\n```dart\n// Data sources\ngetIt.registerLazySingleton<FirestoreArticleDataSource>(() =>\n    FirestoreArticleDataSourceImpl());\ngetIt.registerLazySingleton<FirebaseStorageDataSource>(() =>\n    FirebaseStorageDataSourceImpl());\n\n// Use cases\ngetIt.registerLazySingleton(() => UploadArticleUseCase(getIt()));\ngetIt.registerLazySingleton(() => UploadArticleThumbnailUseCase(getIt()));\ngetIt.registerLazySingleton(() => GetUserArticlesUseCase(getIt()));\n\n// Cubits (registered later after BLoC implementation)\n// getIt.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(...));\n// getIt.registerFactory<UserArticlesCubit>(() => UserArticlesCubit(...));\n```\nVerify get_it ^7.6.0, flutter_bloc ^8.1.2 in pubspec.yaml.",
+        "testStrategy": "`getIt<ArticleRepository>()` resolves without null. `getIt<UploadArticleUseCase>()` returns non-null instance. No DI resolution errors on app startup.",
+        "priority": "medium",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Verify get_it and flutter_bloc package versions",
+            "description": "Check and update pubspec.yaml to ensure get_it ^7.6.0 and flutter_bloc ^8.1.2 are correctly specified in dependencies",
+            "dependencies": [],
+            "details": "Open pubspec.yaml, locate dependencies section, verify or add exact versions: get_it: ^7.6.0 and flutter_bloc: ^8.1.2. Run flutter pub get to update lockfile.",
+            "status": "pending",
+            "testStrategy": "Run `flutter pub deps` to confirm versions match exactly. Check pubspec.lock for resolved versions."
+          },
+          {
+            "id": 2,
+            "title": "Register FirestoreArticleDataSource in injection_container.dart",
+            "description": "Add lazy singleton registration for FirestoreArticleDataSource implementation in the DI container",
+            "dependencies": [
+              1
+            ],
+            "details": "In lib/core/injection_container.dart (or equivalent), add: getIt.registerLazySingleton<FirestoreArticleDataSource>(() => FirestoreArticleDataSourceImpl()); Ensure import for FirestoreArticleDataSource is present.",
+            "status": "pending",
+            "testStrategy": "Add test: expect(getIt<FirestoreArticleDataSource>(), isNotNull); Verify resolves without errors."
+          },
+          {
+            "id": 3,
+            "title": "Register FirebaseStorageDataSource in injection_container.dart",
+            "description": "Add lazy singleton registration for FirebaseStorageDataSource implementation in the DI container",
+            "dependencies": [
+              1
+            ],
+            "details": "In injection_container.dart, add: getIt.registerLazySingleton<FirebaseStorageDataSource>(() => FirebaseStorageDataSourceImpl()); Ensure proper import statement for the data source interface.",
+            "status": "pending",
+            "testStrategy": "Test: expect(getIt<FirebaseStorageDataSource>(), isNotNull); Confirm non-null resolution."
+          },
+          {
+            "id": 4,
+            "title": "Register Article Use Cases in injection_container.dart",
+            "description": "Register UploadArticleUseCase, UploadArticleThumbnailUseCase, and GetUserArticlesUseCase as lazy singletons",
+            "dependencies": [
+              1
+            ],
+            "details": "Add to injection_container.dart: getIt.registerLazySingleton(() => UploadArticleUseCase(getIt())); getIt.registerLazySingleton(() => UploadArticleThumbnailUseCase(getIt())); getIt.registerLazySingleton(() => GetUserArticlesUseCase(getIt()));",
+            "status": "pending",
+            "testStrategy": "Verify getIt<UploadArticleUseCase>() and others return non-null instances without dependency resolution errors."
+          },
+          {
+            "id": 5,
+            "title": "Add placeholder comments for future Cubit registrations",
+            "description": "Document Cubit registration locations in injection_container.dart with clear comments for Task 13 completion",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Add commented section at end of data sources/use cases registrations: // Cubits (registered later after BLoC implementation) // getIt.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(...)); // getIt.registerFactory<UserArticlesCubit>(() => UserArticlesCubit(...));",
+            "status": "pending",
+            "testStrategy": "Verify no DI resolution errors on app startup. Run app and check logs for successful container initialization."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement ArticleUploadCubit",
+        "description": "Create ArticleUploadCubit with states and uploadArticle method handling thumbnail first then article upload",
+        "details": "**States** (`presentation/bloc/article/upload/article_upload_state.dart`):\n```dart\nabstract class ArticleUploadState extends Equatable {}\nclass ArticleUploadInitial extends ArticleUploadState {}\nclass ArticleUploadLoading extends ArticleUploadState {}\nclass ArticleUploadSuccess extends ArticleUploadState {}\nclass ArticleUploadFailure extends ArticleUploadState {\n  final String message;\n  ArticleUploadFailure(this.message);\n  @override\n  List<Object> get props => [message];\n}\n```\n**Cubit**:\n```dart\nclass ArticleUploadCubit extends Cubit<ArticleUploadState> {\n  final UploadArticleUseCase uploadArticle;\n  final UploadArticleThumbnailUseCase uploadThumbnail;\n\n  ArticleUploadCubit(this.uploadArticle, this.uploadThumbnail)\n      : super(ArticleUploadInitial());\n\n  Future<void> uploadArticle(ArticleEntity article, String? thumbnailFilePath) async {\n    emit(ArticleUploadLoading());\n    try {\n      String? thumbnailUrl;\n      if (thumbnailFilePath != null) {\n        final thumbResult = await uploadThumbnail(UploadThumbnailParams(thumbnailFilePath));\n        thumbnailUrl = thumbResult.data;\n      }\n      final finalArticle = article.copyWith(\n        thumbnailURL: thumbnailUrl,\n        isUserArticle: true,\n        createdAt: DateTime.now().toIso8601String(),\n      );\n      await uploadArticle(UploadArticleParams(finalArticle));\n      emit(ArticleUploadSuccess());\n    } catch (e) {\n      emit(ArticleUploadFailure(e.toString()));\n    }\n  }\n}\n```",
+        "testStrategy": "Widget tests: verify state transitions (Initial→Loading→Success/Failure). Mock use cases verify thumbnail uploaded first, then article with thumbnailURL. Test error handling paths.",
+        "priority": "high",
+        "dependencies": [
+          6,
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ArticleUploadState file and classes",
+            "description": "Generate the article_upload_state.dart file with all defined Equatable states including Initial, Loading, Success, and Failure with message prop.",
+            "dependencies": [],
+            "details": "Place file at presentation/bloc/article/upload/article_upload_state.dart. Ensure ArticleUploadFailure implements props correctly with [message]. Import Equatable and use abstract base class.",
+            "status": "pending",
+            "testStrategy": "Unit test: Verify state equality and props for Failure state with different messages."
+          },
+          {
+            "id": 2,
+            "title": "Create ArticleUploadCubit class skeleton",
+            "description": "Implement ArticleUploadCubit extending Cubit<ArticleUploadState> with required use case dependencies and initial state.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add constructor with UploadArticleUseCase and UploadArticleThumbnailUseCase parameters. Set super(ArticleUploadInitial()). Import necessary domain entities and use cases.",
+            "status": "pending",
+            "testStrategy": "Unit test: Verify cubit initializes with ArticleUploadInitial state."
+          },
+          {
+            "id": 3,
+            "title": "Implement thumbnail upload logic in uploadArticle method",
+            "description": "Add thumbnail upload handling: check if thumbnailFilePath provided, call uploadThumbnail use case, capture thumbnailUrl result.",
+            "dependencies": [
+              2
+            ],
+            "details": "Use UploadThumbnailParams(thumbnailFilePath) for thumbnail upload. Handle null thumbnailFilePath case with thumbnailUrl remaining null. Add inside try block before article modification.",
+            "status": "pending",
+            "testStrategy": "Unit test: Mock uploadThumbnail, verify called only when thumbnailFilePath non-null, verify thumbnailUrl captured correctly."
+          },
+          {
+            "id": 4,
+            "title": "Implement article modification and upload completion",
+            "description": "Create finalArticle with copyWith(thumbnailURL, isUserArticle: true, createdAt), call uploadArticle use case, emit Success on completion.",
+            "dependencies": [
+              3
+            ],
+            "details": "Use DateTime.now().toIso8601String() for createdAt. Use UploadArticleParams(finalArticle). Emit ArticleUploadSuccess after successful upload.",
+            "status": "pending",
+            "testStrategy": "Unit test: Verify article.copyWith called with correct params, uploadArticle use case called with finalArticle, Success emitted."
+          },
+          {
+            "id": 5,
+            "title": "Add error handling and complete method implementation",
+            "description": "Wrap entire upload process in try-catch, emit ArticleUploadLoading at start, emit ArticleUploadFailure(e.toString()) on any exception.",
+            "dependencies": [
+              4
+            ],
+            "details": "Emit Loading immediately after method entry. Catch all exceptions in single catch block. Ensure proper state flow: Initial→Loading→Success/Failure.",
+            "status": "pending",
+            "testStrategy": "Widget tests: Verify complete state transitions (Initial→Loading→Success/Failure). Mock use cases to test thumbnail first then article sequence. Test error paths for both thumbnail and article upload failures."
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Implement UserArticlesCubit",
+        "description": "Create UserArticlesCubit with fetchUserArticles method and appropriate states",
+        "details": "**States** (`presentation/bloc/article/user/user_articles_state.dart`):\n```dart\nabstract class UserArticlesState extends Equatable {}\nclass UserArticlesInitial extends UserArticlesState {}\nclass UserArticlesLoading extends UserArticlesState {}\nclass UserArticlesLoaded extends UserArticlesState {\n  final List<ArticleEntity> articles;\n  UserArticlesLoaded(this.articles);\n  @override\n  List<Object> get props => [articles];\n}\nclass UserArticlesError extends UserArticlesState {\n  final String message;\n  UserArticlesError(this.message);\n  @override\n  List<Object> get props => [message];\n}\n```\n**Cubit**:\n```dart\nclass UserArticlesCubit extends Cubit<UserArticlesState> {\n  final GetUserArticlesUseCase getUserArticles;\n\n  UserArticlesCubit(this.getUserArticles) : super(UserArticlesInitial());\n\n  Future<void> fetchUserArticles() async {\n    emit(UserArticlesLoading());\n    final result = await getUserArticles(NoParams());\n    result.fold(\n      (failure) => emit(UserArticlesError(failure.message)),\n      (articles) => emit(UserArticlesLoaded(articles)),\n    );\n  }\n}\n```",
+        "testStrategy": "Widget tests verify state flow: Initial→Loading→Loaded/Error. Mock use case tests success/error paths. Verify pull-to-refresh calls fetchUserArticles.",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create UserArticlesState file with Equatable states",
+            "description": "Generate the user_articles_state.dart file in presentation/bloc/article/user/ with all defined states including Initial, Loading, Loaded, and Error.",
+            "dependencies": [],
+            "details": "Implement abstract UserArticlesState extending Equatable. Add UserArticlesInitial, UserArticlesLoading, UserArticlesLoaded with List<ArticleEntity>, and UserArticlesError with String message. Ensure proper props override for Equatable.",
+            "status": "pending",
+            "testStrategy": "Unit test Equatable props equality for each state variant. Verify Loaded state props include articles list reference. Test Error state props include message string."
+          },
+          {
+            "id": 2,
+            "title": "Implement UserArticlesCubit core class structure",
+            "description": "Create the UserArticlesCubit class extending Cubit<UserArticlesState> with dependency injection and initial state.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add constructor taking GetUserArticlesUseCase, set super(UserArticlesInitial()). Import necessary packages: flutter_bloc, dartz, domain usecase. Place in presentation/bloc/article/user/user_articles_cubit.dart.",
+            "status": "pending",
+            "testStrategy": "Unit test constructor initializes with UserArticlesInitial state. Mock use case dependency injection verification."
+          },
+          {
+            "id": 3,
+            "title": "Implement fetchUserArticles method logic",
+            "description": "Add the fetchUserArticles method handling loading state, use case call, and result folding to success/error states.",
+            "dependencies": [
+              2
+            ],
+            "details": "Implement async method: emit Loading, call getUserArticles(NoParams()), fold failure to UserArticlesError(failure.message), success to UserArticlesLoaded(articles). Handle Either<Failure, List<ArticleEntity>>.",
+            "status": "pending",
+            "testStrategy": "Unit tests with mocked use case: verify emit sequence Initial→Loading→Loaded for success path, Initial→Loading→Error for failure path. Test NoParams usage."
+          },
+          {
+            "id": 4,
+            "title": "Register UserArticlesCubit in dependency injection",
+            "description": "Add UserArticlesCubit registration to GetIt service locator for screen usage.",
+            "dependencies": [
+              3
+            ],
+            "details": "In dependency injection setup (likely injection_container.dart), register as GetIt.registerLazySingleton(() => UserArticlesCubit(getIt<GetUserArticlesUseCase>())). Ensure dependencies tasks 6,10 completed.",
+            "status": "pending",
+            "testStrategy": "Integration test verifies GetIt can resolve UserArticlesCubit with mocked use case. Test cubit instance retrieves correct use case dependency."
+          },
+          {
+            "id": 5,
+            "title": "Write unit and widget tests for UserArticlesCubit",
+            "description": "Create comprehensive tests verifying state flow and integration as per test strategy.",
+            "dependencies": [
+              3
+            ],
+            "details": "Write bloc_test for state transitions: Initial→Loading→Loaded/Error. Mock GetUserArticlesUseCase for success/error paths. Widget tests verify pull-to-refresh calls fetchUserArticles(). Test empty list handling.",
+            "status": "pending",
+            "testStrategy": "bloc_test package for state emission verification. Mock use case returns empty list → verify Loaded with empty articles. Test error message propagation. Golden tests for widget state flows."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Register BLoC/Cubits in DI Container",
+        "description": "Complete DI registration for ArticleUploadCubit and UserArticlesCubit as factories",
+        "details": "Add to `injection_container.dart`:\n```dart\nggetIt.registerFactory<ArticleUploadCubit>(() =>\n    ArticleUploadCubit(getIt(), getIt()));\ngetIt.registerFactory<UserArticlesCubit>(() =>\n    UserArticlesCubit(getIt()));\n```\nVerify all dependencies resolve: `getIt<ArticleUploadCubit>()`, `getIt<UserArticlesCubit>()`.",
+        "testStrategy": "DI resolution test: all cubits resolve without errors. Verify factory pattern creates new instances each call.",
+        "priority": "medium",
+        "dependencies": [
+          10,
+          11,
+          12
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate and Open injection_container.dart",
+            "description": "Navigate to the core or di folder and open the injection_container.dart file for editing",
+            "dependencies": [],
+            "details": "Find injection_container.dart in lib/core/di or similar directory structure. Ensure file is properly imported with get_it package. Verify existing registrations from Task 10 are present before adding new cubits.",
+            "status": "pending",
+            "testStrategy": "File opens without errors and contains existing data source/use case registrations from Task 10."
+          },
+          {
+            "id": 2,
+            "title": "Register ArticleUploadCubit as Factory",
+            "description": "Add factory registration for ArticleUploadCubit with its two dependencies using getIt()",
+            "dependencies": [
+              1
+            ],
+            "details": "Insert the following code: getIt.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(getIt(), getIt())); Ensure proper indentation and no typos. Note the two getIt() calls correspond to the cubit's constructor parameters (likely repository and storage data source).",
+            "status": "pending",
+            "testStrategy": "Code compiles without syntax errors. No duplicate registration warnings."
+          },
+          {
+            "id": 3,
+            "title": "Register UserArticlesCubit as Factory",
+            "description": "Add factory registration for UserArticlesCubit with its single dependency using getIt()",
+            "dependencies": [
+              2
+            ],
+            "details": "Insert the following code: getIt.registerFactory<UserArticlesCubit>(() => UserArticlesCubit(getIt())); Place after ArticleUploadCubit registration. The single getIt() call resolves the repository dependency automatically via existing DI chain.",
+            "status": "pending",
+            "testStrategy": "Code compiles without syntax errors. Verify both cubit registrations appear sequentially in file."
+          },
+          {
+            "id": 4,
+            "title": "Save File and Verify DI Registration Syntax",
+            "description": "Save changes and perform initial compilation check to ensure no syntax errors",
+            "dependencies": [
+              3
+            ],
+            "details": "Save injection_container.dart. Run 'flutter analyze' or 'dart analyze' to check for syntax issues. Ensure getIt is properly imported (import 'package:get_it/get_it.dart';). Verify no naming conflicts with existing registrations.",
+            "status": "pending",
+            "testStrategy": "flutter analyze passes without DI-related errors. File saves successfully."
+          },
+          {
+            "id": 5,
+            "title": "Test DI Resolution for Both Cubits",
+            "description": "Verify both cubits can be resolved via getIt without errors and confirm factory behavior",
+            "dependencies": [
+              4
+            ],
+            "details": "Create temporary test in main.dart or test file: getIt<ArticleUploadCubit>(); getIt<UserArticlesCubit>(); Call multiple times to verify new instances created each time (factory pattern). Check console for resolution errors. Remove test code after verification.",
+            "status": "pending",
+            "testStrategy": "Both getIt<>() calls succeed without null or dependency errors. Multiple calls create distinct instances confirming factory registration works."
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Implement Article Upload Screen UI",
+        "description": "Create upload_article_screen.dart with form validation, image picker, thumbnail preview, submit with loading states",
+        "details": "Use `image_picker: ^1.1.2` for gallery/camera. **Key features**:\n- Form fields: TextFormField (title/author/desc), TextFormField(multi-line: content), DatePicker (publishedAt)\n- Image picker button → preview Container with NetworkImage/FileImage\n- Client validation: title/content/author/publishedAt required\n- BlocConsumer<ArticleUploadCubit> for loading/success/error states\n- Success: Navigator.pop(context, true)\n- Error: SnackBar\n\n**Pseudo-code**:\n```dart\nBlocProvider(\n  create: (_) => getIt<ArticleUploadCubit>(),\n  child: BlocConsumer<ArticleUploadCubit, ArticleUploadState>(\n    listener: (context, state) {\n      if (state is Success) Navigator.pop(context, true);\n      if (state is Failure) ScaffoldMessenger.showSnackBar(...);\n    },\n    builder: (context, state) => Scaffold(\n      body: Form(\n        child: Column(\n          TextFormField(titleController, validator: required),\n          // ... other fields\n          ElevatedButton(\n            onPressed: state is Loading ? null : _submit,\n            child: state is Loading ? CircularProgressIndicator() : Text('Upload'),\n          ),\n        ),\n      ),\n    ),\n  ),\n)\n```",
+        "testStrategy": "Widget tests: form validation blocks submit with empty required fields. Image picker opens gallery/camera. Submit triggers cubit uploadArticle. Loading disables button/shows spinner. Success/error states handled correctly.",
+        "priority": "high",
+        "dependencies": [
+          11,
+          13
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Basic Screen Structure with BlocProvider",
+            "description": "Set up the upload_article_screen.dart file with Scaffold, BlocProvider for ArticleUploadCubit, and BlocConsumer for state management",
+            "dependencies": [],
+            "details": "Use getIt<ArticleUploadCubit>() in BlocProvider create callback. Implement BlocConsumer with listener for Success (Navigator.pop(true)) and Failure (SnackBar) states. Builder returns Scaffold with Form key.",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify BlocProvider and BlocConsumer are present in widget tree. Check listener callbacks trigger correct navigation and SnackBar."
+          },
+          {
+            "id": 2,
+            "title": "Implement Form Fields with Controllers and Validators",
+            "description": "Add TextFormField widgets for title, author, description, multi-line content, and DatePicker for publishedAt with required field validation",
+            "dependencies": [
+              1
+            ],
+            "details": "Create TextEditingControllers for title, author, desc, content. Use validator: (value) => value?.isEmpty ?? true ? 'Required' : null. For content use maxLines: null, keyboardType: TextInputType.multiline. DatePicker shows date dialog on tap.",
+            "status": "pending",
+            "testStrategy": "Widget test: Form validation fails with empty required fields. DatePicker dialog opens on tap. Controllers update values correctly."
+          },
+          {
+            "id": 3,
+            "title": "Add Image Picker with Thumbnail Preview",
+            "description": "Implement image picker button using image_picker package and display selected image preview with FileImage or placeholder",
+            "dependencies": [
+              1
+            ],
+            "details": "Add ElevatedButton 'Pick Image' calling ImagePicker().pickImage(source: ImageSource.gallery). Show Container with FileImage(file) or placeholder when image selected. Store XFile? imageFile state variable.",
+            "status": "pending",
+            "testStrategy": "Widget test: Image picker button triggers gallery/camera selection. Preview shows correct FileImage after selection. No image shows placeholder."
+          },
+          {
+            "id": 4,
+            "title": "Implement Form Submission with Client Validation",
+            "description": "Create _submit method that validates form and calls cubit.uploadArticle if valid, handling required fields check",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "In _submit: if (!_formKey.currentState!.validate()) return; Collect form data into ArticleEntity (title, author, desc, content, publishedAt, imageFile). Call context.read<ArticleUploadCubit>().uploadArticle(article).",
+            "status": "pending",
+            "testStrategy": "Widget test: Submit blocked with empty required fields (validation errors show). Valid form calls cubit.uploadArticle with correct ArticleEntity data."
+          },
+          {
+            "id": 5,
+            "title": "Add Loading State UI and Button Management",
+            "description": "Update submit button to show CircularProgressIndicator and disable during Loading state, with proper state-based UI",
+            "dependencies": [
+              4
+            ],
+            "details": "ElevatedButton onPressed: state is Loading ? null : _submit. Child: state is Loading ? SizedBox(child: CircularProgressIndicator()) : Text('Upload Article'). Add overlay opacity or disabled styling during loading.",
+            "status": "pending",
+            "testStrategy": "Widget test: Loading state disables button and shows spinner. Button enabled with correct text in Initial state. Full state flow: Initial→Loading→Success/Error handled correctly."
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Implement User Articles Screen",
+        "description": "Create user_articles_screen.dart with article list, pull-to-refresh, empty state, navigation to detail screen",
+        "details": "**Features**:\n- BlocProvider<UserArticlesCubit>\n- RefreshIndicator calling `cubit.fetchUserArticles()`\n- ListView.builder with existing article card widget\n- Empty state: Column with illustration + 'No articles yet' text\n- Card tap: Navigator.pushNamed(context, ArticleDetailRoute, arguments: article)\n\n**Integration**: Add FAB to DailyNewsScreen: `FloatingActionButton(onPressed: () => Navigator.pushNamed(context, UploadArticleRoute))`. Add app bar action: `IconButton(onPressed: () => Navigator.pushNamed(context, UserArticlesRoute))`.",
+        "testStrategy": "Widget tests: pull-to-refresh calls fetchUserArticles. Empty state shows when articles.isEmpty. List renders correct number of cards. Card tap navigates with correct article. Integration test verifies navigation from home screen.",
+        "priority": "high",
+        "dependencies": [
+          12,
+          13
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create UserArticlesScreen scaffold with BlocProvider",
+            "description": "Create user_articles_screen.dart file with basic Scaffold structure and BlocProvider<UserArticlesCubit> wrapping the screen content",
+            "dependencies": [],
+            "details": "Use BlocProvider(create: (context) => getIt<UserArticlesCubit>()..fetchUserArticles(), child: ...) as root widget. Include AppBar with title 'My Articles'. Ensure proper imports for bloc and cubit.",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify BlocProvider is created with correct cubit instance and initial fetchUserArticles() is called."
+          },
+          {
+            "id": 2,
+            "title": "Implement RefreshIndicator and ListView.builder",
+            "description": "Add RefreshIndicator wrapping BlocBuilder that shows ListView.builder with article cards when articles loaded",
+            "dependencies": [
+              1
+            ],
+            "details": "RefreshIndicator(onRefresh: context.read<UserArticlesCubit>().fetchUserArticles()). Use BlocBuilder<UserArticlesCubit, UserArticlesState> to handle states. ListView.builder(itemCount: state.articles.length, itemBuilder: (_, i) => ArticleCardWidget(article: state.articles[i])).",
+            "status": "pending",
+            "testStrategy": "Widget test: Pull-to-refresh calls fetchUserArticles(). List renders correct number of ArticleCardWidget when UserArticlesLoaded state."
+          },
+          {
+            "id": 3,
+            "title": "Add card tap navigation to ArticleDetail",
+            "description": "Implement onTap handler for ArticleCardWidget to navigate to ArticleDetailRoute with article argument",
+            "dependencies": [
+              2
+            ],
+            "details": "In ListView.builder itemBuilder: ArticleCardWidget(..., onTap: () => Navigator.pushNamed(context, ArticleDetailRoute, arguments: state.articles[i])). Ensure ArticleCardWidget accepts onTap callback or wrap with GestureDetector.",
+            "status": "pending",
+            "testStrategy": "Widget test: Tap ArticleCardWidget triggers Navigator.pushNamed with correct ArticleEntity argument."
+          },
+          {
+            "id": 4,
+            "title": "Implement empty state UI",
+            "description": "Show empty state Column with illustration and 'No articles yet' text when articles list is empty",
+            "dependencies": [
+              2
+            ],
+            "details": "In BlocBuilder, when state is UserArticlesLoaded && state.articles.isEmpty, show Center(child: Column(mainAxisSize: MainAxisSize.min, children: [IllustrationWidget(), SizedBox(height: 16), Text('No articles yet')])). Use loading/error states appropriately.",
+            "status": "pending",
+            "testStrategy": "Widget test: Empty state displays when UserArticlesLoaded with empty articles list. Verify illustration and text widgets render."
+          },
+          {
+            "id": 5,
+            "title": "Add integration to DailyNewsScreen",
+            "description": "Update DailyNewsScreen to include FAB for UploadArticleRoute and AppBar action for UserArticlesRoute",
+            "dependencies": [
+              1
+            ],
+            "details": "In DailyNewsScreen Scaffold: floatingActionButton: FloatingActionButton(onPressed: () => Navigator.pushNamed(context, UploadArticleRoute), child: Icon(Icons.add)). appBar: AppBar(actions: [IconButton(onPressed: () => Navigator.pushNamed(context, UserArticlesRoute), icon: Icon(Icons.article))]).",
+            "status": "pending",
+            "testStrategy": "Integration test: Verify FAB tap navigates to UploadArticleRoute. Verify AppBar action navigates to UserArticlesRoute from home screen."
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Update Routes Configuration",
+        "description": "Add named routes for upload_article_screen and user_articles_screen in config/routes/routes.dart",
+        "details": "**routes.dart**:\n```dart\nstatic const String uploadArticleRoute = '/upload-article';\nstatic const String userArticlesRoute = '/user-articles';\n\nGetPage(\n  name: Routes.uploadArticleRoute,\n  page: () => UploadArticleScreen(),\n),\nGetPage(\n  name: Routes.userArticlesRoute,\n  page: () => UserArticlesScreen(),\n),\n```\nUpdate app bar FAB and navigation integration in existing DailyNewsScreen.",
+        "testStrategy": "`Navigator.pushNamed(context, '/upload-article')` navigates to correct screen. `Navigator.pushNamed(context, '/user-articles')` works. No route conflicts with existing routes.",
+        "priority": "medium",
+        "dependencies": [
+          14,
+          15
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add Named Route Constants to Routes Class",
+            "description": "Define static const strings for uploadArticleRoute and userArticlesRoute in config/routes/routes.dart",
+            "dependencies": [],
+            "details": "Add these exact constants to the Routes class: static const String uploadArticleRoute = '/upload-article'; static const String userArticlesRoute = '/user-articles'; Ensure proper naming convention matches existing routes.",
+            "status": "pending",
+            "testStrategy": "Verify constants are defined and accessible via Routes.uploadArticleRoute and Routes.userArticlesRoute without compile errors."
+          },
+          {
+            "id": 2,
+            "title": "Create GetPage for UploadArticleScreen",
+            "description": "Add GetPage entry for UploadArticleScreen using the uploadArticleRoute name in routes.dart",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement: GetPage(name: Routes.uploadArticleRoute, page: () => UploadArticleScreen()), Ensure it follows the exact pattern shown in current details with proper comma placement.",
+            "status": "pending",
+            "testStrategy": "Verify GetPage compiles and route name matches '/upload-article' exactly. Check no syntax errors in routes list."
+          },
+          {
+            "id": 3,
+            "title": "Create GetPage for UserArticlesScreen",
+            "description": "Add GetPage entry for UserArticlesScreen using the userArticlesRoute name in routes.dart",
+            "dependencies": [
+              1
+            ],
+            "details": "Implement: GetPage(name: Routes.userArticlesRoute, page: () => UserArticlesScreen()), Place after UploadArticleScreen GetPage with proper comma separation.",
+            "status": "pending",
+            "testStrategy": "Verify GetPage compiles and route name matches '/user-articles' exactly. Ensure list structure remains valid."
+          },
+          {
+            "id": 4,
+            "title": "Update DailyNewsScreen AppBar FAB for Upload",
+            "description": "Modify FloatingActionButton in DailyNewsScreen app bar to navigate to upload_article_screen",
+            "dependencies": [
+              2
+            ],
+            "details": "Replace existing FAB onPressed with: Get.toNamed(Routes.uploadArticleRoute); or Navigator.pushNamed(context, Routes.uploadArticleRoute); Add proper import for Routes if needed.",
+            "status": "pending",
+            "testStrategy": "Tap FAB navigates to UploadArticleScreen without errors. Verify correct route name used in navigation call."
+          },
+          {
+            "id": 5,
+            "title": "Implement User Articles Navigation in DailyNewsScreen",
+            "description": "Add navigation integration to user_articles_screen from DailyNewsScreen app bar or menu",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Add navigation button/link in app bar (possibly second FAB, menu item, or tab) using Get.toNamed(Routes.userArticlesRoute); Ensure proper UI placement and accessibility.",
+            "status": "pending",
+            "testStrategy": "Test both routes: Get.toNamed('/upload-article') and Get.toNamed('/user-articles') navigate correctly from DailyNewsScreen. Verify no route conflicts and back navigation works."
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "End-to-End Integration Testing",
+        "description": "Verify complete flow: form → image pick → upload → list refresh → Firestore/Storage population",
+        "details": "Test sequence:\n1. Navigate to upload screen via FAB\n2. Fill form (title, author, content, date)\n3. Pick image from gallery\n4. Submit → verify loading → success navigation\n5. Navigate to user articles screen\n6. Verify article appears in list with thumbnail\n7. Pull-to-refresh updates list\n8. Verify Firestore doc and Storage file created\n9. Test security rules block unauth access\n\nRun with emulator: `firebase emulators:start` + `flutter run`.",
+        "testStrategy": "Integration test suite verifies full happy path. Test error cases: network failure, invalid image, missing required fields. Verify no regressions in existing news feed.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4,
+          9,
+          14,
+          15,
+          16
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Setup Firebase Emulator and Launch App",
+            "description": "Start Firebase emulators and run the Flutter app to prepare the testing environment for end-to-end integration testing.",
+            "dependencies": [],
+            "details": "Execute `firebase emulators:start` in one terminal, then `flutter run` in another. Verify emulators are running for Firestore and Storage, and app launches successfully on emulator/device without crashes.",
+            "status": "pending",
+            "testStrategy": "Manual verification: Check emulator logs show Firestore/Storage on ports 8080/9199, app connects without auth errors."
+          },
+          {
+            "id": 2,
+            "title": "Test Upload Flow: Form Fill to Success Navigation",
+            "description": "Navigate to upload screen via FAB, complete form with valid data, pick image, submit, and verify loading state then success navigation.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Tap FAB to open upload screen. 2. Enter title/author/content/date. 3. Select image from gallery. 4. Tap submit. 5. Confirm loading spinner appears, then success snackbar/navigation back to previous screen.",
+            "status": "pending",
+            "testStrategy": "Visual verification: Screenshot form states, loading indicator, success message. Verify no errors in console."
+          },
+          {
+            "id": 3,
+            "title": "Verify Article Display and List Refresh",
+            "description": "Navigate to user articles screen, confirm new article appears with thumbnail, perform pull-to-refresh, and verify list updates correctly.",
+            "dependencies": [
+              2
+            ],
+            "details": "1. Navigate to user articles list. 2. Verify newest article shows correct title, thumbnail image loads. 3. Pull down to refresh list. 4. Confirm list updates without duplication or errors.",
+            "status": "pending",
+            "testStrategy": "UI verification: Check thumbnail loads (not broken image), title matches form input, refresh animation completes successfully."
+          },
+          {
+            "id": 4,
+            "title": "Validate Firestore Document and Storage File Creation",
+            "description": "Check Firebase emulator console to confirm article document created in Firestore and image file uploaded to Storage with correct thumbnail URL.",
+            "dependencies": [
+              3
+            ],
+            "details": "1. Open Firebase emulator UI (localhost:4000). 2. Navigate to Firestore → users/{uid}/articles. 3. Verify new doc with correct fields (title, thumbnailUrl, etc.). 4. Check Storage for uploaded image file.",
+            "status": "pending",
+            "testStrategy": "Backend verification: Copy document data, verify thumbnailUrl points to Storage file, confirm file exists and is accessible."
+          },
+          {
+            "id": 5,
+            "title": "Test Security Rules and Error Scenarios",
+            "description": "Verify security rules block unauthorized access and test error cases including network failure, invalid image, and missing required fields.",
+            "dependencies": [
+              4
+            ],
+            "details": "1. Sign out user, attempt to view user articles → verify access denied. 2. Test missing title → submit fails with validation error. 3. Test invalid image format → upload fails. 4. Disconnect network → verify offline error handling.",
+            "status": "pending",
+            "testStrategy": "Negative testing: Confirm security rules enforced (403 errors), validation prevents invalid submits, network errors show user-friendly messages."
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Write Comprehensive Project Report",
+        "description": "Create docs/REPORT.md covering all required sections including learning journey, challenges, overdelivery, screenshots",
+        "details": "Follow `docs/REPORT_INSTRUCTIONS.md` structure:\n1. **Introduction**: Experience level with Flutter/Firebase/Clean Arch\n2. **Learning Journey**: BLoC 8.1.2 patterns, Firebase emulator workflow, Clean Arch enforcement\n3. **Challenges**: Security rules validation, data source exception handling, DI wiring\n4. **Reflection**: Architecture benefits, testability improvements\n5. **Proof**: Screenshots (upload form, success state, user articles list, Firebase console)\n6. **Overdelivery**: Progress tracking in upload (from search results[1]), image compression, offline draft saving\n7. **Architecture**: Layer violation prevention strategies",
+        "testStrategy": "Verify REPORT.md exists with all 6+ required sections complete. Include 5+ screenshots. Document 2+ overdelivery features implemented.",
+        "priority": "low",
+        "dependencies": [
+          17
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Write Introduction Section",
+            "description": "Document prior experience levels with Flutter, Firebase, and Clean Architecture in the Introduction section of REPORT.md",
+            "dependencies": [],
+            "details": "Follow REPORT_INSTRUCTIONS.md structure. Be honest about starting experience (e.g., 'Limited prior Flutter experience, new to BLoC 8.1.2 and Firebase emulators'). Keep concise, 150-250 words.",
+            "status": "pending",
+            "testStrategy": "Verify section exists with all 3 topics covered: Flutter, Firebase, Clean Arch experience levels documented clearly."
+          },
+          {
+            "id": 2,
+            "title": "Document Learning Journey Section",
+            "description": "Detail learnings from BLoC 8.1.2 patterns, Firebase emulator workflow, and Clean Architecture enforcement in Learning Journey section",
+            "dependencies": [],
+            "details": "Reference Tasks 2,6,12 context. Cover BLoC state patterns from UserArticlesCubit, emulator ports/setup from Task 2, layer enforcement from domain/usecases. Include code snippets if relevant. 300-400 words.",
+            "status": "pending",
+            "testStrategy": "Confirm section covers exact 3 topics: BLoC 8.1.2, Firebase emulator, Clean Arch enforcement with specific examples from project tasks."
+          },
+          {
+            "id": 3,
+            "title": "Write Challenges and Reflection Sections",
+            "description": "Document technical challenges faced and reflections on architecture benefits/testability in Challenges and Reflection sections",
+            "dependencies": [],
+            "details": "Challenges: Security rules validation, data source exceptions (Task 6), DI wiring issues. Reflection: Benefits of Clean Arch layers, improved unit testing from pure domain layer (Task 5). 250-350 words total.",
+            "status": "pending",
+            "testStrategy": "Verify Challenges lists exact 3 issues mentioned. Reflection covers architecture benefits and testability with concrete examples."
+          },
+          {
+            "id": 4,
+            "title": "Capture and Add Proof Screenshots",
+            "description": "Take and embed 5+ screenshots for Proof section: upload form, success state, user articles list, Firebase console",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Capture: 1) Article upload UI, 2) Success confirmation, 3) UserArticles list (Task 12), 4-5) Firebase emulator console showing articles collection and media/articles/ storage. Use markdown image syntax. Add captions.",
+            "status": "pending",
+            "testStrategy": "Count 5+ screenshots present with descriptive alt text/captions matching required 4 views + Firebase console proof."
+          },
+          {
+            "id": 5,
+            "title": "Complete Overdelivery and Architecture Sections",
+            "description": "Document overdelivery features and architecture layer violation prevention strategies in final sections",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Overdelivery: Progress tracking in upload, image compression, offline draft saving (cite search results[1] for patterns). Architecture: Strategies like repository interfaces (Task 5), use case isolation (Task 6), DI enforcement. Finalize with conclusion if required.",
+            "status": "pending",
+            "testStrategy": "Verify 3+ overdelivery features listed with implementation details. Architecture section documents 2+ layer violation prevention strategies. Full REPORT.md matches all 7 sections."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2026-03-27T14:31:48.816Z",
+      "updated": "2026-03-27T14:31:48.816Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
