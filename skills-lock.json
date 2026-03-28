@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-architecting-apps": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "ac8212aa825c75d468c216ffada34302d0ab6e8ffc8e99d789848aba4acd30ed"
+    },
+    "flutter-building-layouts": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "f25c57e933fa78f5e26057be20b8a2edbd9783c654be03198a7cb6c5c2432d12"
+    },
+    "flutter-setting-up-on-macos": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "72e11b005d3182a5a47ed5147b37b19e07b7d06950cd1ff0fe31f3903e46db79"
+    },
+    "flutter-testing-apps": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "c3bc3a540534e97cf391710fb8dcdb49b9f4c8a5385597cb56ef9094e56af776"
+    }
+  }
+}
