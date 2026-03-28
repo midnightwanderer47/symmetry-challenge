@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
-import '../../features/daily_news/presentation/pages/home/daily_news.dart';
+import '../../features/daily_news/presentation/pages/main/main_screen.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/daily_news/presentation/pages/upload_article/upload_article.dart';
 import '../../features/daily_news/presentation/pages/user_articles/user_articles_screen.dart';
@@ -18,7 +18,7 @@ class AppRoutes {
   static Route onGenerateRoutes(RouteSettings settings) {
     switch (settings.name) {
       case homeRoute:
-        return _materialRoute(const DailyNews());
+        return _materialRoute(const MainScreen());
 
       case articleDetailsRoute:
         return _materialRoute(ArticleDetailsView(article: settings.arguments as ArticleEntity));
@@ -33,7 +33,7 @@ class AppRoutes {
         return _materialRoute(const UserArticlesScreen());
 
       default:
-        return _materialRoute(const DailyNews());
+        return _materialRoute(const MainScreen());
     }
   }
 
