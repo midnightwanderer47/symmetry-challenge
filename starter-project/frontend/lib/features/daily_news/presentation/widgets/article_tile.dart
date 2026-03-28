@@ -39,7 +39,7 @@ class ArticleWidget extends StatelessWidget {
 
   Widget _buildImage(BuildContext context) {
     return CachedNetworkImage(
-        imageUrl: article!.urlToImage!,
+        imageUrl: article!.displayImageUrl,
         imageBuilder: (context, imageProvider) => Padding(
               padding: const EdgeInsetsDirectional.only(end: 14),
               child: ClipRRect(

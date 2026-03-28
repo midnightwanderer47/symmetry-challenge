@@ -61,15 +61,22 @@ class ArticleModel extends ArticleEntity {
 
   factory ArticleModel.fromFirestore(DocumentSnapshot doc) {
     final map = doc.data() as Map<String, dynamic>;
+    final rawUrlToImage = map['urlToImage'] as String?;
+    final rawThumbnail = map['thumbnailURL'] as String?;
+    final resolvedImage = (rawUrlToImage != null && rawUrlToImage.isNotEmpty)
+        ? rawUrlToImage
+        : (rawThumbnail != null && rawThumbnail.isNotEmpty)
+            ? rawThumbnail
+            : kDefaultImage;
     return ArticleModel(
       author: map['author'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       url: map['url'] ?? '',
-      urlToImage: map['urlToImage'] ?? kDefaultImage,
+      urlToImage: resolvedImage,
       publishedAt: map['publishedAt'] ?? '',
       content: map['content'] ?? '',
-      thumbnailURL: map['thumbnailURL'],
+      thumbnailURL: rawThumbnail,
       isUserArticle: map['isUserArticle'] ?? false,
       createdAt: map['createdAt']?.toString(),
     );
@@ -95,7 +102,11 @@ class ArticleModel extends ArticleEntity {
       'title': title ?? '',
       'description': description ?? '',
       'url': url ?? '',
-      'urlToImage': urlToImage ?? '',
+      'urlToImage': (urlToImage != null && urlToImage!.isNotEmpty)
+          ? urlToImage
+          : (thumbnailURL != null && thumbnailURL!.isNotEmpty)
+              ? thumbnailURL
+              : kDefaultImage,
       'publishedAt': publishedAt ?? '',
       'content': content ?? '',
       'thumbnailURL': (thumbnailURL != null && thumbnailURL!.isNotEmpty)

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/constants/constants.dart';
 
 class ArticleEntity extends Equatable{
   final int ? id;
@@ -26,6 +27,12 @@ class ArticleEntity extends Equatable{
     this.isUserArticle = false,
     this.createdAt,
   });
+
+  String get displayImageUrl {
+    if (urlToImage != null && urlToImage!.isNotEmpty) return urlToImage!;
+    if (thumbnailURL != null && thumbnailURL!.isNotEmpty) return thumbnailURL!;
+    return kDefaultImage;
+  }
 
   ArticleEntity copyWith({
     int? id,

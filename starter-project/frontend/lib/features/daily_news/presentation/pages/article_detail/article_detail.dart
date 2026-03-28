@@ -85,7 +85,7 @@ class ArticleDetailsView extends HookWidget {
       width: double.maxFinite,
       height: 250,
       margin: const EdgeInsets.only(top: 14),
-      child: Image.network(article!.urlToImage!, fit: BoxFit.cover),
+      child: Image.network(article!.displayImageUrl, fit: BoxFit.cover),
     );
   }
 
