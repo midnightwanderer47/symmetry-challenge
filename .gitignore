@@ -23,3 +23,11 @@ node_modules/
 
 # OS specific
 .DS_Store
+
+# Flutter / Dart — generated build outputs (do not commit)
+**/build/
+**/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
