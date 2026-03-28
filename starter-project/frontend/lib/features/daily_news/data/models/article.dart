@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:floor/floor.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import '../../../../core/constants/constants.dart';
@@ -13,6 +14,9 @@ class ArticleModel extends ArticleEntity {
     String ? urlToImage,
     String ? publishedAt,
     String ? content,
+    String ? thumbnailURL,
+    bool isUserArticle = false,
+    String ? createdAt,
   }): super(
     id: id,
     author: author,
@@ -22,6 +26,9 @@ class ArticleModel extends ArticleEntity {
     urlToImage: urlToImage,
     publishedAt: publishedAt,
     content: content,
+    thumbnailURL: thumbnailURL,
+    isUserArticle: isUserArticle,
+    createdAt: createdAt,
   );
 
   factory ArticleModel.fromJson(Map < String, dynamic > map) {
@@ -45,7 +52,55 @@ class ArticleModel extends ArticleEntity {
       url: entity.url,
       urlToImage: entity.urlToImage,
       publishedAt: entity.publishedAt,
-      content: entity.content
+      content: entity.content,
+      thumbnailURL: entity.thumbnailURL,
+      isUserArticle: entity.isUserArticle,
+      createdAt: entity.createdAt,
     );
+  }
+
+  factory ArticleModel.fromFirestore(DocumentSnapshot doc) {
+    final map = doc.data() as Map<String, dynamic>;
+    return ArticleModel(
+      author: map['author'] ?? '',
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      url: map['url'] ?? '',
+      urlToImage: map['urlToImage'] ?? kDefaultImage,
+      publishedAt: map['publishedAt'] ?? '',
+      content: map['content'] ?? '',
+      thumbnailURL: map['thumbnailURL'],
+      isUserArticle: map['isUserArticle'] ?? false,
+      createdAt: map['createdAt']?.toString(),
+    );
+  }
+
+  ArticleEntity toEntity() => ArticleEntity(
+    id: id,
+    author: author,
+    title: title,
+    description: description,
+    url: url,
+    urlToImage: urlToImage,
+    publishedAt: publishedAt,
+    content: content,
+    thumbnailURL: thumbnailURL,
+    isUserArticle: isUserArticle,
+    createdAt: createdAt,
+  );
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'author': author ?? '',
+      'title': title ?? '',
+      'description': description ?? '',
+      'url': url ?? '',
+      'urlToImage': urlToImage ?? '',
+      'publishedAt': publishedAt ?? '',
+      'content': content ?? '',
+      'thumbnailURL': thumbnailURL,
+      'isUserArticle': isUserArticle,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
   }
 }

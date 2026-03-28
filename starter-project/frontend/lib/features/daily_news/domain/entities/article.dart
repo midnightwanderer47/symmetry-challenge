@@ -9,6 +9,9 @@ class ArticleEntity extends Equatable{
   final String ? urlToImage;
   final String ? publishedAt;
   final String ? content;
+  final String ? thumbnailURL;
+  final bool isUserArticle;
+  final String ? createdAt;
 
   const ArticleEntity({
     this.id,
@@ -19,7 +22,36 @@ class ArticleEntity extends Equatable{
     this.urlToImage,
     this.publishedAt,
     this.content,
+    this.thumbnailURL,
+    this.isUserArticle = false,
+    this.createdAt,
   });
+
+  ArticleEntity copyWith({
+    int? id,
+    String? author,
+    String? title,
+    String? description,
+    String? url,
+    String? urlToImage,
+    String? publishedAt,
+    String? content,
+    String? thumbnailURL,
+    bool? isUserArticle,
+    String? createdAt,
+  }) => ArticleEntity(
+    id: id ?? this.id,
+    author: author ?? this.author,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    url: url ?? this.url,
+    urlToImage: urlToImage ?? this.urlToImage,
+    publishedAt: publishedAt ?? this.publishedAt,
+    content: content ?? this.content,
+    thumbnailURL: thumbnailURL ?? this.thumbnailURL,
+    isUserArticle: isUserArticle ?? this.isUserArticle,
+    createdAt: createdAt ?? this.createdAt,
+  );
 
   @override
   List < Object ? > get props {
@@ -32,6 +64,9 @@ class ArticleEntity extends Equatable{
       urlToImage,
       publishedAt,
       content,
+      thumbnailURL,
+      isUserArticle,
+      createdAt,
     ];
   }
 }

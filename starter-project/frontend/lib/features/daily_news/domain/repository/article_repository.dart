@@ -11,4 +11,11 @@ abstract class ArticleRepository {
   Future < void > saveArticle(ArticleEntity article);
 
   Future < void > removeArticle(ArticleEntity article);
+
+  // Firebase methods
+  Future<DataState<void>> uploadArticle(ArticleEntity article);
+
+  Future<DataState<String>> uploadArticleThumbnail(String filePath);
+
+  Future<DataState<List<ArticleEntity>>> getUserArticles();
 }
