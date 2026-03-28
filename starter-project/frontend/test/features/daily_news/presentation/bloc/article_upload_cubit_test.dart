@@ -1,0 +1,97 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:news_app_clean_architecture/core/resources/data_state.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article_thumbnail.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_cubit.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_state.dart';
+
+class MockUploadArticleUseCase extends Mock implements UploadArticleUseCase {}
+
+class MockUploadArticleThumbnailUseCase extends Mock
+    implements UploadArticleThumbnailUseCase {}
+
+DioError _dioError() => DioError(
+      requestOptions: RequestOptions(path: ''),
+      error: Exception('test error'),
+    );
+
+const _article = ArticleEntity(
+  title: 'Test Title',
+  author: 'Test Author',
+  content: 'Test Content',
+  publishedAt: '2024-01-01T00:00:00.000Z',
+);
+
+void main() {
+  late MockUploadArticleUseCase mockUploadUseCase;
+  late MockUploadArticleThumbnailUseCase mockThumbnailUseCase;
+
+  setUp(() {
+    mockUploadUseCase = MockUploadArticleUseCase();
+    mockThumbnailUseCase = MockUploadArticleThumbnailUseCase();
+    registerFallbackValue(_article);
+    registerFallbackValue('');
+  });
+
+  ArticleUploadCubit buildCubit() =>
+      ArticleUploadCubit(mockUploadUseCase, mockThumbnailUseCase);
+
+  test('initial state is ArticleUploadInitial', () {
+    expect(buildCubit().state, const ArticleUploadInitial());
+  });
+
+  test('state is Success when upload without thumbnail succeeds', () async {
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => const DataSuccess(null));
+    final cubit = buildCubit();
+    await cubit.upload(_article);
+    expect(cubit.state, const ArticleUploadSuccess());
+  });
+
+  test('state is Success when upload with thumbnail succeeds', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => const DataSuccess('https://example.com/thumb.jpg'));
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => const DataSuccess(null));
+    final cubit = buildCubit();
+    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    expect(cubit.state, const ArticleUploadSuccess());
+  });
+
+  test('state is Failure when thumbnail upload fails', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => DataFailed(_dioError()));
+    final cubit = buildCubit();
+    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    expect(cubit.state, isA<ArticleUploadFailure>());
+  });
+
+  test('state is Failure when article upload fails', () async {
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => DataFailed(_dioError()));
+    final cubit = buildCubit();
+    await cubit.upload(_article);
+    expect(cubit.state, isA<ArticleUploadFailure>());
+  });
+
+  test('state is Failure when upload use case throws', () async {
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenThrow(Exception('unexpected'));
+    final cubit = buildCubit();
+    await cubit.upload(_article);
+    expect(cubit.state, isA<ArticleUploadFailure>());
+  });
+
+  test('emits Loading before uploading', () async {
+    final emitted = <ArticleUploadState>[];
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async => const DataSuccess(null));
+    final cubit = buildCubit();
+    cubit.stream.listen(emitted.add);
+    await cubit.upload(_article);
+    expect(emitted, contains(const ArticleUploadLoading()));
+  });
+}
