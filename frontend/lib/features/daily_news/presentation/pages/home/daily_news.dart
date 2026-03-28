@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/config/routes/routes.dart';
-import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
-import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_state.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_cubit.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_state.dart';
 
 import '../../../domain/entities/article.dart';
 import '../../widgets/article_tile.dart';
@@ -42,7 +42,7 @@ class DailyNews extends StatelessWidget {
   }
 
   _buildPage() {
-    return BlocBuilder<RemoteArticlesBloc, RemoteArticlesState>(
+    return BlocBuilder<RemoteArticlesCubit, RemoteArticlesState>(
       builder: (context, state) {
         if (state is RemoteArticlesLoading) {
           return Scaffold(
@@ -54,8 +54,8 @@ class DailyNews extends StatelessWidget {
               appBar: _buildAppbar(context),
               body: const Center(child: Icon(Icons.refresh)));
         }
-        if (state is RemoteArticlesDone) {
-          return _buildArticlesPage(context, state.articles!);
+        if (state is RemoteArticlesLoaded) {
+          return _buildArticlesPage(context, state.articles);
         }
         return const SizedBox();
       },

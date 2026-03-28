@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -18,37 +19,159 @@ class ArticleRepositoryImpl implements ArticleRepository {
   final FirestoreArticleDataSource _firestoreDataSource;
   final FirebaseStorageDataSource _storageDataSource;
 
+  Timer? _debounceTimer;
+
   ArticleRepositoryImpl(
     this._newsApiService,
     this._appDatabase,
     this._firestoreDataSource,
     this._storageDataSource,
   );
-  
-  @override
-  Future<DataState<List<ArticleModel>>> getNewsArticles() async {
-   try {
-    final httpResponse = await _newsApiService.getNewsArticles(
-      apiKey:newsAPIKey,
-      country:countryQuery,
-      category:categoryQuery,
-    );
 
-    if (httpResponse.response.statusCode == HttpStatus.ok) {
-      return DataSuccess(httpResponse.data);
-    } else {
-      return DataFailed(
-        DioError(
-          error: httpResponse.response.statusMessage,
-          response: httpResponse.response,
-          type: DioErrorType.response,
-          requestOptions: httpResponse.response.requestOptions
-        )
-      );
+  @override
+  Future<DataState<List<ArticleEntity>>> getNewsArticles() async {
+    List<ArticleEntity>? firestoreResult;
+    List<ArticleEntity>? newsApiResult;
+    Object? firestoreError;
+    Object? newsApiError;
+
+    await Future.wait([
+      Future(() async {
+        try {
+          firestoreResult = await _fetchFirestoreArticles();
+        } catch (e) {
+          firestoreError = e;
+        }
+      }),
+      Future(() async {
+        try {
+          newsApiResult = await _fetchNewsApiArticles();
+        } catch (e) {
+          newsApiError = e;
+        }
+      }),
+    ]);
+
+    if (firestoreError != null && newsApiError != null) {
+      return DataFailed(DioError(
+        error: newsApiError,
+        requestOptions: RequestOptions(path: ''),
+      ));
     }
-   } on DioError catch(e){
-    return DataFailed(e);
-   }
+
+    return DataSuccess(_mergeAndSortArticles(
+      firestoreResult ?? [],
+      newsApiResult ?? [],
+    ));
+  }
+
+  @override
+  Future<DataState<List<ArticleEntity>>> searchArticles(String query) {
+    if (query.trim().isEmpty) return getNewsArticles();
+
+    final completer = Completer<DataState<List<ArticleEntity>>>();
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () async {
+      List<ArticleEntity>? firestoreResult;
+      List<ArticleEntity>? newsApiResult;
+      Object? firestoreError;
+      Object? newsApiError;
+
+      final lowerQuery = query.toLowerCase();
+
+      await Future.wait([
+        Future(() async {
+          try {
+            final all = await _fetchFirestoreArticles();
+            firestoreResult = all.where((a) {
+              return (a.title ?? '').toLowerCase().contains(lowerQuery) ||
+                  (a.description ?? '').toLowerCase().contains(lowerQuery);
+            }).toList();
+          } catch (e) {
+            firestoreError = e;
+          }
+        }),
+        Future(() async {
+          try {
+            final httpResponse = await _newsApiService.searchNewsArticles(
+              apiKey: newsAPIKey,
+              q: Uri.encodeComponent(query),
+            );
+            if (httpResponse.response.statusCode == HttpStatus.ok) {
+              newsApiResult = httpResponse.data.map((m) => m.toEntity()).toList();
+            } else {
+              throw DioError(
+                error: httpResponse.response.statusMessage,
+                response: httpResponse.response,
+                type: DioErrorType.response,
+                requestOptions: httpResponse.response.requestOptions,
+              );
+            }
+          } catch (e) {
+            newsApiError = e;
+          }
+        }),
+      ]);
+
+      if (firestoreError != null && newsApiError != null) {
+        completer.complete(DataFailed(DioError(
+          error: newsApiError,
+          requestOptions: RequestOptions(path: ''),
+        )));
+        return;
+      }
+
+      completer.complete(DataSuccess(_mergeAndSortArticles(
+        firestoreResult ?? [],
+        newsApiResult ?? [],
+      )));
+    });
+
+    return completer.future;
+  }
+
+  Future<List<ArticleEntity>> _fetchFirestoreArticles() async {
+    final models = await _firestoreDataSource.getUserArticles();
+    return models.map((m) => m.toEntity()).toList();
+  }
+
+  Future<List<ArticleEntity>> _fetchNewsApiArticles() async {
+    final httpResponse = await _newsApiService.getNewsArticles(
+      apiKey: newsAPIKey,
+      country: countryQuery,
+      category: categoryQuery,
+    );
+    if (httpResponse.response.statusCode == HttpStatus.ok) {
+      return httpResponse.data.map((m) => m.toEntity()).toList();
+    }
+    throw DioError(
+      error: httpResponse.response.statusMessage,
+      response: httpResponse.response,
+      type: DioErrorType.response,
+      requestOptions: httpResponse.response.requestOptions,
+    );
+  }
+
+  List<ArticleEntity> _mergeAndSortArticles(
+    List<ArticleEntity> firestoreArticles,
+    List<ArticleEntity> newsApiArticles,
+  ) {
+    final Map<String, ArticleEntity> merged = {};
+    for (final a in newsApiArticles) {
+      final key = (a.title ?? '').toLowerCase().trim();
+      if (key.isNotEmpty) merged[key] = a;
+    }
+    for (final a in firestoreArticles) {
+      final key = (a.title ?? '').toLowerCase().trim();
+      if (key.isNotEmpty) merged[key] = a;
+    }
+    final list = merged.values.toList()
+      ..sort((a, b) {
+        final aDate = a.publishedAt ?? a.createdAt ?? '';
+        final bDate = b.publishedAt ?? b.createdAt ?? '';
+        return bDate.compareTo(aDate);
+      });
+    return list;
   }
 
   @override

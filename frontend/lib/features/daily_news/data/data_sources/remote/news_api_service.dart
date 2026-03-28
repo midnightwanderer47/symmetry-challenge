@@ -14,4 +14,10 @@ abstract class NewsApiService {
     @Query("country") String ? country,
     @Query("category") String ? category,
   });
+
+  @GET('/everything')
+  Future<HttpResponse<List<ArticleModel>>> searchNewsArticles({
+    @Query("apiKey") String? apiKey,
+    @Query("q") String? q,
+  });
 }

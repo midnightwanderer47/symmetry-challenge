@@ -9,9 +9,11 @@ import 'package:news_app_clean_architecture/features/daily_news/data/repository/
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/search_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article_thumbnail.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'features/daily_news/data/data_sources/local/app_database.dart';
@@ -75,6 +77,10 @@ Future<void> initializeDependencies() async {
     GetUserArticlesUseCase(sl())
   );
 
+  sl.registerSingleton<SearchArticlesUseCase>(
+    SearchArticlesUseCase(sl())
+  );
+
   //Blocs
   sl.registerFactory<ArticleUploadCubit>(
     () => ArticleUploadCubit(sl(), sl())
@@ -86,6 +92,10 @@ Future<void> initializeDependencies() async {
 
   sl.registerFactory<RemoteArticlesBloc>(
     ()=> RemoteArticlesBloc(sl())
+  );
+
+  sl.registerFactory<RemoteArticlesCubit>(
+    () => RemoteArticlesCubit(sl())
   );
 
   sl.registerFactory<LocalArticleBloc>(
