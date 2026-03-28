@@ -2,6 +2,11 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TODO: WRITE ANY NECESSARY FIRESTORE RULES HERE
+    match /articles/{doc} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null &&
+        request.resource.data.keys().hasAll(['title', 'content', 'author', 'thumbnailURL', 'publishedAt', 'createdAt']) &&
+        request.resource.data.thumbnailURL is string && request.resource.data.thumbnailURL.size() > 0;
+    }
   }
 }
