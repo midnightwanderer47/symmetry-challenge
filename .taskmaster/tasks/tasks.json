@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Design Article Firestore Schema",
         "description": "Create DB_SCHEMA.md documenting the Firestore schema for articles collection with all required fields including thumbnailURL, createdAt, and isUserArticle flag",
         "details": "Create `backend/docs/DB_SCHEMA.md` with schema definition:\n\n```\narticles/{docId}\n├── id: string (auto-generated)\n├── author: string (required)\n├── title: string (required)\n├── description: string\n├── url: string?\n├── publishedAt: timestamp (required)\n├── content: string (required)\n├── thumbnailURL: string (Cloud Storage path: media/articles/{filename})\n├── createdAt: timestamp (required)\n└── isUserArticle: boolean (true for user uploads)\n```\nInclude field types, descriptions, nullability, and validation rules. Reference Cloud Storage path format exactly as `media/articles/{uuid}.{ext}`",
@@ -81,7 +81,7 @@
         "updatedAt": "2026-03-27T15:31:03.124Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Setup Firebase Project and Local Emulator",
         "description": "Create Firebase project, enable Firestore and Storage, setup Local Emulator Suite with correct ports, initialize articles collection structure",
         "details": "Run `firebase login`, `firebase projects:create symmetry-news-[unique]`, enable Firestore (production mode) and Storage. Configure `.firebaserc` with project ID. Install Firebase CLI v13.0+ and run `firebase init emulators` with ports: Firestore=8080, Storage=9199. Create `media/articles/` folder structure in Storage rules. Test: `firebase emulators:start --only firestore,storage`. Verify emulator accessible at localhost:4000",
@@ -165,7 +165,7 @@
         "updatedAt": "2026-03-28T02:54:16.976Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Implement Firestore and Storage Security Rules",
         "description": "Write and deploy security rules for Firestore (public read, auth write, field validation) and Storage (public read, auth write, 10MB image limit)",
         "details": "**Firestore rules (`backend/firestore.rules`):\n```\nrules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /articles/{doc} {\n      allow read: if true;\n      allow create, update, delete: if request.auth != null &&\n        request.resource.data.keys().hasAll(['title', 'content', 'author', 'thumbnailURL', 'publishedAt', 'createdAt']) &&\n        request.resource.data.thumbnailURL is string && request.resource.data.thumbnailURL.size() > 0;\n    }\n  }\n}\n```\n**Storage rules (`backend/storage.rules`):\n```\nrules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /media/articles/{allPaths=**} {\n      allow read: if true;\n      allow write: if request.auth != null &&\n        request.resource.size < 10 * 1024 * 1024 &&\n        request.resource.contentType.matches('image/.*');\n    }\n  }\n}\n```\nDeploy: `firebase deploy --only firestore:rules,storage:rules`",
@@ -240,7 +240,7 @@
         "updatedAt": "2026-03-27T18:00:03.514Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Firebase Flutter Integration Setup",
         "description": "Configure FlutterFire CLI, generate firebase_options.dart, initialize Firebase in main.dart, verify no connection errors",
         "details": "Run `dart pub global activate flutterfire_cli`, `flutterfire configure --project=symmetry-news-[id] --platforms=android,ios,web`. Add to `main.dart`:\n```dart\nimport 'package:firebase_core/firebase_core.dart';\nimport 'firebase_options.dart';\n\nvoid main() async {\n  WidgetsFlutterBinding.ensureInitialized();\n  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);\n  runApp(MyApp());\n}\n```\nUpdate `pubspec.yaml` dependencies: `firebase_core: ^3.2.0`, `cloud_firestore: ^5.1.0`, `firebase_storage: ^12.1.1`. Run `flutter pub get`. Update `backend/.firebaserc` project ID.",
@@ -324,7 +324,7 @@
         "updatedAt": "2026-03-28T02:57:40.044Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Extend Domain Layer - ArticleEntity and Repository",
         "description": "Extend ArticleEntity with new fields, add repository interface methods for uploadArticle, uploadArticleThumbnail, getUserArticles",
         "details": "**ArticleEntity** (`domain/entities/article.dart`):\n```dart\nclass ArticleEntity {\n  // existing fields...\n  final String? thumbnailURL;\n  final bool isUserArticle;\n  final String? createdAt;\n\n  const ArticleEntity({\n    // existing...\n    this.thumbnailURL,\n    this.isUserArticle = false,\n    this.createdAt,\n  });\n\n  ArticleEntity copyWith({\n    String? thumbnailURL,\n    bool? isUserArticle,\n    String? createdAt,\n  }) => ArticleEntity(\n    // copy existing + new fields\n  );\n}\n```\n**Repository** (`domain/repository/article_repository.dart`):\n```dart\nabstract class ArticleRepository {\n  // existing...\n  Future<DataState<void>> uploadArticle(ArticleEntity article);\n  Future<DataState<String>> uploadArticleThumbnail(String filePath);\n  Future<DataState<List<ArticleEntity>>> getUserArticles();\n}\n```",
@@ -405,7 +405,7 @@
         "updatedAt": "2026-03-28T02:59:15.135Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Implement Domain Use Cases",
         "description": "Create UploadArticleUseCase, UploadArticleThumbnailUseCase, GetUserArticlesUseCase following UseCase base class pattern",
         "details": "**UploadArticleUseCase** (`domain/use_cases/upload_article.dart`):\n```dart\nclass UploadArticleUseCase implements UseCase<void, UploadArticleParams> {\n  final ArticleRepository repository;\n  UploadArticleUseCase(this.repository);\n  @override\n  Future<DataState<void>> call(UploadArticleParams params) =>\n      repository.uploadArticle(params.article);\n}\nclass UploadArticleParams extends Params {\n  final ArticleEntity article;\n  UploadArticleParams(this.article);\n}\n```\n**UploadArticleThumbnailUseCase**:\n```dart\nclass UploadArticleThumbnailUseCase implements UseCase<String, UploadThumbnailParams> {\n  final ArticleRepository repository;\n  @override\n  Future<DataState<String>> call(UploadThumbnailParams params) =>\n      repository.uploadArticleThumbnail(params.filePath);\n}\n```\n**GetUserArticlesUseCase**:\n```dart\nclass GetUserArticlesUseCase implements UseCase<List<ArticleEntity>, NoParams> {\n  final ArticleRepository repository;\n  @override\n  Future<DataState<List<ArticleEntity>>> call(NoParams params) =>\n      repository.getUserArticles();\n}\n```",
@@ -487,7 +487,7 @@
         "updatedAt": "2026-03-28T03:02:07.704Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement Data Sources - Firestore and Storage",
         "description": "Create FirestoreArticleDataSource and FirebaseStorageDataSource implementations with Firebase SDK imports only in data layer",
         "details": "**FirestoreArticleDataSourceImpl**:\n```dart\nimport 'package:cloud_firestore/cloud_firestore.dart';\n\nclass FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {\n  final FirebaseFirestore firestore = FirebaseFirestore.instance;\n\n  @override\n  Future<void> uploadArticle(ArticleModel article) async {\n    await firestore.collection('articles').add(article.toFirestore());\n  }\n\n  @override\n  Future<List<ArticleModel>> getUserArticles() async {\n    final snapshot = await firestore\n        .collection('articles')\n        .where('isUserArticle', isEqualTo: true)\n        .orderBy('createdAt', descending: true)\n        .get();\n    return snapshot.docs.map((doc) => ArticleModel.fromFirestore(doc)).toList();\n  }\n}\n```\n**FirebaseStorageDataSourceImpl**:\n```dart\nimport 'package:firebase_storage/firebase_storage.dart';\nimport 'package:path/path.dart' as path;\nimport 'package:uuid/uuid.dart';\n\nclass FirebaseStorageDataSourceImpl implements FirebaseStorageDataSource {\n  final FirebaseStorage storage = FirebaseStorage.instance;\n\n  @override\n  Future<String> uploadThumbnail(String filePath) async {\n    final fileName = '${Uuid().v4()}${path.extension(filePath)}';\n    final ref = storage.ref().child('media/articles/$fileName');\n    final uploadTask = ref.putFile(File(filePath));\n    final snapshot = await uploadTask;\n    return await snapshot.ref.getDownloadURL();\n  }\n}\n```",
@@ -567,7 +567,7 @@
         "updatedAt": "2026-03-28T03:00:58.108Z"
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Extend ArticleModel with Firestore Serialization",
         "description": "Add fromFirestore, toFirestore, toEntity methods to ArticleModel handling new fields",
         "details": "**ArticleModel** extensions:\n```dart\nfactory ArticleModel.fromFirestore(DocumentSnapshot doc) {\n  final data = doc.data() as Map<String, dynamic>;\n  return ArticleModel(\n    // existing fields...\n    thumbnailURL: data['thumbnailURL'],\n    isUserArticle: data['isUserArticle'] ?? false,\n    createdAt: data['createdAt'],\n  );\n}\n\nMap<String, dynamic> toFirestore() => {\n  // existing...\n  'thumbnailURL': thumbnailURL,\n  'isUserArticle': isUserArticle,\n  'createdAt': createdAt ?? FieldValue.serverTimestamp(),\n};\n\n@override\nArticleEntity toEntity() => ArticleEntity(\n  // map all fields including new ones\n);\n```",
@@ -646,7 +646,7 @@
         "updatedAt": "2026-03-28T03:02:31.022Z"
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Implement ArticleRepositoryImpl with New Methods",
         "description": "Extend repository implementation to delegate to data sources, wrap exceptions in DataFailed",
         "details": "**ArticleRepositoryImpl** extensions:\n```dart\nclass ArticleRepositoryImpl implements ArticleRepository {\n  final FirestoreArticleDataSource firestoreDataSource;\n  final FirebaseStorageDataSource storageDataSource;\n\n  @override\n  Future<DataState<void>> uploadArticle(ArticleEntity article) async {\n    try {\n      final model = ArticleModel.fromEntity(article);\n      await firestoreDataSource.uploadArticle(model);\n      return const DataSuccess(null);\n    } on FirebaseException catch (e) {\n      return DataFailed(e.message ?? 'Upload failed');\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n\n  @override\n  Future<DataState<String>> uploadArticleThumbnail(String filePath) async {\n    try {\n      final url = await storageDataSource.uploadThumbnail(filePath);\n      return DataSuccess(url);\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n\n  @override\n  Future<DataState<List<ArticleEntity>>> getUserArticles() async {\n    try {\n      final models = await firestoreDataSource.getUserArticles();\n      final entities = models.map((m) => m.toEntity()).toList();\n      return DataSuccess(entities);\n    } catch (e) {\n      return DataFailed(e.toString());\n    }\n  }\n}\n```",
@@ -731,7 +731,7 @@
         "updatedAt": "2026-03-28T03:04:03.948Z"
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Dependency Injection Setup",
         "description": "Register all new dependencies in injection_container.dart including data sources, use cases, and cubits",
         "details": "**injection_container.dart** updates:\n```dart\n// Data sources\ngetIt.registerLazySingleton<FirestoreArticleDataSource>(() =>\n    FirestoreArticleDataSourceImpl());\ngetIt.registerLazySingleton<FirebaseStorageDataSource>(() =>\n    FirebaseStorageDataSourceImpl());\n\n// Use cases\ngetIt.registerLazySingleton(() => UploadArticleUseCase(getIt()));\ngetIt.registerLazySingleton(() => UploadArticleThumbnailUseCase(getIt()));\ngetIt.registerLazySingleton(() => GetUserArticlesUseCase(getIt()));\n\n// Cubits (registered later after BLoC implementation)\n// getIt.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(...));\n// getIt.registerFactory<UserArticlesCubit>(() => UserArticlesCubit(...));\n```\nVerify get_it ^7.6.0, flutter_bloc ^8.1.2 in pubspec.yaml.",
@@ -814,7 +814,7 @@
         "updatedAt": "2026-03-28T03:04:16.786Z"
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Implement ArticleUploadCubit",
         "description": "Create ArticleUploadCubit with states and uploadArticle method handling thumbnail first then article upload",
         "details": "**States** (`presentation/bloc/article/upload/article_upload_state.dart`):\n```dart\nabstract class ArticleUploadState extends Equatable {}\nclass ArticleUploadInitial extends ArticleUploadState {}\nclass ArticleUploadLoading extends ArticleUploadState {}\nclass ArticleUploadSuccess extends ArticleUploadState {}\nclass ArticleUploadFailure extends ArticleUploadState {\n  final String message;\n  ArticleUploadFailure(this.message);\n  @override\n  List<Object> get props => [message];\n}\n```\n**Cubit**:\n```dart\nclass ArticleUploadCubit extends Cubit<ArticleUploadState> {\n  final UploadArticleUseCase uploadArticle;\n  final UploadArticleThumbnailUseCase uploadThumbnail;\n\n  ArticleUploadCubit(this.uploadArticle, this.uploadThumbnail)\n      : super(ArticleUploadInitial());\n\n  Future<void> uploadArticle(ArticleEntity article, String? thumbnailFilePath) async {\n    emit(ArticleUploadLoading());\n    try {\n      String? thumbnailUrl;\n      if (thumbnailFilePath != null) {\n        final thumbResult = await uploadThumbnail(UploadThumbnailParams(thumbnailFilePath));\n        thumbnailUrl = thumbResult.data;\n      }\n      final finalArticle = article.copyWith(\n        thumbnailURL: thumbnailUrl,\n        isUserArticle: true,\n        createdAt: DateTime.now().toIso8601String(),\n      );\n      await uploadArticle(UploadArticleParams(finalArticle));\n      emit(ArticleUploadSuccess());\n    } catch (e) {\n      emit(ArticleUploadFailure(e.toString()));\n    }\n  }\n}\n```",
@@ -896,7 +896,7 @@
         "updatedAt": "2026-03-28T03:05:12.947Z"
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Implement UserArticlesCubit",
         "description": "Create UserArticlesCubit with fetchUserArticles method and appropriate states",
         "details": "**States** (`presentation/bloc/article/user/user_articles_state.dart`):\n```dart\nabstract class UserArticlesState extends Equatable {}\nclass UserArticlesInitial extends UserArticlesState {}\nclass UserArticlesLoading extends UserArticlesState {}\nclass UserArticlesLoaded extends UserArticlesState {\n  final List<ArticleEntity> articles;\n  UserArticlesLoaded(this.articles);\n  @override\n  List<Object> get props => [articles];\n}\nclass UserArticlesError extends UserArticlesState {\n  final String message;\n  UserArticlesError(this.message);\n  @override\n  List<Object> get props => [message];\n}\n```\n**Cubit**:\n```dart\nclass UserArticlesCubit extends Cubit<UserArticlesState> {\n  final GetUserArticlesUseCase getUserArticles;\n\n  UserArticlesCubit(this.getUserArticles) : super(UserArticlesInitial());\n\n  Future<void> fetchUserArticles() async {\n    emit(UserArticlesLoading());\n    final result = await getUserArticles(NoParams());\n    result.fold(\n      (failure) => emit(UserArticlesError(failure.message)),\n      (articles) => emit(UserArticlesLoaded(articles)),\n    );\n  }\n}\n```",
@@ -978,7 +978,7 @@
         "updatedAt": "2026-03-28T03:05:58.316Z"
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Register BLoC/Cubits in DI Container",
         "description": "Complete DI registration for ArticleUploadCubit and UserArticlesCubit as factories",
         "details": "Add to `injection_container.dart`:\n```dart\nggetIt.registerFactory<ArticleUploadCubit>(() =>\n    ArticleUploadCubit(getIt(), getIt()));\ngetIt.registerFactory<UserArticlesCubit>(() =>\n    UserArticlesCubit(getIt()));\n```\nVerify all dependencies resolve: `getIt<ArticleUploadCubit>()`, `getIt<UserArticlesCubit>()`.",
@@ -1061,7 +1061,7 @@
         "updatedAt": "2026-03-28T03:06:03.110Z"
       },
       {
-        "id": 14,
+        "id": "14",
         "title": "Implement Article Upload Screen UI",
         "description": "Create upload_article_screen.dart with form validation, image picker, thumbnail preview, submit with loading states",
         "details": "Use `image_picker: ^1.1.2` for gallery/camera. **Key features**:\n- Form fields: TextFormField (title/author/desc), TextFormField(multi-line: content), DatePicker (publishedAt)\n- Image picker button → preview Container with NetworkImage/FileImage\n- Client validation: title/content/author/publishedAt required\n- BlocConsumer<ArticleUploadCubit> for loading/success/error states\n- Success: Navigator.pop(context, true)\n- Error: SnackBar\n\n**Pseudo-code**:\n```dart\nBlocProvider(\n  create: (_) => getIt<ArticleUploadCubit>(),\n  child: BlocConsumer<ArticleUploadCubit, ArticleUploadState>(\n    listener: (context, state) {\n      if (state is Success) Navigator.pop(context, true);\n      if (state is Failure) ScaffoldMessenger.showSnackBar(...);\n    },\n    builder: (context, state) => Scaffold(\n      body: Form(\n        child: Column(\n          TextFormField(titleController, validator: required),\n          // ... other fields\n          ElevatedButton(\n            onPressed: state is Loading ? null : _submit,\n            child: state is Loading ? CircularProgressIndicator() : Text('Upload'),\n          ),\n        ),\n      ),\n    ),\n  ),\n)\n```",
@@ -1144,7 +1144,7 @@
         "updatedAt": "2026-03-28T03:07:32.685Z"
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "Implement User Articles Screen",
         "description": "Create user_articles_screen.dart with article list, pull-to-refresh, empty state, navigation to detail screen",
         "details": "**Features**:\n- BlocProvider<UserArticlesCubit>\n- RefreshIndicator calling `cubit.fetchUserArticles()`\n- ListView.builder with existing article card widget\n- Empty state: Column with illustration + 'No articles yet' text\n- Card tap: Navigator.pushNamed(context, ArticleDetailRoute, arguments: article)\n\n**Integration**: Add FAB to DailyNewsScreen: `FloatingActionButton(onPressed: () => Navigator.pushNamed(context, UploadArticleRoute))`. Add app bar action: `IconButton(onPressed: () => Navigator.pushNamed(context, UserArticlesRoute))`.",
@@ -1226,7 +1226,7 @@
         "updatedAt": "2026-03-28T03:24:31.565Z"
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Update Routes Configuration",
         "description": "Add named routes for upload_article_screen and user_articles_screen in config/routes/routes.dart",
         "details": "**routes.dart**:\n```dart\nstatic const String uploadArticleRoute = '/upload-article';\nstatic const String userArticlesRoute = '/user-articles';\n\nGetPage(\n  name: Routes.uploadArticleRoute,\n  page: () => UploadArticleScreen(),\n),\nGetPage(\n  name: Routes.userArticlesRoute,\n  page: () => UserArticlesScreen(),\n),\n```\nUpdate app bar FAB and navigation integration in existing DailyNewsScreen.",
@@ -1304,7 +1304,7 @@
         "updatedAt": "2026-03-28T03:33:18.983Z"
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "End-to-End Integration Testing",
         "description": "Verify complete flow: form → image pick → upload → list refresh → Firestore/Storage population",
         "details": "Test sequence:\n1. Navigate to upload screen via FAB\n2. Fill form (title, author, content, date)\n3. Pick image from gallery\n4. Submit → verify loading → success navigation\n5. Navigate to user articles screen\n6. Verify article appears in list with thumbnail\n7. Pull-to-refresh updates list\n8. Verify Firestore doc and Storage file created\n9. Test security rules block unauth access\n\nRun with emulator: `firebase emulators:start` + `flutter run`.",
@@ -1385,7 +1385,7 @@
         "updatedAt": "2026-03-28T04:07:36.098Z"
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "Write Comprehensive Project Report",
         "description": "Create docs/REPORT.md covering all required sections including learning journey, challenges, overdelivery, screenshots",
         "details": "Follow `docs/REPORT_INSTRUCTIONS.md` structure:\n1. **Introduction**: Experience level with Flutter/Firebase/Clean Arch\n2. **Learning Journey**: BLoC 8.1.2 patterns, Firebase emulator workflow, Clean Arch enforcement\n3. **Challenges**: Security rules validation, data source exception handling, DI wiring\n4. **Reflection**: Architecture benefits, testability improvements\n5. **Proof**: Screenshots (upload form, success state, user articles list, Firebase console)\n6. **Overdelivery**: Progress tracking in upload (from search results[1]), image compression, offline draft saving\n7. **Architecture**: Layer violation prevention strategies",
@@ -1467,14 +1467,14 @@
         "updatedAt": "2026-03-28T04:36:11.011Z"
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Add firebase_auth dependency to pubspec.yaml",
         "description": "Add firebase_auth package compatible with existing firebase_core BOM to enable Firebase Authentication in the Flutter app (FR1)",
         "details": "Run `flutter pub add firebase_auth` from project root. Verify version compatibility with firebase_core in pubspec.yaml. Run `flutter pub get` to fetch dependencies. Ensure no version conflicts with existing Firebase BOM.",
         "testStrategy": "Verify firebase_auth appears in pubspec.yaml lockfile. Run `flutter pub get` and `flutter analyze` without errors. Build app with `flutter build apk --debug` to confirm dependency resolution.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1482,8 +1482,10 @@
             "description": "Execute the Flutter package addition command from the project root directory to automatically add firebase_auth to pubspec.yaml",
             "dependencies": [],
             "details": "Navigate to project root in terminal and run: flutter pub add firebase_auth. This command automatically handles version resolution and updates pubspec.yaml with compatible version.",
-            "status": "pending",
-            "testStrategy": "Verify command completes without errors and firebase_auth appears under dependencies in pubspec.yaml"
+            "status": "done",
+            "testStrategy": "Verify command completes without errors and firebase_auth appears under dependencies in pubspec.yaml",
+            "updatedAt": "2026-03-28T18:43:23.075Z",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1493,8 +1495,10 @@
               1
             ],
             "details": "Open pubspec.yaml and compare firebase_auth version constraint with firebase_core BOM. Ensure no ^ or specific version conflicts. Firebase BOM typically handles compatibility automatically.",
-            "status": "pending",
-            "testStrategy": "Manually inspect pubspec.yaml versions. No version conflict warnings should appear in subsequent flutter pub get output"
+            "status": "done",
+            "testStrategy": "Manually inspect pubspec.yaml versions. No version conflict warnings should appear in subsequent flutter pub get output",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:43:23.084Z"
           },
           {
             "id": 3,
@@ -1505,8 +1509,10 @@
               2
             ],
             "details": "From project root, run: flutter pub get. This generates/updates pubspec.lock with exact resolved versions and downloads packages to .pub-cache.",
-            "status": "pending",
-            "testStrategy": "Command completes successfully without version conflict errors. Check pubspec.lock contains firebase_auth entry with resolved version"
+            "status": "done",
+            "testStrategy": "Command completes successfully without version conflict errors. Check pubspec.lock contains firebase_auth entry with resolved version",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:43:23.088Z"
           },
           {
             "id": 4,
@@ -1516,8 +1522,10 @@
               3
             ],
             "details": "Run: flutter analyze from project root. This checks for any breaking changes, missing imports, or analysis errors introduced by the new dependency.",
-            "status": "pending",
-            "testStrategy": "flutter analyze reports 0 issues. No errors related to firebase_auth imports or unresolved dependencies"
+            "status": "done",
+            "testStrategy": "flutter analyze reports 0 issues. No errors related to firebase_auth imports or unresolved dependencies",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:43:23.091Z"
           },
           {
             "id": 5,
@@ -1529,19 +1537,21 @@
             ],
             "details": "Run: flutter build apk --debug. This compiles the app with firebase_auth included and tests full dependency graph resolution including native Android Firebase SDKs.",
             "status": "pending",
-            "testStrategy": "Build completes successfully without Gradle/Firebase BOM conflicts. APK generated in build/app/outputs/flutter-apk/"
+            "testStrategy": "Build completes successfully without Gradle/Firebase BOM conflicts. APK generated in build/app/outputs/flutter-apk/",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T18:43:25.562Z"
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Enable Anonymous Authentication in Firebase Console",
         "description": "Configure Firebase project to support anonymous sign-in as required for minimal UX friction (FR2)",
         "details": "Navigate to Firebase Console > Authentication > Sign-in method. Enable 'Anonymous' provider. Save changes. Verify in project matching firebase_options.dart.",
         "testStrategy": "Screenshot console showing Anonymous enabled. Test via curl or Firebase CLI: `firebase auth:export` shows anonymous provider active.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1549,8 +1559,10 @@
             "description": "Navigate to the Firebase Console and open the Authentication section for the symmetry-news project matching firebase_options.dart.",
             "dependencies": [],
             "details": "Log into Firebase Console at console.firebase.google.com. Select the exact project ID from firebase_options.dart (symmetry-news-[unique]). Click 'Authentication' in left sidebar, then 'Sign-in method' tab.",
-            "status": "pending",
-            "testStrategy": "Verify correct project selected by checking project ID in header matches firebase_options.dart. Confirm landing on Sign-in method page."
+            "status": "done",
+            "testStrategy": "Verify correct project selected by checking project ID in header matches firebase_options.dart. Confirm landing on Sign-in method page.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:50:01.742Z"
           },
           {
             "id": 2,
@@ -1560,8 +1572,10 @@
               1
             ],
             "details": "Scroll to find 'Anonymous' provider in the list of sign-in methods. Click 'Edit' or pencil icon next to Anonymous. Toggle 'Enable' switch to ON position.",
-            "status": "pending",
-            "testStrategy": "Verify Anonymous provider shows 'Enabled' status with green indicator before saving."
+            "status": "done",
+            "testStrategy": "Verify Anonymous provider shows 'Enabled' status with green indicator before saving.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:50:03.487Z"
           },
           {
             "id": 3,
@@ -1571,8 +1585,10 @@
               2
             ],
             "details": "Click blue 'Save' button at bottom of Anonymous provider configuration dialog. Wait for success confirmation toast/message to appear.",
-            "status": "pending",
-            "testStrategy": "Confirm save success by seeing green confirmation message and Anonymous status remains 'Enabled' on Sign-in methods page."
+            "status": "done",
+            "testStrategy": "Confirm save success by seeing green confirmation message and Anonymous status remains 'Enabled' on Sign-in methods page.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:50:05.244Z"
           },
           {
             "id": 4,
@@ -1582,8 +1598,10 @@
               3
             ],
             "details": "Full page screenshot of Authentication > Sign-in method showing: Project name, Anonymous 'Enabled' status, timestamp visible. Save as 'task20_anonymous_enabled.png'.",
-            "status": "pending",
-            "testStrategy": "Screenshot clearly shows project ID matching firebase_options.dart and Anonymous status=Enabled."
+            "status": "done",
+            "testStrategy": "Screenshot clearly shows project ID matching firebase_options.dart and Anonymous status=Enabled.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:50:07.010Z"
           },
           {
             "id": 5,
@@ -1593,22 +1611,25 @@
               3
             ],
             "details": "Run `firebase auth:export --project=symmetry-news-[id] > auth_export.json`. Check JSON output contains anonymous provider configuration or test anonymous sign-in succeeds.",
-            "status": "pending",
-            "testStrategy": "`firebase auth:export` completes without errors. Verify anonymous provider listed or run test anonymous sign-in via Flutter app/emulator."
+            "status": "done",
+            "testStrategy": "`firebase auth:export` completes without errors. Verify anonymous provider listed or run test anonymous sign-in via Flutter app/emulator.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T18:50:08.820Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T18:50:08.820Z"
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Implement Firebase Auth initialization in main.dart",
         "description": "Extend existing Firebase.initializeApp() to include auth state restoration and anonymous sign-in at app bootstrap (FR3)",
         "details": "In main.dart after Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform): Check FirebaseAuth.instance.currentUser. If null, call await FirebaseAuth.instance.signInAnonymously(). Use try-catch with debugPrint for errors. Call runApp only after auth ready.",
         "testStrategy": "Add debugPrint('Current user: ${FirebaseAuth.instance.currentUser?.uid}'); Verify non-null UID in logs after cold start before runApp executes.",
         "priority": "high",
         "dependencies": [
-          19
+          "19"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1617,7 +1638,8 @@
             "dependencies": [],
             "details": "Add WidgetsFlutterBinding.ensureInitialized() at start of main(). Confirm Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform) exists and completes successfully before proceeding to auth checks.",
             "status": "pending",
-            "testStrategy": "Verify no initialization errors in console logs after cold start."
+            "testStrategy": "Verify no initialization errors in console logs after cold start.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1628,7 +1650,8 @@
             ],
             "details": "After await Firebase.initializeApp(), add: User? currentUser = FirebaseAuth.instance.currentUser; Use debugPrint('Auth state restored: ${currentUser != null}'); to log restoration status.",
             "status": "pending",
-            "testStrategy": "Check logs show 'Auth state restored: false' on first cold start."
+            "testStrategy": "Check logs show 'Auth state restored: false' on first cold start.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1639,7 +1662,8 @@
             ],
             "details": "Wrap in if (currentUser == null) { await FirebaseAuth.instance.signInAnonymously(); } Ensure this happens before runApp() to guarantee auth readiness at app bootstrap.",
             "status": "pending",
-            "testStrategy": "Verify signInAnonymously() called only when currentUser is null."
+            "testStrategy": "Verify signInAnonymously() called only when currentUser is null.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1650,7 +1674,8 @@
             ],
             "details": "Use try { ... Firebase.initializeApp() ... currentUser check ... signInAnonymously() ... } catch (e) { debugPrint('Auth init error: $e'); } rethrow or handle gracefully before runApp().",
             "status": "pending",
-            "testStrategy": "Simulate network error, verify error logged but app still launches."
+            "testStrategy": "Simulate network error, verify error logged but app still launches.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1661,22 +1686,24 @@
             ],
             "details": "After auth logic: debugPrint('Current user: ${FirebaseAuth.instance.currentUser?.uid}'); runApp(MyApp()); Ensure UID is non-null in logs before runApp executes.",
             "status": "pending",
-            "testStrategy": "Confirm non-null UID printed in logs after cold start before runApp, verifying complete auth flow."
+            "testStrategy": "Confirm non-null UID printed in logs after cold start before runApp, verifying complete auth flow.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T18:55:54.167Z"
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Create Auth readiness stream wrapper",
         "description": "Wrap app with StreamBuilder on authStateChanges() to block UI until authenticated (FR3, FR4)",
         "details": "Create AuthGate widget using StreamBuilder<User?>(stream: FirebaseAuth.instance.authStateChanges()). Show loading spinner if !snapshot.hasData, else show MaterialApp home. Handle sign-in errors with SnackBar in debug mode.",
         "testStrategy": "Cold start app, verify StreamBuilder waits for auth completion. Logs show auth state transitions. Debugger confirms currentUser non-null before upload UI accessible.",
         "priority": "high",
         "dependencies": [
-          19,
-          21
+          "19",
+          "21"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1684,8 +1711,10 @@
             "description": "Create the basic AuthGate StatelessWidget structure with StreamBuilder<User?> listening to FirebaseAuth.instance.authStateChanges()",
             "dependencies": [],
             "details": "Create file lib/presentation/widgets/auth_gate.dart. Import firebase_auth and flutter/material. Define class AuthGate extends StatelessWidget with StreamBuilder<User?>(stream: FirebaseAuth.instance.authStateChanges()).",
-            "status": "pending",
-            "testStrategy": "Verify widget compiles without errors and StreamBuilder is properly initialized with authStateChanges stream."
+            "status": "done",
+            "testStrategy": "Verify widget compiles without errors and StreamBuilder is properly initialized with authStateChanges stream.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T19:21:20.061Z"
           },
           {
             "id": 2,
@@ -1695,8 +1724,10 @@
               1
             ],
             "details": "In StreamBuilder builder, add if (!snapshot.hasData) return Scaffold(body: Center(child: CircularProgressIndicator())). Ensure full-screen loading blocks UI access.",
-            "status": "pending",
-            "testStrategy": "Cold start app shows loading spinner until auth state resolves. Verify spinner is centered and responsive."
+            "status": "done",
+            "testStrategy": "Cold start app shows loading spinner until auth state resolves. Verify spinner is centered and responsive.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T19:21:20.065Z"
           },
           {
             "id": 3,
@@ -1707,8 +1738,10 @@
               2
             ],
             "details": "In else clause of StreamBuilder, return MaterialApp(home: MainAppContent() or existing home widget). Ensure proper theme and routing setup. Import main app widget.",
-            "status": "pending",
-            "testStrategy": "After auth completes, verify MaterialApp renders with correct home screen. Check no UI flicker during transition."
+            "status": "done",
+            "testStrategy": "After auth completes, verify MaterialApp renders with correct home screen. Check no UI flicker during transition.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T19:21:20.068Z"
           },
           {
             "id": 4,
@@ -1718,8 +1751,10 @@
               1
             ],
             "details": "Import 'package:flutter/foundation.dart' show kDebugMode. Add else if (snapshot.hasError && kDebugMode) {ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(snapshot.error.toString()))); return LoadingSpinner();}",
-            "status": "pending",
-            "testStrategy": "Force auth error in debug mode, verify SnackBar shows error message. Confirm no SnackBar in release mode."
+            "status": "done",
+            "testStrategy": "Force auth error in debug mode, verify SnackBar shows error message. Confirm no SnackBar in release mode.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T19:21:20.071Z"
           },
           {
             "id": 5,
@@ -1731,23 +1766,26 @@
               4
             ],
             "details": "In main.dart, change runApp(MyApp()) to runApp(AuthGate()). Ensure Firebase is initialized before runApp. Test cold start to authenticated state transition.",
-            "status": "pending",
-            "testStrategy": "Cold start app: verify waits for auth completion, logs show auth state transitions, currentUser non-null before main UI accessible."
+            "status": "done",
+            "testStrategy": "Cold start app: verify waits for auth completion, logs show auth state transitions, currentUser non-null before main UI accessible.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-28T19:21:20.073Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T19:21:20.073Z"
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Add auth error handling and logging",
         "description": "Implement visible failure handling for sign-in errors (provider disabled, network issues) (FR3)",
         "details": "In signInAnonymously() try-catch: catch FirebaseAuthException with codes 'operation-not-allowed', 'network-request-failed'. debugPrint full stack trace. Optional: SnackBar('Auth failed: ${e.message}').",
         "testStrategy": "Disable Anonymous in console, restart app, verify error logs appear and app doesn't crash. Re-enable, confirm recovery.",
         "priority": "medium",
         "dependencies": [
-          19,
-          21
+          "19",
+          "21"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1756,7 +1794,8 @@
             "dependencies": [],
             "details": "Locate the signInAnonymously() method in the authentication service or cubit. Add try { await FirebaseAuth.instance.signInAnonymously(); } on FirebaseAuthException catch (e) { ... } ensuring the catch block is implemented next.",
             "status": "pending",
-            "testStrategy": "Verify no syntax errors after adding try-catch structure. Ensure successful sign-in path still works without throwing unhandled exceptions."
+            "testStrategy": "Verify no syntax errors after adding try-catch structure. Ensure successful sign-in path still works without throwing unhandled exceptions.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1767,7 +1806,8 @@
             ],
             "details": "In the catch block, add if (e.code == 'operation-not-allowed' || e.code == 'network-request-failed') { ... } to specifically handle provider disabled and network issues as specified in FR3.",
             "status": "pending",
-            "testStrategy": "Unit test verifies correct error code detection for both specified codes. Test other error codes fall through to default handling."
+            "testStrategy": "Unit test verifies correct error code detection for both specified codes. Test other error codes fall through to default handling.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1778,7 +1818,8 @@
             ],
             "details": "Inside the specific error handling block, add debugPrint('Auth error: ${e.code}'); debugPrint('Message: ${e.message}'); debugPrintStack(stackTrace: e.stackTrace); to capture complete error information.",
             "status": "pending",
-            "testStrategy": "Run app in debug mode, trigger errors, verify debug console shows full stack trace and error codes. Check logs are formatted correctly."
+            "testStrategy": "Run app in debug mode, trigger errors, verify debug console shows full stack trace and error codes. Check logs are formatted correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1789,7 +1830,8 @@
             ],
             "details": "Use ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Auth failed: ${e.message}'), backgroundColor: Colors.red)); Ensure context is available or use a state management solution to trigger SnackBar.",
             "status": "pending",
-            "testStrategy": "Verify SnackBar appears with correct error message for both error codes. Test SnackBar styling and auto-dismiss behavior."
+            "testStrategy": "Verify SnackBar appears with correct error message for both error codes. Test SnackBar styling and auto-dismiss behavior.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1801,21 +1843,23 @@
             ],
             "details": "Add else clause for other FirebaseAuthException codes with generic logging. Document test steps: disable anonymous auth in Firebase console, restart app, verify error handling, re-enable and test recovery.",
             "status": "pending",
-            "testStrategy": "Integration test: Disable anonymous auth in Firebase console, attempt sign-in, verify error SnackBar appears, logs show correct codes, app doesn't crash. Re-enable auth and verify normal flow works."
+            "testStrategy": "Integration test: Disable anonymous auth in Firebase console, attempt sign-in, verify error SnackBar appears, logs show correct codes, app doesn't crash. Re-enable auth and verify normal flow works.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T19:56:53.707Z"
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Verify upload flow waits for auth completion",
         "description": "Ensure article/thumbnail upload routes only accessible after FirebaseAuth.currentUser != null (FR4)",
         "details": "Guard upload button/form with if(FirebaseAuth.instance.currentUser == null) return Future.value(); before Storage/Firestore calls. Add auth check in upload service methods.",
         "testStrategy": "Add print('Auth check: ${FirebaseAuth.instance.currentUser != null}'); before upload. Verify true before any write operations in successful flow.",
         "priority": "high",
         "dependencies": [
-          22
+          "22"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1824,7 +1868,8 @@
             "dependencies": [],
             "details": "In upload screen/widget, wrap onPressed/onSubmit with: if(FirebaseAuth.instance.currentUser == null) { showSnackBar('Please sign in first'); return; } before calling upload service. Add print('UI Auth check: ${FirebaseAuth.instance.currentUser != null}');",
             "status": "pending",
-            "testStrategy": "Tap upload button while signed out - verify no service call, snackbar shows. Sign in then tap - verify print shows true and proceeds."
+            "testStrategy": "Tap upload button while signed out - verify no service call, snackbar shows. Sign in then tap - verify print shows true and proceeds.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1835,7 +1880,8 @@
             ],
             "details": "In UploadService class, add to uploadArticle/uploadArticleThumbnail: if(FirebaseAuth.instance.currentUser == null) return Future.value(Left(Failure('User not authenticated'))); Add print('Service Auth check: ${FirebaseAuth.instance.currentUser != null}'); before Storage/Firestore calls.",
             "status": "pending",
-            "testStrategy": "Call service methods while signed out - verify returns Failure immediately, print shows false. Sign in then call - verify print shows true."
+            "testStrategy": "Call service methods while signed out - verify returns Failure immediately, print shows false. Sign in then call - verify print shows true.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1846,7 +1892,8 @@
             ],
             "details": "In upload screen initState or provider, listen to FirebaseAuth.instance.authStateChanges(). Listen for null user to set isUploadEnabled=false and show loading/redirect. Dispose listener properly.",
             "status": "pending",
-            "testStrategy": "Navigate to upload screen signed out - verify upload disabled. Sign in - verify enables. Sign out during upload screen - verify immediately disables."
+            "testStrategy": "Navigate to upload screen signed out - verify upload disabled. Sign in - verify enables. Sign out during upload screen - verify immediately disables.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1857,7 +1904,8 @@
             ],
             "details": "Before every Storage.uploadFile and Firestore.add/set, add await Future.delayed(Duration(milliseconds: 100)); then recheck FirebaseAuth.instance.currentUser != null. Use User?.getIdToken() to force refresh if needed.",
             "status": "pending",
-            "testStrategy": "Monitor logs during fresh app start + quick upload attempt - verify all auth checks pass true before any write operations execute."
+            "testStrategy": "Monitor logs during fresh app start + quick upload attempt - verify all auth checks pass true before any write operations execute.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1870,21 +1918,23 @@
             ],
             "details": "Write widget tests simulating signed out/in states calling upload flows. Add README section: 'Upload Auth Guards' explaining the 3-layer protection (UI/Service/Operation). Update Task 24 implementation details.",
             "status": "pending",
-            "testStrategy": "Run full test suite: verify 100% auth check coverage, no uploads succeed without auth, all failure paths return user-friendly errors."
+            "testStrategy": "Run full test suite: verify 100% auth check coverage, no uploads succeed without auth, all failure paths return user-friendly errors.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T19:31:28.726Z"
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Fix thumbnailURL requirement for Firestore rules",
         "description": "Ensure Firestore writes include non-empty thumbnailURL to satisfy existing rules (FR5)",
         "details": "In article submission: if no thumbnail selected, set thumbnailURL: 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image'. Require thumbnail before submit OR use placeholder. Validate before Firestore write.",
         "testStrategy": "Submit article without thumbnail using placeholder. Verify Firestore write succeeds (no permission-denied on thumbnailURL). Check rules simulator.",
         "priority": "medium",
         "dependencies": [
-          24
+          "24"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1893,7 +1943,8 @@
             "dependencies": [],
             "details": "In ArticleModel.toFirestore(), add logic: 'thumbnailURL': thumbnailURL?.isNotEmpty == true ? thumbnailURL : 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image'",
             "status": "pending",
-            "testStrategy": "Unit test: create ArticleModel with null/empty thumbnailURL, verify toFirestore() returns placeholder URL"
+            "testStrategy": "Unit test: create ArticleModel with null/empty thumbnailURL, verify toFirestore() returns placeholder URL",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1904,7 +1955,8 @@
             ],
             "details": "Add validateArticleSubmission() that checks article.thumbnailURL != null && article.thumbnailURL.isNotEmpty, throws exception if invalid",
             "status": "pending",
-            "testStrategy": "Unit test validation with null/empty thumbnailURL cases, verify throws ValidationException"
+            "testStrategy": "Unit test validation with null/empty thumbnailURL cases, verify throws ValidationException",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1915,7 +1967,8 @@
             ],
             "details": "In FirestoreArticleDataSourceImpl.uploadArticle(): validateArticleSubmission(article); await firestore.collection('articles').add(article.toFirestore());",
             "status": "pending",
-            "testStrategy": "Integration test: call uploadArticle with valid article (placeholder thumbnail), verify Firestore write succeeds"
+            "testStrategy": "Integration test: call uploadArticle with valid article (placeholder thumbnail), verify Firestore write succeeds",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1926,7 +1979,8 @@
             ],
             "details": "In submission screen: use ValueNotifier for thumbnail state, set placeholder URL automatically if null, enable submit button only after validation passes",
             "status": "pending",
-            "testStrategy": "Widget test: submit form without thumbnail selection, verify placeholder URL used and submission succeeds"
+            "testStrategy": "Widget test: submit form without thumbnail selection, verify placeholder URL used and submission succeeds",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1937,22 +1991,24 @@
             ],
             "details": "Run integration test with Firebase emulator, test Firestore rules simulator with article containing placeholder thumbnailURL, confirm no permission denied errors",
             "status": "pending",
-            "testStrategy": "E2E test: complete article submission flow without thumbnail, verify document created in Firestore with valid thumbnailURL field"
+            "testStrategy": "E2E test: complete article submission flow without thumbnail, verify document created in Firestore with valid thumbnailURL field",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T19:37:05.823Z"
       },
       {
-        "id": 26,
+        "id": "26",
         "title": "End-to-end test auth-gated uploads",
         "description": "Verify complete flow: cold start → auth → upload succeeds against deployed rules (Acceptance Criteria)",
         "details": "Deploy firestore.rules/storage.rules to same project. Run app, fill article form + thumbnail, submit. Verify Firestore document created and Storage file uploaded.",
         "testStrategy": "Integration test: flutter test with Firebase emulators OR device test. Confirm no permission-denied errors. Document successful paths.",
         "priority": "high",
         "dependencies": [
-          24,
-          25
+          "24",
+          "25"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -1961,7 +2017,8 @@
             "dependencies": [],
             "details": "Run `firebase deploy --only firestore:rules,storage` from the firebase directory. Verify deployment success in Firebase console Rules tab. Ensure rules require authentication for writes.",
             "status": "pending",
-            "testStrategy": "Check Firebase console Rules tab shows deployed rules with correct auth requirements."
+            "testStrategy": "Check Firebase console Rules tab shows deployed rules with correct auth requirements.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1972,7 +2029,8 @@
             ],
             "details": "Run `flutter run` (device or emulator). Navigate through any splash/onboarding screens. Sign in with valid email/password or social provider. Add debug print: print('Auth state: ${FirebaseAuth.instance.currentUser != null}');",
             "status": "pending",
-            "testStrategy": "Verify auth stream fires sign-in event and currentUser is non-null before proceeding."
+            "testStrategy": "Verify auth stream fires sign-in event and currentUser is non-null before proceeding.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1983,7 +2041,8 @@
             ],
             "details": "Tap FAB or navigate to upload screen. Fill title, author, content, publishedAt date. Pick thumbnail from gallery. Verify form validation passes and preview shows image.",
             "status": "pending",
-            "testStrategy": "Confirm no auth guards block access and form shows all fields enabled."
+            "testStrategy": "Confirm no auth guards block access and form shows all fields enabled.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1994,7 +2053,8 @@
             ],
             "details": "Tap submit button. Watch ArticleUploadCubit states: Initial → Loading → Success. Note any console logs or SnackBar messages. Ensure no permission-denied errors appear.",
             "status": "pending",
-            "testStrategy": "Verify UI shows loading spinner, submit button disabled during upload, success navigation occurs."
+            "testStrategy": "Verify UI shows loading spinner, submit button disabled during upload, success navigation occurs.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -2005,22 +2065,24 @@
             ],
             "details": "Check Firebase console: Firestore → articles collection for new document with correct fields/thumbnailURL. Storage → thumbnails/ for uploaded file. Verify document matches form data.",
             "status": "pending",
-            "testStrategy": "Screenshot console views. Test unauth access blocked by attempting read without login. Document entire successful path."
+            "testStrategy": "Screenshot console views. Test unauth access blocked by attempting read without login. Document entire successful path.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T19:49:37.916Z"
       },
       {
-        "id": 27,
+        "id": "27",
         "title": "Add auth verification negative test",
         "description": "Confirm app fails gracefully when auth unavailable (Acceptance Criteria verification step)",
         "details": "Temporary test: disable Anonymous provider. Run app, attempt upload → verify sign-in error surfaces (logs/UI). Re-enable provider.",
         "testStrategy": "Manual test: toggle provider on/off in console. Verify error handling works, app doesn't allow unauthenticated writes.",
         "priority": "medium",
         "dependencies": [
-          23,
-          26
+          "23",
+          "26"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2029,7 +2091,8 @@
             "dependencies": [],
             "details": "Open browser, login to Firebase console, select symmetry-news-[id] project, navigate to Authentication > Sign-in method tab where providers are managed.",
             "status": "pending",
-            "testStrategy": "Verify correct project selected and Authentication section loads without errors."
+            "testStrategy": "Verify correct project selected and Authentication section loads without errors.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -2040,7 +2103,8 @@
             ],
             "details": "In Sign-in method tab, find Anonymous provider, click pencil/edit icon, toggle 'Enable' to OFF, click Save. Note any warnings about existing users.",
             "status": "pending",
-            "testStrategy": "Confirm provider status shows DISABLED in console UI after saving changes."
+            "testStrategy": "Confirm provider status shows DISABLED in console UI after saving changes.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -2051,7 +2115,8 @@
             ],
             "details": "Run `flutter run` from project root. Navigate to upload/create article screen. Fill required fields (title, content, etc.) and tap upload/submit button.",
             "status": "pending",
-            "testStrategy": "Verify app launches successfully but upload attempt triggers auth-related failure."
+            "testStrategy": "Verify app launches successfully but upload attempt triggers auth-related failure.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -2062,7 +2127,8 @@
             ],
             "details": "Monitor Flutter console logs for FirebaseAuth errors. Check app UI for error dialogs, snackbars, or sign-in prompts. Expected: 'sign-in required', permission denied, or similar.",
             "status": "pending",
-            "testStrategy": "Confirm error message clearly indicates authentication failure, no crashes occur, Firestore write blocked as per security rules."
+            "testStrategy": "Confirm error message clearly indicates authentication failure, no crashes occur, Firestore write blocked as per security rules.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -2073,23 +2139,25 @@
             ],
             "details": "Return to Firebase console > Authentication > Sign-in method. Re-enable Anonymous provider, save changes. Restart app (`flutter run`), test successful anonymous upload.",
             "status": "pending",
-            "testStrategy": "Verify provider re-enabled, app allows anonymous sign-in and successful article upload with all fields validated."
+            "testStrategy": "Verify provider re-enabled, app allows anonymous sign-in and successful article upload with all fields validated.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T20:20:08.150Z"
       },
       {
-        "id": 28,
+        "id": "28",
         "title": "Document Firebase Auth implementation",
         "description": "Add documentation explaining anonymous auth usage to satisfy security rules (Acceptance Criteria)",
         "details": "Append paragraph to docs/REPORT.md or README.md: 'App uses anonymous Firebase Authentication at startup via signInAnonymously() to satisfy Firestore/Storage rules requiring request.auth != null. currentUser ensured non-null before uploads.'",
         "testStrategy": "Verify documentation exists and accurately describes implementation. Include code snippets showing auth bootstrap.",
         "priority": "low",
         "dependencies": [
-          21,
-          22,
-          26
+          "21",
+          "22",
+          "26"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2098,7 +2166,8 @@
             "dependencies": [],
             "details": "Check project root for existing README.md and docs/REPORT.md files. Review current content to determine most appropriate location for Firebase Auth explanation. Ensure file exists or create if missing.",
             "status": "pending",
-            "testStrategy": "Verify target file exists and is accessible for editing."
+            "testStrategy": "Verify target file exists and is accessible for editing.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -2109,7 +2178,8 @@
             ],
             "details": "Use provided text as base: 'App uses anonymous Firebase Authentication at startup via signInAnonymously() to satisfy Firestore/Storage rules requiring request.auth != null. currentUser ensured non-null before uploads.' Expand with context from security rules (Task 3).",
             "status": "pending",
-            "testStrategy": "Review paragraph for technical accuracy against Firebase Auth docs and project security rules."
+            "testStrategy": "Review paragraph for technical accuracy against Firebase Auth docs and project security rules.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -2120,7 +2190,8 @@
             ],
             "details": "Extract or recreate the auth bootstrap code from implementation (likely Tasks 21/22/26). Format as Markdown code block with Dart syntax highlighting. Reference exact file locations and line numbers.",
             "status": "pending",
-            "testStrategy": "Verify code snippet matches actual implementation and demonstrates auth flow correctly."
+            "testStrategy": "Verify code snippet matches actual implementation and demonstrates auth flow correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -2132,7 +2203,8 @@
             ],
             "details": "Add content under appropriate section heading like '## Firebase Authentication' or '### Security Implementation'. Use Markdown formatting: H3 for subsection, paragraph text, code block. Ensure logical flow with existing content.",
             "status": "pending",
-            "testStrategy": "Confirm content appears correctly rendered in Markdown previewer or VS Code preview."
+            "testStrategy": "Confirm content appears correctly rendered in Markdown previewer or VS Code preview.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -2143,15 +2215,21 @@
             ],
             "details": "Cross-reference with Tasks 2, 3, 21, 22, 26 implementations. Ensure explanation covers: 1) anonymous auth purpose, 2) signInAnonymously() usage, 3) security rules dependency, 4) currentUser validation before uploads. Check for typos and formatting.",
             "status": "pending",
-            "testStrategy": "Manual review confirms documentation accurately describes implementation. Team review verifies clarity for future maintainers."
+            "testStrategy": "Manual review confirms documentation accurately describes implementation. Team review verifies clarity for future maintainers.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-03-28T20:23:17.210Z"
       }
     ],
     "metadata": {
-      "created": "2026-03-28T16:18:05.155Z",
-      "updated": "2026-03-28T16:18:05.155Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2026-03-28T20:23:17.210Z",
+      "taskCount": 28,
+      "completedCount": 28,
+      "tags": [
+        "master"
+      ]
     }
   }
 }

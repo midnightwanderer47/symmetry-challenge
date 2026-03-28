@@ -1,8 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article.dart';
@@ -14,17 +14,7 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/pag
 // Mock repository used only to satisfy use case constructors in stub cubits.
 class _MockRepository extends Mock implements ArticleRepository {}
 
-ArticleUploadCubit _makeCubitWithState(ArticleUploadState initial) {
-  final repo = _MockRepository();
-  final cubit = ArticleUploadCubit(
-    UploadArticleUseCase(repo),
-    UploadArticleThumbnailUseCase(repo),
-  );
-  // Emit the desired initial state via a no-op subclass trick:
-  // We close the cubit and return a fresh one seeded to Initial;
-  // for non-Initial states we use _SeededCubit below.
-  return cubit;
-}
+class _MockUser extends Mock implements User {}
 
 /// A cubit subclass that starts at [initialState] without calling through
 /// to the real use cases.
@@ -33,6 +23,7 @@ class _SeededCubit extends ArticleUploadCubit {
       : super(
           UploadArticleUseCase(_MockRepository()),
           UploadArticleThumbnailUseCase(_MockRepository()),
+          getCurrentUser: () => _MockUser(),
         ) {
     emit(initialState);
   }
@@ -51,6 +42,7 @@ class _EmittingCubit extends ArticleUploadCubit {
       : super(
           UploadArticleUseCase(_MockRepository()),
           UploadArticleThumbnailUseCase(_MockRepository()),
+          getCurrentUser: () => _MockUser(),
         );
 
   @override
@@ -63,7 +55,10 @@ class _EmittingCubit extends ArticleUploadCubit {
 
 final _sl = GetIt.instance;
 
-Widget _buildApp() => const MaterialApp(home: UploadArticleView());
+// Provide a stream that emits a signed-in user so the upload button is enabled.
+Widget _buildApp() => MaterialApp(
+      home: UploadArticleView(authStateStream: Stream.value(_MockUser())),
+    );
 
 void main() {
   setUp(() => _sl.reset());
@@ -89,6 +84,7 @@ void main() {
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
+      await tester.ensureVisible(find.byType(ElevatedButton));
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
 
@@ -104,6 +100,7 @@ void main() {
       await tester.enterText(find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
       await tester.enterText(find.widgetWithText(TextFormField, 'Content *'), 'Some content here');
 
+      await tester.ensureVisible(find.byType(ElevatedButton));
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
 

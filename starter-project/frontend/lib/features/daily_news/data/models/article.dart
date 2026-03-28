@@ -98,7 +98,9 @@ class ArticleModel extends ArticleEntity {
       'urlToImage': urlToImage ?? '',
       'publishedAt': publishedAt ?? '',
       'content': content ?? '',
-      'thumbnailURL': thumbnailURL,
+      'thumbnailURL': (thumbnailURL != null && thumbnailURL!.isNotEmpty)
+          ? thumbnailURL
+          : 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image',
       'isUserArticle': isUserArticle,
       'createdAt': FieldValue.serverTimestamp(),
     };

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,10 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import 'package:news_app_clean_architecture/injection_container.dart';
 
 class UploadArticleView extends StatefulWidget {
-  const UploadArticleView({Key? key}) : super(key: key);
+  @visibleForTesting
+  final Stream<User?>? authStateStream;
+
+  const UploadArticleView({Key? key, this.authStateStream}) : super(key: key);
 
   @override
   State<UploadArticleView> createState() => _UploadArticleViewState();
@@ -155,17 +159,38 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                           fit: BoxFit.cover,
                         ),
                       ),
+                    ] else ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'No thumbnail selected — placeholder will be used',
+                          style: TextStyle(color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : () => _submit(context),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Upload Article'),
+                    StreamBuilder<User?>(
+                      stream: widget.authStateStream ?? FirebaseAuth.instance.authStateChanges(),
+                      builder: (context, authSnapshot) {
+                        final isAuthenticated = authSnapshot.data != null;
+                        return ElevatedButton(
+                          onPressed: (isLoading || !isAuthenticated) ? null : () => _submit(context),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('Upload Article'),
+                        );
+                      },
                     ),
                   ],
                 ),
