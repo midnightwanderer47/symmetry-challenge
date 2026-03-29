@@ -1,0 +1,14 @@
+# Install: pre-commit install --hook-type pre-push
+# Requires: https://pre-commit.com (e.g. brew install pre-commit) and `just` on PATH.
+default_install_hook_types: [pre-push]
+
+repos:
+  - repo: local
+    hooks:
+      - id: just-format-on-main-push
+        name: just format (push to main)
+        entry: bash scripts/pre-push-just-format-on-main.sh
+        language: system
+        stages: [pre-push]
+        pass_filenames: false
+        always_run: true
