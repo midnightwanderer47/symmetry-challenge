@@ -7,13 +7,9 @@ part of 'news_api_service.dart';
 // **************************************************************************
 
 class _NewsApiService implements NewsApiService {
-  _NewsApiService(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://newsapi.org/v2';
-  }
+  _NewsApiService(this._dio);
 
   final Dio _dio;
-
-  String? baseUrl;
 
   @override
   Future<HttpResponse<List<ArticleModel>>> getNewsArticles(
@@ -32,7 +28,7 @@ class _NewsApiService implements NewsApiService {
             Options(method: 'GET', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/top-headlines',
                     queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+                .copyWith(baseUrl: _dio.options.baseUrl)));
     List<ArticleModel> value = _result.data!['articles']
         .map<ArticleModel>((dynamic i) => ArticleModel.fromJson(i as Map<String, dynamic>))
         .toList();
@@ -56,7 +52,7 @@ class _NewsApiService implements NewsApiService {
             Options(method: 'GET', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/everything',
                     queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+                .copyWith(baseUrl: _dio.options.baseUrl)));
     List<ArticleModel> value = _result.data!['articles']
         .map<ArticleModel>((dynamic i) => ArticleModel.fromJson(i as Map<String, dynamic>))
         .toList();
