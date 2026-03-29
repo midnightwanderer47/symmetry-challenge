@@ -123,8 +123,9 @@ class ArticleDetailsView extends HookWidget {
           // Author
           Builder(builder: (context) {
             final author = article!.author;
-            if (author == null || author.trim().isEmpty)
+            if (author == null || author.trim().isEmpty) {
               return const SizedBox.shrink();
+            }
             return Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Row(
@@ -177,8 +178,9 @@ class ArticleDetailsView extends HookWidget {
 
   Widget _buildLedeDescription() {
     final description = article!.description;
-    if (description == null || description.trim().isEmpty)
+    if (description == null || description.trim().isEmpty) {
       return const SizedBox.shrink();
+    }
     return Builder(builder: (context) {
       final colorScheme = Theme.of(context).colorScheme;
       return Padding(
@@ -215,8 +217,9 @@ class ArticleDetailsView extends HookWidget {
 
   Widget _buildArticleContent() {
     final content = article!.content;
-    if (content == null || content.trim().isEmpty)
+    if (content == null || content.trim().isEmpty) {
       return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 18),
       child: ArticleMarkdownBody(content: content),
