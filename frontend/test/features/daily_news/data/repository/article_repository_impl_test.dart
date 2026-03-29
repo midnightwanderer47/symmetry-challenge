@@ -333,7 +333,7 @@ void main() {
 
     test('filters Firestore articles by description', () async {
       final firestoreModelsWithDesc = [
-        ArticleModel(
+        const ArticleModel(
           title: 'Tech Article',
           description: 'All about Flutter widgets',
           isUserArticle: true,
