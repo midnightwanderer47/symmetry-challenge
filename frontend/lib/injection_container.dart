@@ -25,6 +25,7 @@ import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'features/daily_news/presentation/bloc/article/delete/delete_article_cubit.dart';
 import 'features/daily_news/presentation/bloc/article/search/search_articles_cubit.dart';
+import 'features/daily_news/presentation/bloc/theme/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -125,5 +126,7 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<DeleteArticleCubit>(
     () => DeleteArticleCubit(sl())
   );
+
+  sl.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
 
 }

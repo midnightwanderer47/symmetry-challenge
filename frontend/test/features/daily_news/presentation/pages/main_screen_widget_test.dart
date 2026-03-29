@@ -17,6 +17,7 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_state.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/theme/theme_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/pages/main/main_screen.dart';
 
 class _MockRepository extends Mock implements ArticleRepository {}
@@ -61,8 +62,11 @@ final _sl = GetIt.instance;
 
 Widget _buildApp() {
   final remoteCubit = _SeededRemoteCubit(const RemoteArticlesLoading());
-  return BlocProvider<RemoteArticlesCubit>.value(
-    value: remoteCubit,
+  return MultiBlocProvider(
+    providers: [
+      BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
+      BlocProvider<RemoteArticlesCubit>.value(value: remoteCubit),
+    ],
     child: MaterialApp(
       home: MainScreen(authStateStream: Stream.value(_MockUser())),
     ),

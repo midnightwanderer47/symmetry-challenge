@@ -4,7 +4,15 @@ ThemeData theme() {
   return ThemeData(
     scaffoldBackgroundColor: Colors.white,
     fontFamily: 'Muli',
-    appBarTheme: appBarTheme()
+    appBarTheme: appBarTheme(),
+  );
+}
+
+ThemeData darkTheme() {
+  return ThemeData(
+    brightness: Brightness.dark,
+    fontFamily: 'Muli',
+    appBarTheme: darkAppBarTheme(),
   );
 }
 
@@ -15,5 +23,12 @@ AppBarTheme appBarTheme() {
     centerTitle: true,
     iconTheme: IconThemeData(color: Color(0XFF8B8B8B)),
     titleTextStyle: TextStyle(color: Color(0XFF8B8B8B), fontSize: 18),
+  );
+}
+
+AppBarTheme darkAppBarTheme() {
+  return const AppBarTheme(
+    elevation: 0,
+    centerTitle: true,
   );
 }

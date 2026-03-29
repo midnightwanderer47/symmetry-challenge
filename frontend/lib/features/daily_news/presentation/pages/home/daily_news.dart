@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/config/routes/routes.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_state.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/theme/theme_cubit.dart';
 
 import '../../../domain/entities/article.dart';
 import '../../widgets/article_tile.dart';
@@ -23,6 +24,14 @@ class DailyNews extends StatelessWidget {
         style: TextStyle(color: Colors.black),
       ),
       actions: [
+        IconButton(
+          icon: Icon(
+            context.watch<ThemeCubit>().state == ThemeMode.dark
+                ? Icons.brightness_7
+                : Icons.brightness_4,
+          ),
+          onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+        ),
         GestureDetector(
           onTap: () => Navigator.pushNamed(context, AppRoutes.searchRoute),
           child: const Padding(
