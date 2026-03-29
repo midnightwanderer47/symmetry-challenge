@@ -24,6 +24,13 @@ class DailyNews extends StatelessWidget {
       ),
       actions: [
         GestureDetector(
+          onTap: () => Navigator.pushNamed(context, AppRoutes.searchRoute),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14),
+            child: Icon(Icons.search, color: Colors.black),
+          ),
+        ),
+        GestureDetector(
           onTap: () => Navigator.pushNamed(context, AppRoutes.userArticlesRoute),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -74,8 +81,12 @@ class DailyNews extends StatelessWidget {
 
     return Scaffold(
       appBar: _buildAppbar(context),
-      body: ListView(
-        children: articleWidgets,
+      body: RefreshIndicator(
+        onRefresh: () => context.read<RemoteArticlesCubit>().refresh(),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: articleWidgets,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, AppRoutes.uploadArticleRoute),

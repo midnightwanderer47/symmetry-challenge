@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../home/daily_news.dart';
@@ -5,7 +6,10 @@ import '../upload_article/upload_article.dart';
 import '../user_articles/user_articles_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  @visibleForTesting
+  final Stream<User?>? authStateStream;
+
+  const MainScreen({Key? key, this.authStateStream}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -14,10 +18,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  static const List<Widget> _tabs = [
-    DailyNews(),
-    UploadArticleView(),
-    UserArticlesScreen(),
+  late final List<Widget> _tabs = [
+    const DailyNews(),
+    UploadArticleView(authStateStream: widget.authStateStream),
+    const UserArticlesScreen(),
   ];
 
   @override

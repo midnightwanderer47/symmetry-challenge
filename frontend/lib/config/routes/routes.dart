@@ -5,6 +5,7 @@ import '../../features/daily_news/presentation/pages/article_detail/article_deta
 import '../../features/daily_news/presentation/pages/main/main_screen.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/daily_news/presentation/pages/upload_article/upload_article.dart';
+import '../../features/daily_news/presentation/pages/search/search_screen.dart';
 import '../../features/daily_news/presentation/pages/user_articles/user_articles_screen.dart';
 
 
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String savedArticlesRoute = '/SavedArticles';
   static const String uploadArticleRoute = '/UploadArticle';
   static const String userArticlesRoute = '/UserArticles';
+  static const String searchRoute = '/Search';
 
   static Route onGenerateRoutes(RouteSettings settings) {
     switch (settings.name) {
@@ -31,6 +33,9 @@ class AppRoutes {
 
       case userArticlesRoute:
         return _materialRoute(const UserArticlesScreen());
+
+      case searchRoute:
+        return _materialRoute(const SearchScreen());
 
       default:
         return _materialRoute(const MainScreen());
