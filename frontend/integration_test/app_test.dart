@@ -61,18 +61,10 @@ void main() {
             find.widgetWithText(TextFormField, 'Content *'), 'Integration test content body.');
         await tester.pump();
 
-        // Select a publication date via the date picker.
-        await tester.tap(find.text('Select Publication Date *'));
-        await tester.pumpAndSettle();
-
-        // Confirm today's date in the date picker dialog.
-        await tester.tap(find.text('OK'));
-        await tester.pumpAndSettle();
-
-        // Tap Upload Article – no thumbnail selected, so Firestore write will
+        // Tap Publish Article – no thumbnail selected, so Firestore write will
         // be rejected by security rules (thumbnailURL required). This exercises
         // the failure path and confirms the error SnackBar is shown.
-        await tester.tap(find.text('Upload Article'));
+        await tester.tap(find.text('Publish Article'));
         await tester.pump();
 
         // Loading indicator should briefly appear.

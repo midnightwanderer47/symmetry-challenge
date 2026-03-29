@@ -53,6 +53,24 @@ class _EmittingCubit extends ArticleUploadCubit {
   }
 }
 
+/// A cubit that captures the [ArticleEntity] passed to upload().
+class _CapturingCubit extends ArticleUploadCubit {
+  ArticleEntity? lastArticle;
+
+  _CapturingCubit()
+      : super(
+          UploadArticleUseCase(_MockRepository()),
+          UploadArticleThumbnailUseCase(_MockRepository()),
+          getCurrentUser: () => _MockUser(),
+        );
+
+  @override
+  Future<void> upload(ArticleEntity article, {String? thumbnailFilePath}) async {
+    lastArticle = article;
+    emit(const ArticleUploadSuccess());
+  }
+}
+
 final _sl = GetIt.instance;
 
 // Provide a stream that emits a signed-in user so the upload button is enabled.
@@ -91,8 +109,9 @@ void main() {
       expect(find.text('Required'), findsWidgets);
     });
 
-    testWidgets('shows SnackBar when date is missing on valid form', (tester) async {
-      _sl.registerFactory<ArticleUploadCubit>(() => _SeededCubit(const ArticleUploadInitial()));
+    testWidgets('sets publishedAt automatically on valid submit', (tester) async {
+      final cubit = _CapturingCubit();
+      _sl.registerSingleton<ArticleUploadCubit>(cubit);
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
@@ -100,11 +119,14 @@ void main() {
       await tester.enterText(find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
       await tester.enterText(find.widgetWithText(TextFormField, 'Content *'), 'Some content here');
 
+      final before = DateTime.now();
       await tester.ensureVisible(find.byType(ElevatedButton));
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
 
-      expect(find.text('Please select a publication date'), findsOneWidget);
+      expect(cubit.lastArticle, isNotNull);
+      final parsed = DateTime.parse(cubit.lastArticle!.publishedAt!);
+      expect(parsed.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
     });
   });
 

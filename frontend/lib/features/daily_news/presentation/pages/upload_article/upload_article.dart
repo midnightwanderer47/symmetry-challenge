@@ -25,7 +25,6 @@ class _UploadArticleViewState extends State<UploadArticleView> {
   final _authorController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _contentController = TextEditingController();
-  DateTime? _publishedAt;
   XFile? _imageFile;
 
   @override
@@ -44,33 +43,15 @@ class _UploadArticleViewState extends State<UploadArticleView> {
     }
   }
 
-  Future<void> _pickDate() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (date != null) {
-      setState(() => _publishedAt = date);
-    }
-  }
-
   void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
-    if (_publishedAt == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a publication date')),
-      );
-      return;
-    }
 
     final article = ArticleEntity(
       title: _titleController.text.trim(),
       author: _authorController.text.trim(),
       description: _descriptionController.text.trim(),
       content: _contentController.text.trim(),
-      publishedAt: _publishedAt!.toIso8601String(),
+      publishedAt: DateTime.now().toIso8601String(),
     );
 
     context.read<ArticleUploadCubit>().upload(
@@ -131,6 +112,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                     TextFormField(
                       controller: _contentController,
                       decoration: const InputDecoration(labelText: 'Content *'),
+                      minLines: 10,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
@@ -145,15 +127,6 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                           TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(text: ', **bold**, _italic_, - lists, line breaks'),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: _pickDate,
-                      child: Text(
-                        _publishedAt == null
-                            ? 'Select Publication Date *'
-                            : 'Date: ${_publishedAt!.toLocal().toString().split(' ')[0]}',
                       ),
                     ),
                     const SizedBox(height: 12),
