@@ -57,6 +57,9 @@ dependencies:
   #theme persistence
   shared_preferences: ^2.2.2
 
+  #markdown rendering
+  flutter_markdown: ^0.7.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

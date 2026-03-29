@@ -95,14 +95,18 @@ class _UploadArticleViewState extends State<UploadArticleView> {
         },
         builder: (context, state) {
           final isLoading = state is ArticleUploadLoading;
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                'Upload Article',
-                style: TextStyle(color: Colors.black),
+          return PopScope(
+            canPop: !isLoading,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text(
+                  'Upload Article',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
-            ),
-            body: SingleChildScrollView(
+              body: Stack(
+                children: [
+                  SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
                 key: _formKey,
@@ -196,7 +200,31 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                 ),
               ),
             ),
-          );
+            if (isLoading)
+              IgnorePointer(
+                child: Positioned.fill(
+                  child: Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Publishing...',
+                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
         },
       ),
     );

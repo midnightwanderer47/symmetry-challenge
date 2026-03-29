@@ -9,6 +9,7 @@ import '../../bloc/article/delete/delete_article_cubit.dart';
 import '../../bloc/article/delete/delete_article_state.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
+import '../../widgets/markdown_body_widget.dart';
 
 class ArticleDetailsView extends HookWidget {
   final ArticleEntity? article;
@@ -122,12 +123,11 @@ class ArticleDetailsView extends HookWidget {
   }
 
   Widget _buildArticleDescription() {
+    final content =
+        '${article!.description ?? ''}\n\n${article!.content ?? ''}';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
-      child: Text(
-        '${article!.description ?? ''}\n\n${article!.content ?? ''}',
-        style: const TextStyle(fontSize: 16),
-      ),
+      child: ArticleMarkdownBody(content: content),
     );
   }
 
