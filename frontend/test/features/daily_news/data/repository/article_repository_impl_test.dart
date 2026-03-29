@@ -354,7 +354,63 @@ void main() {
       expect(result.data!.first.title, 'Tech Article');
     });
 
-    test('calls NewsAPI searchNewsArticles with encoded query', () async {
+    test('matches title with punctuation between query words', () async {
+      final firestoreModels = [
+        _model(title: 'Article: About Flutter', isUserArticle: true),
+        _model(title: 'Unrelated Post', isUserArticle: true),
+      ];
+      when(() => mockFirestore.getUserArticles())
+          .thenAnswer((_) async => firestoreModels);
+      when(() => mockNewsApiService.searchNewsArticles(
+            apiKey: any(named: 'apiKey'),
+            q: any(named: 'q'),
+          )).thenAnswer((_) async => _httpResponse([]));
+
+      final resultFuture = repository.searchArticles('Article About');
+      await Future.delayed(const Duration(milliseconds: 450));
+      final result = await resultFuture;
+
+      expect(result.data!.length, 1);
+      expect(result.data!.first.title, 'Article: About Flutter');
+    });
+
+    test('matches title with em-dash and extra spaces between words', () async {
+      final firestoreModels = [
+        _model(title: 'Article — About  Something', isUserArticle: true),
+      ];
+      when(() => mockFirestore.getUserArticles())
+          .thenAnswer((_) async => firestoreModels);
+      when(() => mockNewsApiService.searchNewsArticles(
+            apiKey: any(named: 'apiKey'),
+            q: any(named: 'q'),
+          )).thenAnswer((_) async => _httpResponse([]));
+
+      final resultFuture = repository.searchArticles('article about');
+      await Future.delayed(const Duration(milliseconds: 450));
+      final result = await resultFuture;
+
+      expect(result.data!.length, 1);
+    });
+
+    test('matches when query words appear in different order in title', () async {
+      final firestoreModels = [
+        _model(title: 'About the Article', isUserArticle: true),
+      ];
+      when(() => mockFirestore.getUserArticles())
+          .thenAnswer((_) async => firestoreModels);
+      when(() => mockNewsApiService.searchNewsArticles(
+            apiKey: any(named: 'apiKey'),
+            q: any(named: 'q'),
+          )).thenAnswer((_) async => _httpResponse([]));
+
+      final resultFuture = repository.searchArticles('Article About');
+      await Future.delayed(const Duration(milliseconds: 450));
+      final result = await resultFuture;
+
+      expect(result.data!.length, 1);
+    });
+
+    test('passes raw (not pre-encoded) query to NewsAPI', () async {
       final newsApiModels = [_model(title: 'Search Result')];
       when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.searchNewsArticles(
@@ -368,7 +424,7 @@ void main() {
 
       verify(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
-            q: any(named: 'q'),
+            q: 'dart news',
           )).called(1);
       expect(result.data!.length, 1);
     });

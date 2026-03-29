@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -118,7 +120,26 @@ class ArticleDetailsView extends HookWidget {
       width: double.maxFinite,
       height: 250,
       margin: const EdgeInsets.only(top: 14),
-      child: Image.network(article!.displayImageUrl, fit: BoxFit.cover),
+      child: Builder(
+        builder: (context) {
+          final placeholderColor =
+              Theme.of(context).colorScheme.surfaceContainerHighest;
+          return CachedNetworkImage(
+            imageUrl: article!.displayImageUrl,
+            width: double.maxFinite,
+            height: 250,
+            fit: BoxFit.cover,
+            progressIndicatorBuilder: (context, url, progress) => Container(
+              color: placeholderColor,
+              child: const Center(child: CupertinoActivityIndicator()),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: placeholderColor,
+              child: const Center(child: Icon(Icons.error_outline)),
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -77,15 +77,15 @@ class ArticleRepositoryImpl implements ArticleRepository {
       Object? firestoreError;
       Object? newsApiError;
 
-      final lowerQuery = query.toLowerCase();
+      final queryTokens = _tokenize(query);
 
       await Future.wait([
         Future(() async {
           try {
             final all = await _fetchFirestoreArticles();
             firestoreResult = all.where((a) {
-              return (a.title ?? '').toLowerCase().contains(lowerQuery) ||
-                  (a.description ?? '').toLowerCase().contains(lowerQuery);
+              return _matchesAllTokens(a.title, queryTokens) ||
+                  _matchesAllTokens(a.description, queryTokens);
             }).toList();
           } catch (e) {
             firestoreError = e;
@@ -95,7 +95,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
           try {
             final httpResponse = await _newsApiService.searchNewsArticles(
               apiKey: newsAPIKey,
-              q: Uri.encodeComponent(query),
+              q: query.trim(),
             );
             if (httpResponse.response.statusCode == HttpStatus.ok) {
               newsApiResult = httpResponse.data.map((m) => m.toEntity()).toList();
@@ -128,6 +128,24 @@ class ArticleRepositoryImpl implements ArticleRepository {
     });
 
     return completer.future;
+  }
+
+  static final _nonAlphaNumeric = RegExp(r'[^a-z0-9]+');
+
+  static List<String> _tokenize(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll(_nonAlphaNumeric, ' ')
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+  }
+
+  static bool _matchesAllTokens(String? text, List<String> tokens) {
+    if (text == null || tokens.isEmpty) return false;
+    final normalized = text.toLowerCase().replaceAll(_nonAlphaNumeric, ' ');
+    return tokens.every((t) => normalized.contains(t));
   }
 
   Future<List<ArticleEntity>> _fetchFirestoreArticles() async {
