@@ -2220,13 +2220,497 @@
           }
         ],
         "updatedAt": "2026-03-28T20:23:17.210Z"
+      },
+      {
+        "id": "29",
+        "title": "Implement merged article fetching in ArticleRepositoryImpl",
+        "description": "Modify ArticleRepositoryImpl.getNewsArticles() to fetch from both FirestoreArticleDataSource and NewsApiService in parallel, merge results, deduplicate by normalized title, sort by publishedAt desc, and handle partial failures gracefully.",
+        "details": "Use Future.wait for parallel fetches. Normalize titles with .toLowerCase().trim() for deduplication, prefer Firestore version when duplicate found. Fallback to createdAt if publishedAt missing. Return available data + error metadata on partial failure. Add isUserArticle flag to ArticleEntity.",
+        "testStrategy": "Unit test merge logic with mock data sources: test deduplication (prefer Firestore), sorting (publishedAt/createdAt fallback), partial failure (one source throws, other succeeds), empty states.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement parallel fetching with Future.wait",
+            "description": "Modify ArticleRepositoryImpl.getNewsArticles() to use Future.wait for concurrent calls to FirestoreArticleDataSource and NewsApiService",
+            "dependencies": [],
+            "details": "Inject both data sources if not already present. Create Futures for firestoreDataSource.getArticles() and newsApiService.getArticles(). Use Future.wait([firestoreFuture, newsFuture]) to await both in parallel. Handle timeout if needed.",
+            "status": "pending",
+            "testStrategy": "Unit test verifies both futures execute concurrently using mock data sources with different response times. Assert Future.wait called with correct futures.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create merge, deduplicate, and sort method",
+            "description": "Implement private _mergeAndSortArticles method that combines lists, deduplicates by normalized title, prefers Firestore version, sorts by publishedAt desc",
+            "dependencies": [
+              1
+            ],
+            "details": "Normalize titles: title.toLowerCase().trim(). Use Map<String, ArticleEntity> with normalized title as key, prefer Firestore articles. Sort by (article.publishedAt ?? article.createdAt) descending. Return sorted unique list.",
+            "status": "pending",
+            "testStrategy": "Unit test with duplicate articles: verify Firestore version preferred, correct sorting with mixed publishedAt/createdAt dates, handles empty lists from either source.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add isUserArticle flag and date fallback logic",
+            "description": "Update ArticleEntity with isUserArticle boolean flag. Implement fallback from publishedAt to createdAt in sorting/merging logic",
+            "dependencies": [
+              1
+            ],
+            "details": "Set isUserArticle = true for Firestore articles, false for NewsAPI. In sorting comparator: use article.publishedAt ?? article.createdAt. Ensure ArticleModel.fromEntity handles new field.",
+            "status": "pending",
+            "testStrategy": "Unit test verifies flag correctly set (true for Firestore, false for API). Test sorting fallback: articles missing publishedAt sort correctly by createdAt.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement partial failure handling with error metadata",
+            "description": "Wrap Future.wait in try-catch, return DataState.success with available articles + error metadata when one source fails",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Catch exceptions from individual futures. Create result class with articles list + Map<String, String> errors (firestoreError, newsApiError). Return DataSuccess(MergedArticlesResult(articles, errors)).",
+            "status": "pending",
+            "testStrategy": "Unit test partial failure: mock one source throwing exception, verify returns articles from working source + correct error metadata in success state.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: 1) Implement parallel fetching with Future.wait, 2) Create private merge/deduplicate/sort method with title normalization and Firestore preference, 3) Add fallback logic for publishedAt/createdAt and isUserArticle flag, 4) Implement partial failure handling with error metadata.",
+        "updatedAt": "2026-03-28T23:12:19.746Z"
+      },
+      {
+        "id": "30",
+        "title": "Replace RemoteArticlesBloc with RemoteArticlesCubit",
+        "description": "Create RemoteArticlesCubit that consumes merged repository results, emits loading/done/error states, and supports refresh triggers.",
+        "details": "Cubit states: ArticlesLoading, ArticlesLoaded(list, isUserArticles flag), ArticlesError(message). Invoke GetArticlesUseCase on init and refresh(). Register in injection_container.dart.",
+        "testStrategy": "Unit test cubit state transitions: loading→loaded (success), loading→error (failure), refresh re-emits current state. Mock use case.",
+        "priority": "high",
+        "dependencies": [
+          "29"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define RemoteArticlesCubit states and core logic",
+            "description": "Create Cubit class with ArticlesLoading, ArticlesLoaded(list, isUserArticles), ArticlesError states. Implement init and refresh methods using GetArticlesUseCase.",
+            "dependencies": [],
+            "details": "Extend Cubit<ArticlesState>. Define sealed state classes matching spec. Call use case in constructor and refresh(). Emit loading/loaded/error. Place in presentation/bloc/remote_articles_cubit.dart.",
+            "status": "pending",
+            "testStrategy": "Unit test: init emits loading→loaded (success)/error (failure). refresh re-emits current state. Mock GetArticlesUseCase with valid/invalid ArticleEntity lists.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Register Cubit in DI and update dependencies",
+            "description": "Register RemoteArticlesCubit in injection_container.dart. Update any existing RemoteArticlesBloc references to use Cubit.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add sl.registerFactory<RemoteArticlesCubit>(() => RemoteArticlesCubit(getArticlesUseCase: sl())). Remove/update old Bloc registration. Verify no compilation errors after replacement.",
+            "status": "pending",
+            "testStrategy": "Integration test: Resolve Cubit from GetIt, verify non-null, call init/refresh without crashes. Check container registration via GetIt inspection.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Break down into: 1) Define Cubit states and implement init/refresh logic with GetArticlesUseCase, 2) Register Cubit in DI container and update dependencies.",
+        "updatedAt": "2026-03-28T23:20:51.370Z"
+      },
+      {
+        "id": "31",
+        "title": "Update home feed UI to render merged articles",
+        "description": "Update DailyNews screen to use RemoteArticlesCubit, render merged list with optional user article badge, minimal visual changes to existing ArticleWidget.",
+        "details": "Wrap ListView in BlocBuilder<RemoteArticlesCubit>. Add subtle badge (e.g., 'YOU' pill) when article.isUserArticle. Preserve existing article detail navigation.",
+        "testStrategy": "Widget test: renders mixed list correctly, shows user badge, handles empty/error states, tap navigates to detail.",
+        "priority": "high",
+        "dependencies": [
+          "30"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Integrate BlocBuilder with RemoteArticlesCubit in DailyNewsScreen",
+            "description": "Wrap the existing ListView in DailyNewsScreen with BlocBuilder<RemoteArticlesCubit> to render the merged articles list from cubit state.",
+            "dependencies": [],
+            "details": "Use BlocBuilder to listen to RemoteArticlesCubit states, replace previous data source with cubit.state.articles or equivalent, handle loading/empty/error states appropriately. Ensure BlocProvider is accessible via context.",
+            "status": "pending",
+            "testStrategy": "Widget test verifies BlocBuilder rebuilds on state changes, renders mixed articles list, displays loading/empty/error UI correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 1,
+        "expansionPrompt": "Break down into: 1) Integrate BlocBuilder with RemoteArticlesCubit, add user article badge to ArticleWidget, preserve navigation.",
+        "updatedAt": "2026-03-28T23:26:56.351Z"
+      },
+      {
+        "id": "32",
+        "title": "Add pull-to-refresh to home feed",
+        "description": "Wrap home feed ListView in RefreshIndicator that re-triggers cubit refresh on pull.",
+        "details": "Use RefreshIndicator with onRefresh: cubit.refreshArticles(). Ensure smooth UX with loading overlay during refresh.",
+        "testStrategy": "Widget test: pull gesture triggers refresh, shows loading, completes with updated data. Golden test for visual state.",
+        "priority": "medium",
+        "dependencies": [
+          "31"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate DailyNews screen ListView widget",
+            "description": "Find the existing ListView in the home feed DailyNews screen that renders articles from RemoteArticlesCubit.",
+            "dependencies": [],
+            "details": "Navigate to lib/features/home/presentation/pages/daily_news_screen.dart or equivalent. Identify the BlocBuilder-wrapped ListView.builder that displays ArticleWidget items from cubit state.",
+            "status": "pending",
+            "testStrategy": "Verify ListView exists and is scrollable in widget test before modification.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Wrap ListView with RefreshIndicator widget",
+            "description": "Replace the standalone ListView with RefreshIndicator(ListView(...)) maintaining all existing ListView properties.",
+            "dependencies": [
+              1
+            ],
+            "details": "Import 'package:flutter/material.dart'; Wrap existing ListView: RefreshIndicator(onRefresh: _handleRefresh, child: existingListView). Add AlwaysScrollableScrollPhysics() to ListView physics if not present for reliable pull gesture.",
+            "status": "pending",
+            "testStrategy": "Widget test verifies RefreshIndicator wraps ListView and pull gesture is recognized.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement onRefresh calling cubit.refreshArticles()",
+            "description": "Create async _handleRefresh() method that calls cubit.refreshArticles() and awaits completion.",
+            "dependencies": [
+              2
+            ],
+            "details": "In StatefulWidget state class: Future<void> _handleRefresh() => cubit.refreshArticles(); Assign to RefreshIndicator onRefresh property. Ensure cubit is accessible via context.read<RemoteArticlesCubit>() or widget property.",
+            "status": "pending",
+            "testStrategy": "Mock cubit verifies refreshArticles() called exactly once on pull gesture.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Add loading overlay during refresh operation",
+            "description": "Display smooth UX loading indicator while refreshArticles() executes using BlocListener or overlay.",
+            "dependencies": [
+              3
+            ],
+            "details": "Use BlocListener<RemoteArticlesCubit, RemoteArticlesState> listening for loading state. Show centered CircularProgressIndicator with semi-transparent overlay during cubit.isLoading. Ensure overlay doesn't block pull gesture.",
+            "status": "pending",
+            "testStrategy": "Golden test captures loading overlay visual state during refresh animation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Write widget tests for pull-to-refresh functionality",
+            "description": "Create comprehensive widget tests verifying pull gesture triggers refresh, shows loading, and completes with updated data.",
+            "dependencies": [
+              4
+            ],
+            "details": "Test file: test/features/home/presentation/pages/daily_news_screen_test.dart. Use flutter_test, bloc_test. Simulate pull gesture with tester.dragFrom. Verify cubit.refreshArticles() called, loading shown, list updates. Include error state handling.",
+            "status": "pending",
+            "testStrategy": "Coverage: pull triggers refresh (100%), loading overlay visible (golden), success/error states render correctly, no crashes on rapid pulls.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 2,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-28T23:50:56.383Z"
+      },
+      {
+        "id": "33",
+        "title": "Implement searchArticles in repository with merge reuse",
+        "description": "Add searchArticles(String query) to ArticleRepository interface/impl: client-side filter Firestore by title/content, News API /everything?q= endpoint or client filter, then merge/dedupe/sort same as getNewsArticles.",
+        "details": "Firestore: client-side .where title/content contains query (case-insensitive). NewsAPI: use /everything?q=${Uri.encodeComponent(query)}. Reuse existing merge logic as private method. Debounce queries 400ms.",
+        "testStrategy": "Unit test: Firestore keyword match, API search hits, merged results deduped, empty query returns all, no results → empty list.",
+        "priority": "high",
+        "dependencies": [
+          "29"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Firestore and NewsAPI search queries",
+            "description": "Add client-side Firestore filtering using .where() on title/content (case-insensitive) and NewsAPI /everything?q=${Uri.encodeComponent(query)} endpoint calls in ArticleRepositoryImpl.",
+            "dependencies": [],
+            "details": "Fetch all Firestore articles then filter client-side with query.toLowerCase().contains() on title/content. Call NewsAPI everything endpoint with proper encoding. Handle both sources returning ArticleEntity lists.",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify Firestore returns matching articles with case-insensitive keyword search, NewsAPI called with encoded query param, both sources return expected ArticleEntity lists.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Extract reusable merge logic from getNewsArticles",
+            "description": "Refactor existing merge/dedupe/sort logic in getNewsArticles into private method for reuse in searchArticles.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create private _mergeArticles(List<ArticleEntity> firestoreArticles, List<ArticleEntity> newsArticles) method that handles deduplication by ID/URL and sorting by date. Update getNewsArticles to use this method.",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify extracted method correctly dedupes duplicate articles by ID/URL, sorts by recency, produces identical output to original getNewsArticles merge logic.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add searchArticles method with debouncing and edge cases",
+            "description": "Implement complete searchArticles(String query) in interface/impl with 400ms debouncing, empty query handling, and no-results empty list.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add method signature to ArticleRepository interface. Implement with Timer for 400ms debounce. Handle empty query by returning all articles via existing logic. Return empty list when no matches found.",
+            "status": "pending",
+            "testStrategy": "Unit tests: debounce cancels rapid calls, empty query returns all articles, no matches returns empty list, verify final merged results use extracted merge logic correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: 1) Implement Firestore client-side filtering and NewsAPI /everything endpoint calls, 2) Extract and reuse merge logic from getNewsArticles, 3) Add query debouncing and edge case handling (empty query, no results).",
+        "updatedAt": "2026-03-28T23:32:06.894Z"
+      },
+      {
+        "id": "34",
+        "title": "Create SearchArticlesUseCase and SearchArticleCubit",
+        "description": "Domain use case delegates to repository.searchArticles(query). Cubit manages search state with debounce.",
+        "details": "Cubit emits: SearchLoading, SearchResults(list), SearchEmpty, SearchError. Timer debounce 400ms on query change. Register both in DI container.",
+        "testStrategy": "Unit test cubit: debounce delays emission, rapid queries → single request, empty results state, error handling.",
+        "priority": "medium",
+        "dependencies": [
+          "33"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create SearchArticlesUseCase delegating to repository",
+            "description": "Implement domain use case that takes search query and delegates to ArticleRepository.searchArticles(query), returning Future<List<ArticleEntity>>.",
+            "dependencies": [],
+            "details": "Create SearchArticlesUseCase class in domain/usecases/. Constructor injects ArticleRepository. Implement call(String query) async => await repository.searchArticles(query). Add documentation for input validation if query trimmed is empty. Ensure pure domain layer, no UI dependencies.",
+            "status": "pending",
+            "testStrategy": "Unit test: mock repository, verify delegates query correctly, handles empty query, returns list on success.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement SearchArticleCubit with debounce and DI registration",
+            "description": "Create cubit managing search states with 400ms debounce timer on query changes, emitting Loading/Results/Empty/Error states. Register use case and cubit in DI container.",
+            "dependencies": [],
+            "details": "In presentation/cubits/, implement SearchArticleCubit extending Cubit<SearchState>. Use Timer for 400ms debounce on queryChanged(). Emit SearchLoading(), then try use case, emit SearchResults(list), SearchEmpty, or SearchError. Cancel timer on close(). In di/container.dart, register SearchArticlesUseCase and getIt.registerFactory<SearchArticleCubit>().",
+            "status": "pending",
+            "testStrategy": "Unit test cubit: verify debounce delays emission, rapid queries trigger single request, correct states for empty results/errors, timer cancelled on dispose.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Break down into: 1) Create SearchArticlesUseCase delegating to repository, 2) Implement SearchArticleCubit with debounced query handling and state emissions, register in DI.",
+        "updatedAt": "2026-03-28T23:54:52.991Z"
+      },
+      {
+        "id": "35",
+        "title": "Build search UI screen with results and empty state",
+        "description": "Create search screen: app bar search icon → text field → results list (reuse ArticleWidget) → explicit empty state.",
+        "details": "Route: /search. TextField with input debounce. BlocBuilder<SearchArticleCubit>. Empty state: 'No articles match \"query\"'. Add search icon to main app bar.",
+        "testStrategy": "Widget test: typing triggers search, shows results/empty/error, back navigation, search icon opens screen.",
+        "priority": "medium",
+        "dependencies": [
+          "34"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create search screen layout with TextField and BlocBuilder",
+            "description": "Build the basic search screen structure at route /search with debounced TextField for query input and BlocBuilder wrapped ListView using existing ArticleWidget for displaying SearchResults.",
+            "dependencies": [],
+            "details": "Implement Scaffold with AppBar, Column containing Padding > TextField (onChanged triggers cubit.searchArticles with 400ms debounce via Timer), BlocBuilder<SearchArticleCubit> > ListView.builder(reuse ArticleWidget). Handle SearchLoading with progress indicator.",
+            "status": "pending",
+            "testStrategy": "Widget test: verify TextField renders, typing triggers cubit calls (check debounce), ListView shows ArticleWidgets from mock SearchResults state.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement empty/error states and main app bar search integration",
+            "description": "Add explicit empty state message and error handling in BlocBuilder, plus integrate search icon in main app bar to navigate to /search screen.",
+            "dependencies": [
+              1
+            ],
+            "details": "In BlocBuilder: SearchEmpty → Center('No articles match {state.query}'), SearchError → error message with retry button. Update main app bar: IconButton(Icons.search, onPressed: Navigator.pushNamed('/search')). Ensure back navigation works.",
+            "status": "pending",
+            "testStrategy": "Widget test: empty state shows correct message with query, error state displays/retry works, search icon from main screen navigates to /search and back button returns.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Break down into: 1) Create search screen layout with TextField and BlocBuilder, 2) Implement empty/error states and app bar integration.",
+        "updatedAt": "2026-03-28T23:58:27.935Z"
+      },
+      {
+        "id": "36",
+        "title": "Create MainScreen with BottomNavigationBar shell",
+        "description": "Build MainScreen hosting Feed (DailyNews), Create (UploadArticleView), Profile tabs using BottomNavigationBar + IndexedStack.",
+        "details": "Tabs: 0=Feed (default), 1=Create, 2=Profile/Settings. Update routes.dart: '/' → MainScreen. Preserve deep links. Material 3 icons/labels.",
+        "testStrategy": "Widget test: tab switching preserves state, default Feed tab, navigation gestures, route changes update selected index.",
+        "priority": "high",
+        "dependencies": [
+          "31"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build MainScreen with BottomNavigationBar and IndexedStack",
+            "description": "Create the MainScreen StatefulWidget with Scaffold containing IndexedStack for tab state preservation and BottomNavigationBar with Material 3 icons and labels.",
+            "dependencies": [],
+            "details": "Use int _currentIndex = 0; Scaffold(body: IndexedStack(index: _currentIndex, children: _tabs), bottomNavigationBar: BottomNavigationBar(currentIndex: _currentIndex, onTap: (index) => setState(() => _currentIndex = index), items: [...])). Define tabs list with placeholders for Feed, Create, Profile. Use Icons.newspaper, Icons.add, Icons.person with labels.",
+            "status": "pending",
+            "testStrategy": "Widget test: verify IndexedStack renders correct tab, BottomNavigationBar shows default Feed selected, tap switches index correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure tabs for Feed, Create, Profile with state preservation",
+            "description": "Replace tab placeholders with actual screens: Feed uses DailyNews, Create uses UploadArticleView, Profile/Settings tab. Ensure IndexedStack preserves scroll positions and cubit states across switches.",
+            "dependencies": [
+              1
+            ],
+            "details": "tabs = [DailyNews(), UploadArticleView(), ProfileScreen()]; Wrap each tab with AutomaticKeepAliveClientMixin if needed for complex state. Feed tab default (index 0). Test state preservation like list scroll position and form data in Create tab.",
+            "status": "pending",
+            "testStrategy": "Widget test: switch tabs multiple times, verify Feed list scroll position preserved, Create form inputs retained, Profile state unchanged. Integration test: navigate away/return preserves states.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update routing to use MainScreen as root preserving deep links",
+            "description": "Modify routes.dart to set '/' → MainScreen(). Ensure deep links to specific articles/search still work by handling navigation within MainScreen tabs or using Navigator overlay.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "In routes.dart: {'/': (context) => MainScreen()}. Preserve existing deep link routes by checking ModalRoute.of(context)?.settings.name in MainScreen initState and setting _currentIndex or pushing to Navigator. Update MaterialApp.router if using named routes.",
+            "status": "pending",
+            "testStrategy": "Integration test: cold start app lands on Feed tab. Deep link to article opens in Feed tab. Search deep link navigates to search within Feed. Verify no routing conflicts.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: 1) Build MainScreen with BottomNavigationBar and IndexedStack, 2) Configure tabs for Feed/Create/Profile with state preservation, 3) Update routing to use MainScreen as root preserving deep links.",
+        "updatedAt": "2026-03-28T23:49:28.738Z"
+      },
+      {
+        "id": "37",
+        "title": "Implement delete own articles (Firestore + UI)",
+        "description": "Add deleteArticle to FirestoreArticleDataSource/repository/use case. Article detail/'my articles' shows delete button for own articles.",
+        "details": "Firestore: await articles.doc(id).delete(). Client-side check article.userId == currentUser.uid before showing button. Use case + DeleteArticleCubit. Document anonymous auth limitations.",
+        "testStrategy": "Integration test: delete own article → disappears from feed after refresh. Unit test: repository delete succeeds/fails. Widget test: delete button visibility.",
+        "priority": "medium",
+        "dependencies": [
+          "29"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add deleteArticle to FirestoreArticleDataSource, Repository, and Use Case",
+            "description": "Implement deleteArticle method in data source using Firestore doc.delete(), extend ArticleRepositoryImpl to wrap in DataState, create DeleteArticleUseCase following existing use case pattern.",
+            "dependencies": [],
+            "details": "Data source: await articles.doc(articleId).delete(). Repository: delegate to data source, wrap FirebaseException in DataFailed. Use case: DeleteArticleUseCase with ArticleRepository dependency, params with articleId.",
+            "status": "pending",
+            "testStrategy": "Unit tests: mock data source verifies delete call, repository wraps success/failure DataState, use case calls repository correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create DeleteArticleCubit with states and delete method",
+            "description": "Implement DeleteArticleCubit similar to ArticleUploadCubit, with Initial/Loading/Success/Failure states and deleteArticle method calling DeleteArticleUseCase.",
+            "dependencies": [
+              1
+            ],
+            "details": "States extend Equatable: DeleteArticleInitial, DeleteArticleLoading, DeleteArticleSuccess, DeleteArticleFailure(message). Cubit emits Loading→Success/Failure based on use case result.",
+            "status": "pending",
+            "testStrategy": "Widget tests: verify state transitions Initial→Loading→Success/Failure. Mock use case tests success/error paths and emit calls.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update UI to show delete button for owned articles with client-side check",
+            "description": "Add delete button in Article detail screen and 'My Articles' screen (UserArticlesScreen), visible only when article.userId == currentUser.uid, connect to DeleteArticleCubit.",
+            "dependencies": [
+              2
+            ],
+            "details": "Check FirebaseAuth.instance.currentUser?.uid == article.userId. Button calls cubit.deleteArticle(articleId). Show confirmation dialog. Handle anonymous auth limitations in comments.",
+            "status": "pending",
+            "testStrategy": "Widget tests: delete button visibility when owner/non-owner, tap calls cubit.deleteArticle, confirmation dialog shows.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Handle post-delete UI refresh and integration testing",
+            "description": "Implement UI refresh after successful delete (reload lists/screens), document anonymous auth limitations, add comprehensive tests including integration test.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "After DeleteArticleSuccess: trigger refresh in UserArticlesCubit.fetchUserArticles() and ArticleDetail screen. Document: 'Anonymous users can delete own articles but lose access on sign-out'.",
+            "status": "pending",
+            "testStrategy": "Integration test: delete own article → disappears from 'My Articles' and feed after refresh. Widget test: post-delete UI updates correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: 1) Add deleteArticle to data source/repository/use case, 2) Create DeleteArticleCubit, 3) Update UI to show delete button for owned articles, 4) Handle auth limitations and post-delete UI refresh.",
+        "updatedAt": "2026-03-29T01:18:19.822Z"
+      },
+      {
+        "id": "38",
+        "title": "Implement ThemeCubit with shared_preferences persistence",
+        "description": "Add ThemeCubit for light/dark toggle, persist via shared_preferences. Wrap MaterialApp with BlocProvider.",
+        "details": "Add shared_preferences: ^2.2.2 to pubspec.yaml. ThemeCubit: load/save 'theme_mode' key. Toggle emits ThemeMode.light/dark/system. Update MainScreen to consume.",
+        "testStrategy": "Unit test: toggle persists across restarts (mock prefs), init loads saved state. Widget test: theme changes UI correctly.",
+        "priority": "low",
+        "dependencies": [
+          "36"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add shared_preferences dependency and implement ThemeCubit",
+            "description": "Update pubspec.yaml with shared_preferences: ^2.2.2, create ThemeCubit class with load/save logic for 'theme_mode' key using SharedPreferences, implement toggle method emitting ThemeMode.light/dark/system.",
+            "dependencies": [],
+            "details": "1. Add dependency to pubspec.yaml and run flutter pub get. 2. Create ThemeCubit in presentation/bloc/theme/theme_cubit.dart extending Cubit<ThemeMode>. 3. Implement loadTheme() async: SharedPreferences.getInstance().then((prefs) => prefs.getString('theme_mode')?.parseThemeMode() ?? ThemeMode.system). 4. Implement saveTheme(ThemeMode mode) async: prefs.setString('theme_mode', mode.toString()). 5. Implement toggle(): cycle through modes and emit after save.",
+            "status": "pending",
+            "testStrategy": "Unit test: mock SharedPreferences, verify toggle persists across restarts, init loads saved state correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 3,
+        "recommendedSubtasks": 1,
+        "expansionPrompt": "Break down into: 1) Implement ThemeCubit with load/save logic using shared_preferences, wrap MaterialApp with BlocProvider, update MainScreen consumption.",
+        "updatedAt": "2026-03-29T01:30:38.286Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-28T20:23:17.210Z",
-      "taskCount": 28,
-      "completedCount": 28,
+      "lastModified": "2026-03-29T01:30:38.286Z",
+      "taskCount": 38,
+      "completedCount": 38,
       "tags": [
         "master"
       ]

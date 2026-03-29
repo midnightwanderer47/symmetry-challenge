@@ -1,157 +1,93 @@
 {
 	"meta": {
-		"generatedAt": "2026-03-27T15:09:23.846Z",
-		"tasksAnalyzed": 18,
-		"totalTasks": 18,
-		"analysisCount": 18,
+		"generatedAt": "2026-03-28T23:03:55.553Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 38,
+		"analysisCount": 10,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
 		"usedResearch": true
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 1,
-			"taskTitle": "Design Article Firestore Schema",
-			"complexityScore": 3,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Break down into research Firestore best practices, draft initial schema tree, create detailed field specifications table, add validation rules and examples, document indexing strategy and query patterns.",
-			"reasoning": "Straightforward documentation task with detailed specifications provided. Low technical risk, follows Firestore best practices from search results[1][2]. Already has 5 well-defined subtasks covering all aspects."
+			"taskId": 29,
+			"taskTitle": "Implement merged article fetching in ArticleRepositoryImpl",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) Implement parallel fetching with Future.wait, 2) Create private merge/deduplicate/sort method with title normalization and Firestore preference, 3) Add fallback logic for publishedAt/createdAt and isUserArticle flag, 4) Implement partial failure handling with error metadata.",
+			"reasoning": "High complexity due to parallel async operations, custom deduplication logic with normalization, sorting with fallbacks, error handling for partial failures, and entity modifications. Requires careful testing of edge cases like duplicates and failures. Follows clean architecture but involves multiple data sources."
 		},
 		{
-			"taskId": 2,
-			"taskTitle": "Setup Firebase Project and Local Emulator",
-			"complexityScore": 5,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate into Firebase account setup/authentication, project creation and service enabling, CLI configuration and .firebaserc setup, emulator installation and port configuration, storage rules initialization and initial testing.",
-			"reasoning": "Standard Firebase setup with multiple CLI commands and configuration steps. Potential port conflicts and version compatibility issues. Dependencies on Task 1. Already has comprehensive 5 subtasks."
+			"taskId": 30,
+			"taskTitle": "Replace RemoteArticlesBloc with RemoteArticlesCubit",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Break down into: 1) Define Cubit states and implement init/refresh logic with GetArticlesUseCase, 2) Register Cubit in DI container and update dependencies.",
+			"reasoning": "Standard BLoC to Cubit migration with straightforward state management and use case integration. Low complexity as it follows established patterns with clear states and mockable dependencies. Dependency on task 29 adds minor coordination overhead."
 		},
 		{
-			"taskId": 3,
-			"taskTitle": "Implement Firestore and Storage Security Rules",
+			"taskId": 31,
+			"taskTitle": "Update home feed UI to render merged articles",
+			"complexityScore": 4,
+			"recommendedSubtasks": 1,
+			"expansionPrompt": "Break down into: 1) Integrate BlocBuilder with RemoteArticlesCubit, add user article badge to ArticleWidget, preserve navigation.",
+			"reasoning": "Straightforward UI update using existing widgets and BLoC pattern. Minimal visual changes reduce design complexity. Widget testing is standard for Flutter apps."
+		},
+		{
+			"taskId": 32,
+			"taskTitle": "Add pull-to-refresh to home feed",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Simple Flutter RefreshIndicator integration with cubit method. Standard UX pattern with minimal custom logic. Widget tests are routine."
+		},
+		{
+			"taskId": 33,
+			"taskTitle": "Implement searchArticles in repository with merge reuse",
 			"complexityScore": 7,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Divide into Firestore rules syntax validation, Storage rules size/contentType validation, rules file creation and syntax checking, deployment process, comprehensive Rules Playground testing scenarios.",
-			"reasoning": "Complex security rules with field validation, size limits, and content type checking. Requires deep Firebase rules knowledge and thorough testing. Critical for data security. Well-covered by 5 subtasks."
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down into: 1) Implement Firestore client-side filtering and NewsAPI /everything endpoint calls, 2) Extract and reuse merge logic from getNewsArticles, 3) Add query debouncing and edge case handling (empty query, no results).",
+			"reasoning": "Reuses merge logic but adds search-specific querying across two sources with different APIs, debouncing, and case-insensitive matching. Similar complexity to task 29 but with additional query handling."
 		},
 		{
-			"taskId": 4,
-			"taskTitle": "Firebase Flutter Integration Setup",
-			"complexityScore": 4,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Split into FlutterFire CLI installation, project configuration and firebase_options generation, pubspec dependency updates, main.dart Firebase initialization, multi-platform verification (android/ios/web).",
-			"reasoning": "Standard Flutter Firebase integration following official patterns. Multiple moving parts (CLI, config generation, platform setup). Dependencies on Tasks 2,3. Good 5-subtask breakdown."
-		},
-		{
-			"taskId": 5,
-			"taskTitle": "Extend Domain Layer - ArticleEntity and Repository",
-			"complexityScore": 4,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate ArticleEntity field additions, copyWith method implementation with full field coverage, repository interface method additions with proper typing, Dart analyzer validation, unit test coverage.",
-			"reasoning": "Clean Architecture domain layer extension. Requires careful null safety and copyWith pattern maintenance. Pure Dart, highly testable. Dependencies on Task 4. Solid 5 subtasks."
-		},
-		{
-			"taskId": 6,
-			"taskTitle": "Implement Domain Use Cases",
+			"taskId": 34,
+			"taskTitle": "Create SearchArticlesUseCase and SearchArticleCubit",
 			"complexityScore": 5,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Break into individual use case implementations (UploadArticle, UploadThumbnail, GetUserArticles), Params classes creation, DI container registration, comprehensive unit testing for each.",
-			"reasoning": "Standard Clean Architecture use cases following established patterns. Three separate implementations with testing. Dependency injection wiring. Dependencies on Task 5. Well-structured 5 subtasks."
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Break down into: 1) Create SearchArticlesUseCase delegating to repository, 2) Implement SearchArticleCubit with debounced query handling and state emissions, register in DI.",
+			"reasoning": "Standard use case + cubit pattern with added debounce timer logic. Slightly more complex than basic cubit due to timing and rapid query handling."
 		},
 		{
-			"taskId": 7,
-			"taskTitle": "Implement Data Sources - Firestore and Storage",
-			"complexityScore": 8,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Divide into interface definitions, Firestore data source implementation with error handling, Storage data source with UUID generation and file handling, integration testing setup with emulators.",
-			"reasoning": "First Firebase SDK integration in data layer. File I/O, UUID generation, async error handling, emulator integration testing. High complexity due to external dependencies. Excellent 5-subtask coverage."
+			"taskId": 35,
+			"taskTitle": "Build search UI screen with results and empty state",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Break down into: 1) Create search screen layout with TextField and BlocBuilder, 2) Implement empty/error states and app bar integration.",
+			"reasoning": "Standard Flutter screen with form input, list rendering, and state handling. Reuses existing ArticleWidget. Routine navigation and testing."
 		},
 		{
-			"taskId": 8,
-			"taskTitle": "Extend ArticleModel with Firestore Serialization",
+			"taskId": 36,
+			"taskTitle": "Create MainScreen with BottomNavigationBar shell",
 			"complexityScore": 6,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate fromFirestore factory with DocumentSnapshot handling, toFirestore with FieldValue.serverTimestamp logic, fromEntity/toEntity bidirectional mapping, comprehensive roundtrip unit tests.",
-			"reasoning": "Complex serialization with Firestore-specific types (DocumentSnapshot, FieldValue.serverTimestamp). Null safety, bidirectional mapping, testing critical. Dependencies on 5,7. Thorough 5 subtasks."
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down into: 1) Build MainScreen with BottomNavigationBar and IndexedStack, 2) Configure tabs for Feed/Create/Profile with state preservation, 3) Update routing to use MainScreen as root preserving deep links.",
+			"reasoning": "Involves app shell refactoring, state preservation across tabs, routing changes, and Material 3 compliance. Higher complexity due to navigation coordination and potential state management issues."
 		},
 		{
-			"taskId": 9,
-			"taskTitle": "Implement ArticleRepositoryImpl with New Methods",
+			"taskId": 37,
+			"taskTitle": "Implement delete own articles (Firestore + UI)",
 			"complexityScore": 7,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Break into constructor DI wiring, individual method implementations (uploadArticle, uploadThumbnail, getUserArticles), exception mapping strategies, comprehensive unit tests with mocked data sources.",
-			"reasoning": "Repository pattern implementation bridging domain and data layers. Complex error handling (FirebaseException → DataFailed), model/entity conversion. Dependencies on 6,7,8. Detailed 5 subtasks."
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) Add deleteArticle to data source/repository/use case, 2) Create DeleteArticleCubit, 3) Update UI to show delete button for owned articles, 4) Handle auth limitations and post-delete UI refresh.",
+			"reasoning": "Spans multiple layers (data, domain, presentation), client-side ownership checks, Firestore operations, and UI updates across screens. Integration testing adds complexity."
 		},
 		{
-			"taskId": 10,
-			"taskTitle": "Dependency Injection Setup",
-			"complexityScore": 4,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate package version verification, data source registrations, use case registrations with dependency resolution, DI resolution testing, documentation for future cubit registrations.",
-			"reasoning": "GetIt DI container setup following established patterns. Risk of circular dependencies or resolution failures. Dependencies on Task 9. Clean 5-subtask structure."
-		},
-		{
-			"taskId": 11,
-			"taskTitle": "Implement ArticleUploadCubit",
-			"complexityScore": 8,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Divide into state classes definition, cubit skeleton with DI, thumbnail-first upload orchestration logic, article modification with copyWith, complete error handling and state flow testing.",
-			"reasoning": "Complex BLoC/Cubit orchestration: thumbnail → article sequencing, state management, error propagation. Business logic coordination. Dependencies on 6,10. Sophisticated 5-subtask breakdown."
-		},
-		{
-			"taskId": 12,
-			"taskTitle": "Implement UserArticlesCubit",
-			"complexityScore": 6,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate state hierarchy with Equatable, cubit structure and DI, fetchUserArticles with Either folding, DI registration, comprehensive bloc_test/widget testing coverage.",
-			"reasoning": "Standard list-fetching BLoC with Either<DataState> handling. Less complex than upload flow but requires proper state management patterns. Dependencies on 6,10. Good 5 subtasks."
-		},
-		{
-			"taskId": 13,
-			"taskTitle": "Register BLoC/Cubits in DI Container",
+			"taskId": 38,
+			"taskTitle": "Implement ThemeCubit with shared_preferences persistence",
 			"complexityScore": 3,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "No expansion needed - simple DI registration updates following established patterns from Task 10.",
-			"reasoning": "Simple GetIt factory registrations extending Task 10. Low risk if dependencies resolved correctly. Dependencies on 10,11,12. Overly detailed 5 subtasks for simple task."
-		},
-		{
-			"taskId": 14,
-			"taskTitle": "Implement Article Upload Screen UI",
-			"complexityScore": 9,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Break into screen structure/BlocProvider setup, form fields with validation controllers, image picker with preview state, form submission orchestration, loading state UI management.",
-			"reasoning": "Complex Flutter UI: form validation, image picker integration, BLoC state management, navigation handling. Multiple third-party packages. Dependencies on 11,13. Excellent 5-subtask coverage."
-		},
-		{
-			"taskId": 15,
-			"taskTitle": "Implement User Articles Screen",
-			"complexityScore": 8,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate screen scaffold/BlocProvider, list view with RefreshIndicator, empty state handling, card navigation integration, home screen FAB/AppBar navigation updates.",
-			"reasoning": "Complete screen implementation with list state management, pull-to-refresh, empty states, navigation integration. Dependencies on 12,13. Comprehensive 5 subtasks."
-		},
-		{
-			"taskId": 16,
-			"taskTitle": "Update Routes Configuration",
-			"complexityScore": 3,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "No expansion needed - simple route constant additions and GetPage registrations.",
-			"reasoning": "Straightforward routing configuration updates. Minimal implementation risk. Dependencies on 14,15. 5 subtasks overly granular for simple config changes."
-		},
-		{
-			"taskId": 17,
-			"taskTitle": "End-to-End Integration Testing",
-			"complexityScore": 9,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Divide into emulator environment setup, happy path E2E testing, error scenario testing, security rules validation, data persistence verification across app restart.",
-			"reasoning": "Comprehensive integration testing across full stack (UI→Firebase). Emulator coordination, multiple test scenarios, security validation. Dependencies on multiple tasks. Detailed 5 subtasks."
-		},
-		{
-			"taskId": 18,
-			"taskTitle": "Write Comprehensive Project Report",
-			"complexityScore": 4,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "Separate into technical sections (Introduction, Learning, Challenges), screenshot capture/embedding, overdelivery feature documentation, architecture analysis.",
-			"reasoning": "Documentation task requiring synthesis of entire project experience. Screenshots, analysis, reflection. Low technical complexity. Dependencies on 17. Good 5-subtask structure."
+			"recommendedSubtasks": 1,
+			"expansionPrompt": "Break down into: 1) Implement ThemeCubit with load/save logic using shared_preferences, wrap MaterialApp with BlocProvider, update MainScreen consumption.",
+			"reasoning": "Standard state persistence pattern with well-documented shared_preferences and BLoC integration. Minimal custom logic beyond pubspec update."
 		}
 	]
 }
