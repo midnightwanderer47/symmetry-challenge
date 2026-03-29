@@ -103,23 +103,23 @@ void main() {
     expect(nav.currentIndex, 1);
   });
 
-  testWidgets('tapping Profile tab switches to index 2', (tester) async {
+  testWidgets('tapping My Articles tab switches to index 2', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pump();
 
-    await tester.tap(find.text('Profile'));
+    await tester.tap(find.text('My Articles'));
     await tester.pump();
 
     final nav = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
     expect(nav.currentIndex, 2);
   });
 
-  testWidgets('switching back to Feed after Profile preserves index 0', (tester) async {
+  testWidgets('switching back to Feed after My Articles preserves index 0', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pump();
 
-    // Switch to Profile
-    await tester.tap(find.text('Profile'));
+    // Switch to My Articles
+    await tester.tap(find.text('My Articles'));
     await tester.pump();
 
     // Switch back to Feed

@@ -18,43 +18,54 @@ class DailyNews extends StatelessWidget {
   }
 
   _buildAppbar(BuildContext context) {
+    final titleStyle = Theme.of(context).appBarTheme.titleTextStyle ??
+        Theme.of(context).textTheme.titleLarge;
+
     return AppBar(
-      title: const Text('Daily News'),
-      actions: [
-        IconButton(
-          icon: Icon(
-            context.watch<ThemeCubit>().state == ThemeMode.dark
-                ? Icons.brightness_7
-                : Icons.brightness_4,
-          ),
-          onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+      automaticallyImplyLeading: false,
+      title: const SizedBox.shrink(),
+      flexibleSpace: SafeArea(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Center(child: Text('Daily News', style: titleStyle)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      context.watch<ThemeCubit>().state == ThemeMode.dark
+                          ? Icons.brightness_7
+                          : Icons.brightness_4,
+                    ),
+                    onPressed: () =>
+                        context.read<ThemeCubit>().toggleTheme(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      final remoteState =
+                          context.read<RemoteArticlesCubit>().state;
+                      final articles = remoteState is RemoteArticlesLoaded
+                          ? remoteState.articles
+                          : <ArticleEntity>[];
+                      Navigator.pushNamed(context, AppRoutes.searchRoute,
+                          arguments: articles);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.bookmark),
+                    onPressed: () =>
+                        _onShowSavedArticlesViewTapped(context),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        GestureDetector(
-          onTap: () {
-            final remoteState = context.read<RemoteArticlesCubit>().state;
-            final articles = remoteState is RemoteArticlesLoaded ? remoteState.articles : <ArticleEntity>[];
-            Navigator.pushNamed(context, AppRoutes.searchRoute, arguments: articles);
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.search),
-          ),
-        ),
-        GestureDetector(
-          onTap: () => Navigator.pushNamed(context, AppRoutes.userArticlesRoute),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.person),
-          ),
-        ),
-        GestureDetector(
-          onTap: () => _onShowSavedArticlesViewTapped(context),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.bookmark),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

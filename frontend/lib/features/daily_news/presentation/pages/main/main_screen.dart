@@ -44,8 +44,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Create',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.article_outlined),
+            label: 'My Articles',
           ),
         ],
       ),
