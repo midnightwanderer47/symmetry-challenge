@@ -35,15 +35,6 @@ class DailyNews extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: Icon(
-                      context.watch<ThemeCubit>().state == ThemeMode.dark
-                          ? Icons.brightness_7
-                          : Icons.brightness_4,
-                    ),
-                    onPressed: () =>
-                        context.read<ThemeCubit>().toggleTheme(),
-                  ),
-                  IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {
                       final remoteState =
@@ -60,12 +51,31 @@ class DailyNews extends StatelessWidget {
                     onPressed: () =>
                         _onShowSavedArticlesViewTapped(context),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () => _showSettingsSheet(context),
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showSettingsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return BlocProvider.value(
+          value: context.read<ThemeCubit>(),
+          child: const _SettingsSheet(),
+        );
+      },
     );
   }
 
@@ -143,5 +153,57 @@ class DailyNews extends StatelessWidget {
 
   void _onShowSavedArticlesViewTapped(BuildContext context) {
     Navigator.pushNamed(context, AppRoutes.savedArticlesRoute);
+  }
+}
+
+class _SettingsSheet extends StatelessWidget {
+  const _SettingsSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeCubit>().state == ThemeMode.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Appearance',
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.dark_mode_outlined, color: colorScheme.onSurface),
+              const SizedBox(width: 16),
+              Text('Dark Mode', style: textTheme.bodyLarge),
+              const Spacer(),
+              Switch(
+                value: isDark,
+                onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

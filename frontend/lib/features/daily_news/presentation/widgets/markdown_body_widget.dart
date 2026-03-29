@@ -21,8 +21,10 @@ class ArticleMarkdownBody extends StatelessWidget {
     return MarkdownBody(
       data: content,
       selectable: true,
+      fitContent: false,
       extensionSet: md.ExtensionSet.gitHubFlavored,
       styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+        textAlign: WrapAlignment.start,
         p: TextStyle(fontSize: 16, height: 1.6, color: onSurface),
         h1: h1Style,
         h2: h2Style,
