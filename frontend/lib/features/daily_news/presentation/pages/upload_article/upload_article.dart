@@ -99,10 +99,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
             canPop: !isLoading,
             child: Scaffold(
               appBar: AppBar(
-                title: const Text(
-                  'Upload Article',
-                  style: TextStyle(color: Colors.black),
-                ),
+                title: const Text('Upload Article'),
               ),
               body: Stack(
                 children: [
@@ -139,10 +136,11 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 8),
-                    const Text.rich(
+                    Text.rich(
                       TextSpan(
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                        children: [
+                        style: TextStyle(fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                        children: const [
                           TextSpan(text: 'Supported: '),
                           TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(text: ', **bold**, _italic_, - lists, line breaks'),
@@ -183,9 +181,10 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'Tap to change',
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(fontSize: 12,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                               ),
                             ],
                           ),
@@ -196,13 +195,14 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                       Container(
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
+                        child: Text(
                           'No thumbnail selected — placeholder will be used',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
                           textAlign: TextAlign.center,
                         ),
                       ),

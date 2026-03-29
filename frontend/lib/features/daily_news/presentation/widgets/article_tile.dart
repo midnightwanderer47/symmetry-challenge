@@ -29,7 +29,7 @@ class ArticleWidget extends StatelessWidget {
         child: Row(
           children: [
             _buildImage(context),
-            _buildTitleAndDescription(),
+            _buildTitleAndDescription(context),
             _buildRemovableArea(),
           ],
         ),
@@ -38,6 +38,8 @@ class ArticleWidget extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context) {
+    final placeholderColor =
+        Theme.of(context).colorScheme.surfaceContainerHighest;
     return CachedNetworkImage(
         imageUrl: article!.displayImageUrl,
         imageBuilder: (context, imageProvider) => Padding(
@@ -48,7 +50,7 @@ class ArticleWidget extends StatelessWidget {
                   width: MediaQuery.of(context).size.width / 3,
                   height: double.maxFinite,
                   decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: placeholderColor,
                       image: DecorationImage(
                           image: imageProvider, fit: BoxFit.cover)),
                 ),
@@ -61,10 +63,8 @@ class ArticleWidget extends StatelessWidget {
                 child: Container(
                   width: MediaQuery.of(context).size.width / 3,
                   height: double.maxFinite,
+                  decoration: BoxDecoration(color: placeholderColor),
                   child: const CupertinoActivityIndicator(),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.08),
-                  ),
                 ),
               ),
             ),
@@ -75,16 +75,14 @@ class ArticleWidget extends StatelessWidget {
                 child: Container(
                   width: MediaQuery.of(context).size.width / 3,
                   height: double.maxFinite,
+                  decoration: BoxDecoration(color: placeholderColor),
                   child: const Icon(Icons.error),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.08),
-                  ),
                 ),
               ),
             ));
   }
 
-  Widget _buildTitleAndDescription() {
+  Widget _buildTitleAndDescription(BuildContext context) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 7),
@@ -97,11 +95,11 @@ class ArticleWidget extends StatelessWidget {
               article!.title ?? '',
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Butler',
                 fontWeight: FontWeight.w900,
                 fontSize: 18,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
 

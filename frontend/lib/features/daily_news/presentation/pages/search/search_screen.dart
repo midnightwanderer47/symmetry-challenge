@@ -42,15 +42,16 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchField(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return TextField(
       controller: _controller,
       autofocus: true,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Search articles...',
         border: InputBorder.none,
-        hintStyle: TextStyle(color: Colors.grey),
+        hintStyle: TextStyle(color: onSurface.withOpacity(0.5)),
       ),
-      style: const TextStyle(color: Colors.black),
+      style: TextStyle(color: onSurface),
       onChanged: (query) => context.read<SearchArticlesCubit>().queryChanged(query),
     );
   }

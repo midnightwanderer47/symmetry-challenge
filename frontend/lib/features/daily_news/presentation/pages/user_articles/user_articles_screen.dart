@@ -36,10 +36,7 @@ class UserArticlesScreen extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'My Articles',
-              style: TextStyle(color: Colors.black),
-            ),
+            title: const Text('My Articles'),
           ),
           body: BlocBuilder<UserArticlesCubit, UserArticlesState>(
             builder: (context, state) {
@@ -51,13 +48,16 @@ class UserArticlesScreen extends StatelessWidget {
               }
               if (state is UserArticlesLoaded) {
                 if (state.articles.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.article_outlined, size: 64, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text('No articles yet', style: TextStyle(color: Colors.grey)),
+                        Icon(Icons.article_outlined, size: 64,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+                        const SizedBox(height: 16),
+                        Text('No articles yet',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4))),
                       ],
                     ),
                   );

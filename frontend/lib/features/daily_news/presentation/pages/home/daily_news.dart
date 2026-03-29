@@ -19,10 +19,7 @@ class DailyNews extends StatelessWidget {
 
   _buildAppbar(BuildContext context) {
     return AppBar(
-      title: const Text(
-        'Daily News',
-        style: TextStyle(color: Colors.black),
-      ),
+      title: const Text('Daily News'),
       actions: [
         IconButton(
           icon: Icon(
@@ -40,21 +37,21 @@ class DailyNews extends StatelessWidget {
           },
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.search, color: Colors.black),
+            child: Icon(Icons.search),
           ),
         ),
         GestureDetector(
           onTap: () => Navigator.pushNamed(context, AppRoutes.userArticlesRoute),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.person, color: Colors.black),
+            child: Icon(Icons.person),
           ),
         ),
         GestureDetector(
           onTap: () => _onShowSavedArticlesViewTapped(context),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.bookmark, color: Colors.black),
+            child: Icon(Icons.bookmark),
           ),
         ),
       ],

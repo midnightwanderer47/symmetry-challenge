@@ -1,34 +1,52 @@
 import 'package:flutter/material.dart';
 
+const _seedColor = Color(0xFF6750A4);
+
 ThemeData theme() {
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: _seedColor,
+    brightness: Brightness.light,
+  );
   return ThemeData(
-    scaffoldBackgroundColor: Colors.white,
+    colorScheme: colorScheme,
+    scaffoldBackgroundColor: colorScheme.surface,
     fontFamily: 'Muli',
-    appBarTheme: appBarTheme(),
+    appBarTheme: AppBarTheme(
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0,
+      centerTitle: true,
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
+      titleTextStyle: TextStyle(
+        color: colorScheme.onSurface,
+        fontSize: 18,
+        fontFamily: 'Muli',
+      ),
+    ),
   );
 }
 
 ThemeData darkTheme() {
-  return ThemeData(
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: _seedColor,
     brightness: Brightness.dark,
+  );
+  return ThemeData(
+    colorScheme: colorScheme,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: colorScheme.surface,
     fontFamily: 'Muli',
-    appBarTheme: darkAppBarTheme(),
-  );
-}
-
-AppBarTheme appBarTheme() {
-  return const AppBarTheme(
-    backgroundColor: Colors.white,
-    elevation: 0,
-    centerTitle: true,
-    iconTheme: IconThemeData(color: Color(0XFF8B8B8B)),
-    titleTextStyle: TextStyle(color: Color(0XFF8B8B8B), fontSize: 18),
-  );
-}
-
-AppBarTheme darkAppBarTheme() {
-  return const AppBarTheme(
-    elevation: 0,
-    centerTitle: true,
+    appBarTheme: AppBarTheme(
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0,
+      centerTitle: true,
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
+      titleTextStyle: TextStyle(
+        color: colorScheme.onSurface,
+        fontSize: 18,
+        fontFamily: 'Muli',
+      ),
+    ),
   );
 }
