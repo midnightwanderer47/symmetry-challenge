@@ -14,8 +14,18 @@ format:
     dart format .
 
 [working-directory: 'frontend']
+check-format:
+    dart format --output=none --set-exit-if-changed .
+
+[working-directory: 'frontend']
 test:
     flutter test
+
+[working-directory: 'frontend']
+ci:
+    just test
+    just analyze
+    just check-format
 
 [working-directory: 'frontend']
 test-integration:
