@@ -102,7 +102,28 @@ class DailyNews extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, AppRoutes.uploadArticleRoute),
+        onPressed: () async {
+          final result = await Navigator.pushNamed(context, AppRoutes.uploadArticleRoute);
+          if (result == true && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Semantics(
+                  liveRegion: true,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('Article published!'),
+                    ],
+                  ),
+                ),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+            context.read<RemoteArticlesCubit>().refresh();
+          }
+        },
         child: const Icon(Icons.add),
       ),
     );

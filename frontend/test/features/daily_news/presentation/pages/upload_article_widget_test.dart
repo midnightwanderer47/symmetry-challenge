@@ -73,8 +73,8 @@ void main() {
       expect(find.widgetWithText(TextFormField, 'Title *'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Author *'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Content *'), findsOneWidget);
-      // AppBar + ElevatedButton both contain "Upload Article"; verify the button exists.
-      expect(find.widgetWithText(ElevatedButton, 'Upload Article'), findsOneWidget);
+      // AppBar contains "Upload Article"; ElevatedButton contains "Publish Article".
+      expect(find.widgetWithText(ElevatedButton, 'Publish Article'), findsOneWidget);
     });
   });
 
@@ -137,6 +137,23 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.text('Upload failed: network error'), findsOneWidget);
+    });
+
+    testWidgets('loading overlay absent and SnackBar shown after Failure state', (tester) async {
+      final cubit = _EmittingCubit(const ArticleUploadFailure('Network error'));
+      _sl.registerSingleton<ArticleUploadCubit>(cubit);
+
+      await tester.pumpWidget(_buildApp());
+      await tester.pump();
+
+      // Trigger Loading → Failure transition.
+      cubit.upload(const ArticleEntity(title: 'T', author: 'A', content: 'C'));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // After Failure: overlay must be gone and SnackBar shown.
+      expect(find.text('Publishing...'), findsNothing);
+      expect(find.text('Network error'), findsOneWidget);
     });
   });
 }

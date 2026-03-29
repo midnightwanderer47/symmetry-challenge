@@ -2819,7 +2819,7 @@
         "dependencies": [
           "39"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2881,7 +2881,8 @@
         ],
         "complexity": 1,
         "recommendedSubtasks": 0,
-        "expansionPrompt": "No expansion needed - simple Text.rich addition."
+        "expansionPrompt": "No expansion needed - simple Text.rich addition.",
+        "updatedAt": "2026-03-29T15:24:35.874Z"
       },
       {
         "id": "42",
@@ -2947,7 +2948,7 @@
         "dependencies": [
           "42"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2955,14 +2956,16 @@
             "description": "Add BlocListener<ArticleUploadCubit> in upload_article.dart to show success SnackBar on ArticleUploadSuccess state, clear error SnackBars, and add View action navigation.",
             "dependencies": [],
             "details": "In upload_article.dart scaffold, wrap content with BlocListener listening for ArticleUploadSuccess state. Use ScaffoldMessenger.of(context).clearSnackBars() first, then showSnackBar with green background, 'Article published!' text, 3s duration, SnackBarAction 'View' navigating to '/article' with articleId argument. Add semantics role: SnackBarAnnouncement for accessibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration test: Trigger ArticleUploadCubit success state emission, verify SnackBar displays with correct styling/text/action, View button navigates to article detail page, and prior error SnackBars are cleared.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:57:44.273Z"
           }
         ],
         "complexity": 3,
         "recommendedSubtasks": 1,
-        "expansionPrompt": "1. Implement BlocListener for ArticleUploadSuccess state. 2. Create SnackBar with View action navigation. 3. Add error SnackBar clearing logic."
+        "expansionPrompt": "1. Implement BlocListener for ArticleUploadSuccess state. 2. Create SnackBar with View action navigation. 3. Add error SnackBar clearing logic.",
+        "updatedAt": "2026-03-29T03:57:44.273Z"
       },
       {
         "id": "44",
@@ -2974,7 +2977,7 @@
         "dependencies": [
           "43"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2991,7 +2994,8 @@
         ],
         "complexity": 3,
         "recommendedSubtasks": 1,
-        "expansionPrompt": "1. Update FAB onPressed to await Navigator result. 2. Implement conditional SnackBar + cubit refresh on true result. 3. Test null/false result handling."
+        "expansionPrompt": "1. Update FAB onPressed to await Navigator result. 2. Implement conditional SnackBar + cubit refresh on true result. 3. Test null/false result handling.",
+        "updatedAt": "2026-03-29T15:26:11.599Z"
       },
       {
         "id": "45",
@@ -3001,7 +3005,7 @@
         "testStrategy": "Widget test: Tap preview, verify ImagePicker called. Integration test: Select image, tap preview, select new image, verify UI updates.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3009,9 +3013,10 @@
             "description": "Implement tappable thumbnail preview by wrapping Image.network or cached image with InkWell or GestureDetector that calls existing _pickImage method from gallery.",
             "dependencies": [],
             "details": "In upload_article.dart, locate thumbnail preview widget (Image.network/cacheFile). Wrap with InkWell(onTap: _pickImage) ensuring ripple effect. Verify _pickImage uses ImagePicker.pickImage(source: ImageSource.gallery). Test tap triggers picker.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Render preview with mock image, tap InkWell, verify _pickImage called with gallery source.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T15:08:01.420Z"
           },
           {
             "id": 2,
@@ -3021,14 +3026,16 @@
               1
             ],
             "details": "Add Text('Tap to change', style: TextStyle(fontSize: 12, color: Colors.grey)) below preview. Set Image.network/cacheFile with width:120, height:80, cacheWidth:120, cacheHeight:80. Use Semantics(label: 'Tap preview to change thumbnail', child: preview).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Verify hint text renders with correct style. Integration test: Confirm image loads with specified cache dimensions. Accessibility test: Verify semantics label reads correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T15:08:03.070Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "1. Wrap thumbnail preview with InkWell/GestureDetector calling _pickImage. 2. Add 'Tap to change' hint text. 3. Implement performance optimizations (cacheWidth/Height). 4. Add accessibility semantics."
+        "expansionPrompt": "1. Wrap thumbnail preview with InkWell/GestureDetector calling _pickImage. 2. Add 'Tap to change' hint text. 3. Implement performance optimizations (cacheWidth/Height). 4. Add accessibility semantics.",
+        "updatedAt": "2026-03-29T15:08:03.070Z"
       },
       {
         "id": "46",
@@ -3040,7 +3047,7 @@
         "dependencies": [
           "42"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3103,7 +3110,8 @@
         ],
         "complexity": 1,
         "recommendedSubtasks": 0,
-        "expansionPrompt": "No expansion needed - simple text change."
+        "expansionPrompt": "No expansion needed - simple text change.",
+        "updatedAt": "2026-03-29T16:16:19.129Z"
       },
       {
         "id": "47",
@@ -3116,7 +3124,7 @@
           "42",
           "43"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3156,7 +3164,8 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "1. Implement BlocListener for ArticleUploadFailure state handling. 2. Add overlay dismissal and form state preservation logic. 3. Implement upload timeout (30s). 4. Test network failure scenarios."
+        "expansionPrompt": "1. Implement BlocListener for ArticleUploadFailure state handling. 2. Add overlay dismissal and form state preservation logic. 3. Implement upload timeout (30s). 4. Test network failure scenarios.",
+        "updatedAt": "2026-03-29T15:31:56.020Z"
       },
       {
         "id": "48",
@@ -3171,7 +3180,7 @@
           "43",
           "45"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3179,9 +3188,10 @@
             "description": "Add Semantics labels to loading overlay, SnackBar using SnackBarAnnouncement, and markdown heading levels for TalkBack/VoiceOver navigation.",
             "dependencies": [],
             "details": "Loading: Semantics(label: 'Publishing article, please wait'); SnackBar: Wrap with Semantics or use SnackBarAnnouncement; Markdown: Ensure heading levels (h1-h6) are properly structured for screen reader navigation. Reference Flutter accessibility docs.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify Semantics tree in Flutter Inspector; manual check with TalkBack/VoiceOver announces correct labels.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T16:12:59.703Z"
           },
           {
             "id": 2,
@@ -3191,9 +3201,10 @@
               1
             ],
             "details": "Extract existing Butler font family/theme from app; apply to all text in loading overlay, SnackBar, markdown reader. Use Theme.of(context).textTheme for titles/body. Add 16dp padding, 8dp margins matching Material Design spacing system.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Visual comparison with app's existing typography; measure spacing in Flutter Inspector against Material Design 3 specs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T16:13:01.335Z"
           },
           {
             "id": 3,
@@ -3204,21 +3215,23 @@
               2
             ],
             "details": "Enable TalkBack/VoiceOver; test loading overlay announcement, SnackBar persistence with actions, markdown heading navigation. Test iOS overlay tap requirement. Run flutter test with --enable-accessibility flag. Verify no violations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manual testing on physical devices: Android emulator with TalkBack, iOS simulator with VoiceOver. Document any VoiceOver overlay issues per Flutter GitHub #120638.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T16:13:02.998Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently."
+        "expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently.",
+        "updatedAt": "2026-03-29T16:13:02.998Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-29T03:35:54.329Z",
+      "lastModified": "2026-03-29T16:16:19.129Z",
       "taskCount": 48,
-      "completedCount": 41,
+      "completedCount": 48,
       "tags": [
         "master"
       ]

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,11 +43,15 @@ void main() {
     when(() => mockUser.uid).thenReturn('test-uid');
   });
 
-  ArticleUploadCubit buildCubit({bool authenticated = true}) =>
+  ArticleUploadCubit buildCubit({
+    bool authenticated = true,
+    Duration uploadTimeout = const Duration(seconds: 30),
+  }) =>
       ArticleUploadCubit(
         mockUploadUseCase,
         mockThumbnailUseCase,
         getCurrentUser: () => authenticated ? mockUser : null,
+        uploadTimeout: uploadTimeout,
       );
 
   test('initial state is ArticleUploadInitial', () {
@@ -131,6 +137,36 @@ void main() {
     expect(
       (cubit.state as ArticleUploadFailure).message,
       contains('permission-denied'),
+    );
+  });
+
+  test('emits Failure with timeout message when upload times out', () async {
+    when(() => mockUploadUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      return const DataSuccess(null);
+    });
+    final cubit = buildCubit(uploadTimeout: const Duration(milliseconds: 50));
+    await cubit.upload(_article);
+    expect(cubit.state, isA<ArticleUploadFailure>());
+    expect(
+      (cubit.state as ArticleUploadFailure).message,
+      contains('timed out'),
+    );
+  });
+
+  test('emits Failure with timeout message when thumbnail upload times out', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params')))
+        .thenAnswer((_) async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      return const DataSuccess('url');
+    });
+    final cubit = buildCubit(uploadTimeout: const Duration(milliseconds: 50));
+    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    expect(cubit.state, isA<ArticleUploadFailure>());
+    expect(
+      (cubit.state as ArticleUploadFailure).message,
+      contains('timed out'),
     );
   });
 }

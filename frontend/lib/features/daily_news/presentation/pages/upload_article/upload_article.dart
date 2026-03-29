@@ -86,15 +86,6 @@ class _UploadArticleViewState extends State<UploadArticleView> {
       child: BlocConsumer<ArticleUploadCubit, ArticleUploadState>(
         listener: (context, state) {
           if (state is ArticleUploadSuccess) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(
-                  content: Text('Article published!'),
-                  backgroundColor: Colors.green,
-                  duration: Duration(seconds: 3),
-                ),
-              );
             Navigator.pop(context, true);
           } else if (state is ArticleUploadFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -147,6 +138,17 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                       keyboardType: TextInputType.multiline,
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
+                    const SizedBox(height: 8),
+                    Text.rich(
+                      TextSpan(
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        children: const [
+                          TextSpan(text: 'Supported: '),
+                          TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: ', **bold**, _italic_, - lists, line breaks'),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: _pickDate,
@@ -164,12 +166,29 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                     ),
                     if (_imageFile != null) ...[
                       const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(_imageFile!.path),
-                          height: 180,
-                          fit: BoxFit.cover,
+                      Semantics(
+                        label: 'Tap preview to change thumbnail',
+                        child: InkWell(
+                          onTap: _pickImage,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(_imageFile!.path),
+                                  height: 180,
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 240,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Tap to change',
+                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ] else ...[
@@ -201,7 +220,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                   width: 20,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Upload Article'),
+                              : const Text('Publish Article'),
                         );
                       },
                     ),
@@ -211,20 +230,25 @@ class _UploadArticleViewState extends State<UploadArticleView> {
             ),
             if (isLoading)
               Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    color: Colors.black54,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Publishing...',
-                            style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white),
-                          ),
-                        ],
+                child: Semantics(
+                  label: 'Publishing article, please wait',
+                  liveRegion: true,
+                  child: IgnorePointer(
+                    child: Container(
+                      color: Colors.black54,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Publishing...',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white)
+                                  ?? const TextStyle(fontSize: 20, color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
