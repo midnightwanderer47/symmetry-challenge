@@ -13,6 +13,10 @@ class SearchArticlesCubit extends Cubit<SearchArticlesState> {
 
   void queryChanged(String query) {
     _debounce?.cancel();
+    if (query.trim().isEmpty) {
+      emit(const SearchArticlesInitial());
+      return;
+    }
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       emit(const SearchArticlesLoading());
       final result = await _searchArticlesUseCase(params: query.trim());

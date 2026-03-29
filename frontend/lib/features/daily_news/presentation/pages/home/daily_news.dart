@@ -33,7 +33,11 @@ class DailyNews extends StatelessWidget {
           onPressed: () => context.read<ThemeCubit>().toggleTheme(),
         ),
         GestureDetector(
-          onTap: () => Navigator.pushNamed(context, AppRoutes.searchRoute),
+          onTap: () {
+            final remoteState = context.read<RemoteArticlesCubit>().state;
+            final articles = remoteState is RemoteArticlesLoaded ? remoteState.articles : <ArticleEntity>[];
+            Navigator.pushNamed(context, AppRoutes.searchRoute, arguments: articles);
+          },
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
             child: Icon(Icons.search, color: Colors.black),

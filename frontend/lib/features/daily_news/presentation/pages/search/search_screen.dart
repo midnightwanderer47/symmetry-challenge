@@ -9,7 +9,9 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/wid
 import 'package:news_app_clean_architecture/injection_container.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  final List<ArticleEntity> feedSnapshot;
+
+  const SearchScreen({Key? key, this.feedSnapshot = const []}) : super(key: key);
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -30,7 +32,9 @@ class _SearchScreenState extends State<SearchScreen> {
       create: (_) => sl<SearchArticlesCubit>(),
       child: Scaffold(
         appBar: AppBar(
-          title: _buildSearchField(context),
+          title: Builder(
+            builder: (context) => _buildSearchField(context),
+          ),
         ),
         body: _buildBody(),
       ),
@@ -67,6 +71,9 @@ class _SearchScreenState extends State<SearchScreen> {
         }
         if (state is SearchArticlesError) {
           return Center(child: Text(state.message));
+        }
+        if (widget.feedSnapshot.isNotEmpty) {
+          return _buildResults(context, widget.feedSnapshot);
         }
         return const SizedBox();
       },

@@ -35,7 +35,10 @@ class AppRoutes {
         return _materialRoute(const UserArticlesScreen());
 
       case searchRoute:
-        return _materialRoute(const SearchScreen());
+        final feed = settings.arguments is List<ArticleEntity>
+            ? settings.arguments as List<ArticleEntity>
+            : <ArticleEntity>[];
+        return _materialRoute(SearchScreen(feedSnapshot: feed));
 
       default:
         return _materialRoute(const MainScreen());
