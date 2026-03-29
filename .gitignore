@@ -31,3 +31,4 @@ node_modules/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+firepit-log.txt
