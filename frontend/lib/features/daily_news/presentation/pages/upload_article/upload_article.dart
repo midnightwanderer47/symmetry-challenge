@@ -139,10 +139,10 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 8),
-                    Text.rich(
+                    const Text.rich(
                       TextSpan(
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        children: const [
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        children: [
                           TextSpan(text: 'Supported: '),
                           TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(text: ', **bold**, _italic_, - lists, line breaks'),
