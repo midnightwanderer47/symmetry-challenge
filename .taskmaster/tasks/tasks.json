@@ -2704,13 +2704,521 @@
         "recommendedSubtasks": 1,
         "expansionPrompt": "Break down into: 1) Implement ThemeCubit with load/save logic using shared_preferences, wrap MaterialApp with BlocProvider, update MainScreen consumption.",
         "updatedAt": "2026-03-29T01:30:38.286Z"
+      },
+      {
+        "id": "39",
+        "title": "Add flutter_markdown dependency and basic setup",
+        "description": "Add flutter_markdown package to pubspec.yaml and verify basic markdown rendering functionality.",
+        "details": "Update pubspec.yaml: dependencies: flutter_markdown: ^0.7.1 (latest stable). Run flutter pub get. Create a test widget with sample markdown string: '# Heading\\n**Bold text**\\n- List item' using MarkdownBody. Ensure package follows safe rendering defaults to prevent XSS.",
+        "testStrategy": "Unit test: Render sample markdown strings and verify widget tree contains TextSpans for headings/bold/lists. Integration test: Display test article with markdown content.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update pubspec.yaml with flutter_markdown dependency",
+            "description": "Add the flutter_markdown package to the dependencies section in pubspec.yaml using the specified version.",
+            "dependencies": [],
+            "details": "Open pubspec.yaml, add under dependencies: flutter_markdown: ^0.7.1 (latest stable as specified). Save the file to trigger automatic pub get, or prepare for manual run.",
+            "status": "pending",
+            "testStrategy": "Verify pubspec.yaml contains 'flutter_markdown: ^0.7.1' in dependencies section after save.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Run flutter pub get to install dependency",
+            "description": "Execute flutter pub get command to fetch and install the flutter_markdown package.",
+            "dependencies": [
+              1
+            ],
+            "details": "Run 'flutter pub get' in terminal from project root. Check output for successful installation without errors or conflicts.",
+            "status": "pending",
+            "testStrategy": "Confirm no errors in pub get output. Verify .dart_tool/package_config.json includes flutter_markdown.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create test widget importing flutter_markdown",
+            "description": "Create a basic Flutter widget that imports the flutter_markdown package for testing.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create a new Dart file or add to existing test screen. Import 'package:flutter_markdown/flutter_markdown.dart'. Ensure no import errors on save.",
+            "status": "pending",
+            "testStrategy": "Flutter hot reload succeeds without import errors. IDE shows no red squiggles on flutter_markdown import.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Implement MarkdownBody with sample markdown string",
+            "description": "Add MarkdownBody widget displaying the specified sample markdown content.",
+            "dependencies": [
+              3
+            ],
+            "details": "Use MarkdownBody(data: '# Heading",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 2,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "No expansion needed - straightforward dependency addition and basic widget test.",
+        "updatedAt": "2026-03-29T03:24:20.142Z"
+      },
+      {
+        "id": "40",
+        "title": "Implement markdown rendering in ArticleDetailsView",
+        "description": "Replace existing Text widget concatenation with MarkdownBody renderer in article_detail.dart for content and optionally description.",
+        "details": "In frontend/lib/features/daily_news/presentation/pages/article_detail/article_detail.dart: Replace Text(description + content) with Column(children: [if(description != null) MarkdownBody(data: description), MarkdownBody(data: content)]). Apply custom MarkdownStyleSheet: styleSheet: MarkdownStyleSheet(textStyle: TextStyle(fontFamily: 'Butler' for h1-6, readable body), h1: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), strong: TextStyle(fontWeight: FontWeight.bold)). Use extensionSet: {ExtensionSet.gitHubFlavored} for CommonMark compatibility. Match existing app typography.",
+        "testStrategy": "Widget test: Load mock Article with markdown content, verify rendered text matches expected styled output. Golden test: Screenshot comparison with plain text and formatted markdown articles.",
+        "priority": "high",
+        "dependencies": [
+          "39"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create custom MarkdownStyleSheet for app typography",
+            "description": "Define a custom MarkdownStyleSheet in article_detail.dart that matches existing app typography using 'Butler' font family for headings, readable body text, h1 at 24pt bold, and strong text bolded.",
+            "dependencies": [],
+            "details": "Create MarkdownStyleSheet with: textStyle using TextStyle(fontFamily: 'Butler' for h1-h6, readable body font), h1: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), strong: TextStyle(fontWeight: FontWeight.bold). Ensure consistency with app's existing typography scheme.",
+            "status": "done",
+            "testStrategy": "Verify styles in widget test by checking rendered TextStyle properties match expected font family, sizes, and weights.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:35:52.594Z"
+          },
+          {
+            "id": 2,
+            "title": "Replace Text widget with MarkdownBody Column and extensions",
+            "description": "Refactor ArticleDetailsView in article_detail.dart to replace Text(description + content) with Column containing conditional MarkdownBody for description and always for content, applying custom styleSheet and GitHub Flavored extensionSet.",
+            "dependencies": [
+              1
+            ],
+            "details": "Replace with: Column(children: [if(description != null) MarkdownBody(data: description, styleSheet: customStyleSheet, extensionSet: {ExtensionSet.gitHubFlavored}), MarkdownBody(data: content, styleSheet: customStyleSheet, extensionSet: {ExtensionSet.gitHubFlavored})]). Import necessary packages: flutter_markdown and markdown.",
+            "status": "done",
+            "testStrategy": "Widget test: Load mock Article with markdown content, verify Column renders two MarkdownBody widgets, golden test for screenshot comparison with styled markdown output.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:35:54.328Z"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "1. Create custom MarkdownStyleSheet matching app typography. 2. Replace Text widget with MarkdownBody Column in ArticleDetailsView. 3. Add GitHub Flavored Markdown extension support.",
+        "updatedAt": "2026-03-29T03:35:54.328Z"
+      },
+      {
+        "id": "41",
+        "title": "Add markdown helper text to UploadArticleView content field",
+        "description": "Add instructional helper text below content field listing supported markdown syntax.",
+        "details": "In upload_article.dart content TextField: Add helper Text.rich below field: 'Supported: # Heading, **bold**, *italic*, - lists, line breaks'. Style as muted grey TextStyle(fontSize: 14, color: Colors.grey). Position with SizedBox(height: 8) spacer. Ensure multiline input allows full markdown authoring.",
+        "testStrategy": "Widget test: Verify helper text renders with correct content and styling. Accessibility test: Screen reader announces supported syntax.",
+        "priority": "medium",
+        "dependencies": [
+          "39"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate content TextField in upload_article.dart",
+            "description": "Find the exact location of the content TextField widget in the UploadArticleView build method.",
+            "dependencies": [],
+            "details": "Search for TextField with controller or key related to 'content' in lib/features/.../upload_article.dart. Note parent Column or ListView structure for insertion point.",
+            "status": "pending",
+            "testStrategy": "Verify file path and widget structure matches task context.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create Text.rich helper text widget",
+            "description": "Build the Text.rich widget with exact supported markdown syntax text and grey styling.",
+            "dependencies": [],
+            "details": "Use Text.rich(TextSpan(text: 'Supported: # Heading, **bold**, *italic*, - lists, line breaks')) with TextStyle(fontSize: 14, color: Colors.grey). Reference Flutter RichText docs for correct syntax[1][5].",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add spacer and helper text below TextField",
+            "description": "Insert SizedBox(height: 8) followed by the styled helper Text.rich after the content TextField.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "In Column children list: after content TextField, add SizedBox(height: 8.0), then helperText widget. Ensure proper comma separation and widget wrapping if needed.",
+            "status": "pending",
+            "testStrategy": "Hot reload verifies visual spacing and text appearance below field.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Verify multiline TextField configuration",
+            "description": "Confirm content TextField supports multiline input for markdown authoring.",
+            "dependencies": [
+              1
+            ],
+            "details": "Check TextField has maxLines: null or large number, keyboardType: TextInputType.multiline, expands: true if in Flexible. Add if missing per task requirements.",
+            "status": "pending",
+            "testStrategy": "Test input accepts multiple lines and line breaks render correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Write widget test for helper text rendering",
+            "description": "Create test verifying helper text renders with correct content, styling, and position.",
+            "dependencies": [
+              3
+            ],
+            "details": "In upload_article_test.dart: pumpWidget(UploadArticleView()), expect(find.text('Supported: # Heading')), verify TextStyle color grey, fontSize 14. Add accessibility test for screen reader.",
+            "status": "pending",
+            "testStrategy": "flutter test passes with find.byType(Text).last having correct properties.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 1,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "No expansion needed - simple Text.rich addition."
+      },
+      {
+        "id": "42",
+        "title": "Implement full-screen loading overlay for ArticleUploadLoading state",
+        "description": "Add blocking non-dismissible loading overlay during publish operation.",
+        "details": "In upload_article.dart BlocBuilder<ArticleUploadCubit>: When state is ArticleUploadLoading, wrap content in Stack with Positioned.fill( child: Container(color: Colors.black54, child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Publishing...', style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.white))])))). Use IgnorePointer on overlay to block interactions. Disable AppBar back button during loading via WillPopScope or NavigatorObserver. Keep primary button disabled.",
+        "testStrategy": "Widget test: Simulate loading state, verify overlay appears, blocks taps, shows progress + label. Test back button interception prevents navigation.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create full-screen loading overlay with IgnorePointer",
+            "description": "Implement a full-screen overlay using Stack and Positioned.fill that appears when ArticleUploadLoading state is active, blocking user interaction with IgnorePointer.",
+            "dependencies": [],
+            "details": "In upload_article.dart, wrap the existing content inside BlocBuilder<ArticleUploadCubit, ArticleUploadState> with a Stack. When state is ArticleUploadLoading, add a Positioned.fill child containing a Container with semi-transparent black background and a Centered Column containing CircularProgressIndicator and a styled Text('Publishing...'). Wrap this Positioned widget with IgnorePointer(true) to block taps and gestures.",
+            "status": "done",
+            "testStrategy": "Widget test: verify overlay is visible in ArticleUploadLoading state, and taps on underlying widgets are blocked.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:32:38.101Z"
+          },
+          {
+            "id": 2,
+            "title": "Integrate BlocBuilder state detection for ArticleUploadLoading",
+            "description": "Ensure the overlay is conditionally rendered only when the ArticleUploadCubit emits ArticleUploadLoading state.",
+            "dependencies": [
+              1
+            ],
+            "details": "Inside BlocBuilder<ArticleUploadCubit, ArticleUploadState>, check if state is ArticleUploadLoading. If true, include the overlay Positioned widget in the Stack; otherwise, render only the normal screen content. Keep primary button disabled while in loading state by checking the state in the button's onPressed logic.",
+            "status": "done",
+            "testStrategy": "Widget test: simulate state transitions (Initial → Loading → Success/Failure) and verify overlay appears only during Loading state and disappears afterward.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:32:39.920Z"
+          },
+          {
+            "id": 3,
+            "title": "Disable AppBar back button during loading with WillPopScope",
+            "description": "Prevent navigation back during the publish operation by intercepting the back button using WillPopScope.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Wrap the Scaffold (or the top-level widget) in WillPopScope. In onWillPop, return false when the current state is ArticleUploadLoading to block navigation, and return true otherwise. Ensure this logic is tied to the ArticleUploadCubit state via BlocBuilder or context.read<ArticleUploadCubit>().state.",
+            "status": "done",
+            "testStrategy": "Widget test: simulate back button press during ArticleUploadLoading state and verify navigation is blocked; test that back button works when not in loading state.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T03:32:41.693Z"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "1. Create full-screen Stack overlay with Positioned.fill and IgnorePointer. 2. Implement BlocBuilder state detection for ArticleUploadLoading. 3. Add back button interception with WillPopScope. 4. Style loading UI matching app theme.",
+        "updatedAt": "2026-03-29T03:32:41.693Z"
+      },
+      {
+        "id": "43",
+        "title": "Add SnackBar success feedback on publish completion",
+        "description": "Show unmistakable confirmation when ArticleUploadSuccess state emits.",
+        "details": "In upload_article.dart BlocListener<ArticleUploadCubit>: On ArticleUploadSuccess, ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Article published!'), backgroundColor: Colors.green, duration: Duration(seconds: 3), action: SnackBarAction(label: 'View', onPressed: () => Navigator.pushNamed(context, '/article', arguments: articleId)))). Clear any error SnackBars first. Ensure accessibility: role: SnackBarAnnouncement.",
+        "testStrategy": "Integration test: Trigger success state, verify SnackBar displays with correct copy and View action navigates to article detail.",
+        "priority": "high",
+        "dependencies": [
+          "42"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement BlocListener for ArticleUploadSuccess with SnackBar",
+            "description": "Add BlocListener<ArticleUploadCubit> in upload_article.dart to show success SnackBar on ArticleUploadSuccess state, clear error SnackBars, and add View action navigation.",
+            "dependencies": [],
+            "details": "In upload_article.dart scaffold, wrap content with BlocListener listening for ArticleUploadSuccess state. Use ScaffoldMessenger.of(context).clearSnackBars() first, then showSnackBar with green background, 'Article published!' text, 3s duration, SnackBarAction 'View' navigating to '/article' with articleId argument. Add semantics role: SnackBarAnnouncement for accessibility.",
+            "status": "pending",
+            "testStrategy": "Integration test: Trigger ArticleUploadCubit success state emission, verify SnackBar displays with correct styling/text/action, View button navigates to article detail page, and prior error SnackBars are cleared.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 3,
+        "recommendedSubtasks": 1,
+        "expansionPrompt": "1. Implement BlocListener for ArticleUploadSuccess state. 2. Create SnackBar with View action navigation. 3. Add error SnackBar clearing logic."
+      },
+      {
+        "id": "44",
+        "title": "Handle Navigator.pop result in home screen for success feedback",
+        "description": "Update daily_news.dart to consume true result from upload and show SnackBar on feed.",
+        "details": "In frontend/lib/features/daily_news/presentation/pages/home/daily_news.dart FAB onPressed: final result = await Navigator.pushNamed(context, '/upload'); if(result == true) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Row(children: [Icon(Icons.check_circle, color: Colors.white), SizedBox(width: 8), Text('Article published!')])); context.read<RemoteArticlesCubit>().refresh(); } Prevent double SnackBar by removing upload screen SnackBar or using single home feedback.",
+        "testStrategy": "Widget test: Mock Navigator.push returning true, verify SnackBar shows and cubit refresh called. Test false/null result shows nothing.",
+        "priority": "medium",
+        "dependencies": [
+          "43"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update FAB onPressed to await Navigator result and show conditional SnackBar",
+            "description": "Modify the FloatingActionButton onPressed in daily_news.dart to await Navigator.pushNamed result, check for true value, display success SnackBar with icon and 'Article published!' message, call cubit refresh, and handle null/false silently.",
+            "dependencies": [
+              43
+            ],
+            "details": "Use `final result = await Navigator.pushNamed(context, '/upload'); if (result == true && context.mounted) { ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(SnackBar(content: Row(children: [Icon(Icons.check_circle, color: Colors.white), SizedBox(width: 8), Text('Article published!')] ))); context.read<RemoteArticlesCubit>().refresh(); }` pattern following Flutter docs best practices for result handling and mounted check.",
+            "status": "pending",
+            "testStrategy": "Widget test: Mock Navigator.pushNamed returning true/false/null, verify SnackBar shows only on true with correct content, cubit.refresh() called only on success, no SnackBar on failure/null, and context.mounted check prevents errors.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 3,
+        "recommendedSubtasks": 1,
+        "expansionPrompt": "1. Update FAB onPressed to await Navigator result. 2. Implement conditional SnackBar + cubit refresh on true result. 3. Test null/false result handling."
+      },
+      {
+        "id": "45",
+        "title": "Implement thumbnail preview tap-to-change functionality",
+        "description": "Make thumbnail preview tappable to reopen ImagePicker gallery.",
+        "details": "In upload_article.dart: Wrap Image.network/cacheFile/thumbnail preview with InkWell(onTap: _pickImage) or GestureDetector. Add hint Text('Tap to change', style: TextStyle(fontSize: 12, color: Colors.grey)) below preview. Reuse existing _pickImage method with ImagePicker.pickImage(source: ImageSource.gallery). Set fixed width/height (e.g. 120x80) with cacheWidth/Height for performance. Ensure accessibility label: 'Tap preview to change thumbnail'.",
+        "testStrategy": "Widget test: Tap preview, verify ImagePicker called. Integration test: Select image, tap preview, select new image, verify UI updates.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Wrap thumbnail preview with InkWell/GestureDetector",
+            "description": "Implement tappable thumbnail preview by wrapping Image.network or cached image with InkWell or GestureDetector that calls existing _pickImage method from gallery.",
+            "dependencies": [],
+            "details": "In upload_article.dart, locate thumbnail preview widget (Image.network/cacheFile). Wrap with InkWell(onTap: _pickImage) ensuring ripple effect. Verify _pickImage uses ImagePicker.pickImage(source: ImageSource.gallery). Test tap triggers picker.",
+            "status": "pending",
+            "testStrategy": "Widget test: Render preview with mock image, tap InkWell, verify _pickImage called with gallery source.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Add hint text, performance optimizations, and accessibility",
+            "description": "Add 'Tap to change' hint below preview, implement fixed size with cacheWidth/Height for performance, and add accessibility semantics label.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add Text('Tap to change', style: TextStyle(fontSize: 12, color: Colors.grey)) below preview. Set Image.network/cacheFile with width:120, height:80, cacheWidth:120, cacheHeight:80. Use Semantics(label: 'Tap preview to change thumbnail', child: preview).",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify hint text renders with correct style. Integration test: Confirm image loads with specified cache dimensions. Accessibility test: Verify semantics label reads correctly.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "1. Wrap thumbnail preview with InkWell/GestureDetector calling _pickImage. 2. Add 'Tap to change' hint text. 3. Implement performance optimizations (cacheWidth/Height). 4. Add accessibility semantics."
+      },
+      {
+        "id": "46",
+        "title": "Rename primary button to 'Publish Article'",
+        "description": "Update button label from 'Upload Article' to 'Publish Article' for better UX alignment.",
+        "details": "In upload_article.dart: Change ElevatedButton/FilledButton child: Text('Publish Article') during idle state. Keep consistent with loading state copy. Ensure button disabled during ArticleUploadLoading.",
+        "testStrategy": "Widget test: Verify button text matches 'Publish Article' in idle state.",
+        "priority": "low",
+        "dependencies": [
+          "42"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate primary button widget in upload_article.dart",
+            "description": "Find the ElevatedButton or FilledButton responsible for the primary article submission action.",
+            "dependencies": [],
+            "details": "Search for 'Upload Article' text or onPressed handler connected to article upload logic. Note file path and line number.",
+            "status": "pending",
+            "testStrategy": "Manual verification: Confirm correct button identified by matching current text and functionality.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Update idle state button text to 'Publish Article'",
+            "description": "Replace the Text('Upload Article') child with Text('Publish Article') in the button's idle state.",
+            "dependencies": [
+              1
+            ],
+            "details": "Change only the string literal in Text widget. Preserve all other properties like style, onPressed, padding.",
+            "status": "pending",
+            "testStrategy": null,
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Verify loading state text consistency",
+            "description": "Check and update any loading state button text to match the new terminology if present.",
+            "dependencies": [
+              1
+            ],
+            "details": "Look for conditional Text widgets or loading overlays. Ensure phrases like 'Uploading...' become 'Publishing...' if they exist.",
+            "status": "pending",
+            "testStrategy": "Manual code review: Confirm loading text aligns with idle state terminology.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Confirm button disabled state during ArticleUploadLoading",
+            "description": "Verify the button is properly disabled when ArticleUploadLoading state is active.",
+            "dependencies": [
+              1
+            ],
+            "details": "Check for onPressed: null or isLoading condition in button properties. No changes needed unless broken.",
+            "status": "pending",
+            "testStrategy": "Widget test: Simulate ArticleUploadLoading state and verify button disabled (onPressed null).",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Create widget test for button text verification",
+            "description": "Write test to confirm button displays 'Publish Article' text in idle state.",
+            "dependencies": [
+              2
+            ],
+            "details": "Use flutter_test package. Pump widget with idle state, find.byType(ElevatedButton), verify text content.",
+            "status": "pending",
+            "testStrategy": "Unit test: testWidgets('Primary button shows Publish Article in idle state', (tester) async { ... expect(find.text('Publish Article'), findsOneWidget); });",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 1,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "No expansion needed - simple text change."
+      },
+      {
+        "id": "47",
+        "title": "Add error handling and overlay cleanup",
+        "description": "Ensure loading overlay clears on failure and existing error SnackBar behavior preserved.",
+        "details": "In BlocListener: On ArticleUploadFailure, hide overlay if visible, show existing error SnackBar. Add timeout to upload (e.g. 30s) with failure emission. Test network failure scenarios. Preserve thumbnail upload to Firebase Storage + Firestore write existing flow.",
+        "testStrategy": "Integration test: Simulate upload failure (mock cubit), verify overlay dismissed, error SnackBar shown, form state preserved.",
+        "priority": "medium",
+        "dependencies": [
+          "42",
+          "43"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement BlocListener for ArticleUploadFailure",
+            "description": "Add BlocListener in upload_article.dart to handle ArticleUploadFailure state by hiding loading overlay and showing existing error SnackBar.",
+            "dependencies": [],
+            "details": "Use BlocListener<ArticleUploadCubit, ArticleUploadState> with listener callback: if(state is ArticleUploadFailure){ overlayController?.hide(); if(_snackBarKey.currentState?.mounted ?? false) ScaffoldMessenger.of(context).showSnackBar(existingErrorSnackBar(state.error)); } Ensure form state preservation by not resetting controllers.",
+            "status": "pending",
+            "testStrategy": "Widget test: Trigger ArticleUploadFailure state, verify overlay dismissed and SnackBar displayed with correct error message.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Add 30s upload timeout with failure emission",
+            "description": "Implement timeout mechanism in ArticleUploadCubit upload event handler to emit ArticleUploadFailure after 30 seconds if upload not completed.",
+            "dependencies": [
+              1
+            ],
+            "details": "In cubit uploadArticle method: Use Future.any([ actualUploadFuture, Future.delayed(Duration(seconds:30), () => throw TimeoutException('Upload timed out')) ]). Wrap in try-catch to emit ArticleUploadFailure(TimeoutException message). Preserve thumbnail Firebase Storage/Firestore flow.",
+            "status": "pending",
+            "testStrategy": "Unit test cubit: Mock slow repository (delay >30s), verify timeout failure emitted exactly at 30s. Integration test verifies overlay/SnackBar response.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Test network failure scenarios and integration",
+            "description": "Create comprehensive tests for network failures ensuring overlay cleanup, error display, and form preservation across all failure paths.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Integration tests: Mock Firebase Storage/Firestore network failures (no internet, timeouts), verify: 1) Overlay hides on ALL failures, 2) Existing SnackBar shows correct message, 3) Form fields retain values, 4) Thumbnail upload flow doesn't interfere. Test dependencies 42/43 integration.",
+            "status": "pending",
+            "testStrategy": "Flutter integration_test: Use mockito for Firebase mocks, NetworkLinkConditioner for real network simulation. Verify state transitions and UI behavior.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "1. Implement BlocListener for ArticleUploadFailure state handling. 2. Add overlay dismissal and form state preservation logic. 3. Implement upload timeout (30s). 4. Test network failure scenarios."
+      },
+      {
+        "id": "48",
+        "title": "Accessibility and styling polish",
+        "description": "Ensure loading overlay, SnackBar, and markdown reader meet accessibility standards and match app typography.",
+        "details": "Loading: Semantics(label: 'Publishing article, please wait'); SnackBar: Use SnackBarAnnouncement semantics. Markdown: Ensure heading levels navigateable via TalkBack/VoiceOver. Test with screen readers. Align all TextStyles to existing Butler titles + body fonts. Add padding/margins matching Material Design spacing.",
+        "testStrategy": "Accessibility scan: Run flutter test with accessibility enabled, verify no violations. Manual test: TalkBack/VoiceOver on all new components.",
+        "priority": "medium",
+        "dependencies": [
+          "40",
+          "42",
+          "43",
+          "45"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Semantics for Accessibility",
+            "description": "Add Semantics labels to loading overlay, SnackBar using SnackBarAnnouncement, and markdown heading levels for TalkBack/VoiceOver navigation.",
+            "dependencies": [],
+            "details": "Loading: Semantics(label: 'Publishing article, please wait'); SnackBar: Wrap with Semantics or use SnackBarAnnouncement; Markdown: Ensure heading levels (h1-h6) are properly structured for screen reader navigation. Reference Flutter accessibility docs.",
+            "status": "pending",
+            "testStrategy": "Verify Semantics tree in Flutter Inspector; manual check with TalkBack/VoiceOver announces correct labels.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Align Typography and Material Design Spacing",
+            "description": "Update all TextStyles to match app's Butler title/body fonts and apply consistent padding/margins per Material Design spacing guidelines.",
+            "dependencies": [
+              1
+            ],
+            "details": "Extract existing Butler font family/theme from app; apply to all text in loading overlay, SnackBar, markdown reader. Use Theme.of(context).textTheme for titles/body. Add 16dp padding, 8dp margins matching Material Design spacing system.",
+            "status": "pending",
+            "testStrategy": "Visual comparison with app's existing typography; measure spacing in Flutter Inspector against Material Design 3 specs.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Test Accessibility with Screen Readers",
+            "description": "Run comprehensive accessibility testing with TalkBack (Android) and VoiceOver (iOS) on all components, including overlay interaction.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Enable TalkBack/VoiceOver; test loading overlay announcement, SnackBar persistence with actions, markdown heading navigation. Test iOS overlay tap requirement. Run flutter test with --enable-accessibility flag. Verify no violations.",
+            "status": "pending",
+            "testStrategy": "Manual testing on physical devices: Android emulator with TalkBack, iOS simulator with VoiceOver. Document any VoiceOver overlay issues per Flutter GitHub #120638.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently."
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-29T01:30:38.286Z",
-      "taskCount": 38,
-      "completedCount": 38,
+      "lastModified": "2026-03-29T03:35:54.329Z",
+      "taskCount": 48,
+      "completedCount": 41,
       "tags": [
         "master"
       ]
