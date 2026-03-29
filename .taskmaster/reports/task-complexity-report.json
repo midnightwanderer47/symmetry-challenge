@@ -1,8 +1,8 @@
 {
 	"meta": {
-		"generatedAt": "2026-03-28T23:03:55.553Z",
+		"generatedAt": "2026-03-29T03:16:32.155Z",
 		"tasksAnalyzed": 10,
-		"totalTasks": 38,
+		"totalTasks": 48,
 		"analysisCount": 10,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
@@ -10,84 +10,84 @@
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 29,
-			"taskTitle": "Implement merged article fetching in ArticleRepositoryImpl",
-			"complexityScore": 8,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Break down into: 1) Implement parallel fetching with Future.wait, 2) Create private merge/deduplicate/sort method with title normalization and Firestore preference, 3) Add fallback logic for publishedAt/createdAt and isUserArticle flag, 4) Implement partial failure handling with error metadata.",
-			"reasoning": "High complexity due to parallel async operations, custom deduplication logic with normalization, sorting with fallbacks, error handling for partial failures, and entity modifications. Requires careful testing of edge cases like duplicates and failures. Follows clean architecture but involves multiple data sources."
-		},
-		{
-			"taskId": 30,
-			"taskTitle": "Replace RemoteArticlesBloc with RemoteArticlesCubit",
-			"complexityScore": 4,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "Break down into: 1) Define Cubit states and implement init/refresh logic with GetArticlesUseCase, 2) Register Cubit in DI container and update dependencies.",
-			"reasoning": "Standard BLoC to Cubit migration with straightforward state management and use case integration. Low complexity as it follows established patterns with clear states and mockable dependencies. Dependency on task 29 adds minor coordination overhead."
-		},
-		{
-			"taskId": 31,
-			"taskTitle": "Update home feed UI to render merged articles",
-			"complexityScore": 4,
-			"recommendedSubtasks": 1,
-			"expansionPrompt": "Break down into: 1) Integrate BlocBuilder with RemoteArticlesCubit, add user article badge to ArticleWidget, preserve navigation.",
-			"reasoning": "Straightforward UI update using existing widgets and BLoC pattern. Minimal visual changes reduce design complexity. Widget testing is standard for Flutter apps."
-		},
-		{
-			"taskId": 32,
-			"taskTitle": "Add pull-to-refresh to home feed",
+			"taskId": 39,
+			"taskTitle": "Add flutter_markdown dependency and basic setup",
 			"complexityScore": 2,
 			"recommendedSubtasks": 0,
-			"expansionPrompt": "",
-			"reasoning": "Simple Flutter RefreshIndicator integration with cubit method. Standard UX pattern with minimal custom logic. Widget tests are routine."
+			"expansionPrompt": "No expansion needed - straightforward dependency addition and basic widget test.",
+			"reasoning": "Simple pubspec.yaml update, flutter pub get, and basic MarkdownBody test widget. Minimal risk, standard Flutter package integration with clear test strategy. No architectural changes or complex logic."
 		},
 		{
-			"taskId": 33,
-			"taskTitle": "Implement searchArticles in repository with merge reuse",
-			"complexityScore": 7,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Break down into: 1) Implement Firestore client-side filtering and NewsAPI /everything endpoint calls, 2) Extract and reuse merge logic from getNewsArticles, 3) Add query debouncing and edge case handling (empty query, no results).",
-			"reasoning": "Reuses merge logic but adds search-specific querying across two sources with different APIs, debouncing, and case-insensitive matching. Similar complexity to task 29 but with additional query handling."
-		},
-		{
-			"taskId": 34,
-			"taskTitle": "Create SearchArticlesUseCase and SearchArticleCubit",
-			"complexityScore": 5,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "Break down into: 1) Create SearchArticlesUseCase delegating to repository, 2) Implement SearchArticleCubit with debounced query handling and state emissions, register in DI.",
-			"reasoning": "Standard use case + cubit pattern with added debounce timer logic. Slightly more complex than basic cubit due to timing and rapid query handling."
-		},
-		{
-			"taskId": 35,
-			"taskTitle": "Build search UI screen with results and empty state",
+			"taskId": 40,
+			"taskTitle": "Implement markdown rendering in ArticleDetailsView",
 			"complexityScore": 4,
 			"recommendedSubtasks": 2,
-			"expansionPrompt": "Break down into: 1) Create search screen layout with TextField and BlocBuilder, 2) Implement empty/error states and app bar integration.",
-			"reasoning": "Standard Flutter screen with form input, list rendering, and state handling. Reuses existing ArticleWidget. Routine navigation and testing."
+			"expansionPrompt": "1. Create custom MarkdownStyleSheet matching app typography. 2. Replace Text widget with MarkdownBody Column in ArticleDetailsView. 3. Add GitHub Flavored Markdown extension support.",
+			"reasoning": "Involves UI refactoring, custom styling with MarkdownStyleSheet, extension sets, and typography matching. Requires widget tests and golden tests. Moderate complexity due to styling precision and dependency on task 39."
 		},
 		{
-			"taskId": 36,
-			"taskTitle": "Create MainScreen with BottomNavigationBar shell",
-			"complexityScore": 6,
+			"taskId": 41,
+			"taskTitle": "Add markdown helper text to UploadArticleView content field",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "No expansion needed - simple Text.rich addition.",
+			"reasoning": "Purely cosmetic UI addition of helper text with basic styling. Single widget test. No logic, state management, or integration concerns."
+		},
+		{
+			"taskId": 42,
+			"taskTitle": "Implement full-screen loading overlay for ArticleUploadLoading state",
+			"complexityScore": 5,
 			"recommendedSubtasks": 3,
-			"expansionPrompt": "Break down into: 1) Build MainScreen with BottomNavigationBar and IndexedStack, 2) Configure tabs for Feed/Create/Profile with state preservation, 3) Update routing to use MainScreen as root preserving deep links.",
-			"reasoning": "Involves app shell refactoring, state preservation across tabs, routing changes, and Material 3 compliance. Higher complexity due to navigation coordination and potential state management issues."
+			"expansionPrompt": "1. Create full-screen Stack overlay with Positioned.fill and IgnorePointer. 2. Implement BlocBuilder state detection for ArticleUploadLoading. 3. Add back button interception with WillPopScope. 4. Style loading UI matching app theme.",
+			"reasoning": "Involves Stack positioning, interaction blocking (IgnorePointer), navigation interception (WillPopScope), and BlocBuilder integration. Moderate complexity due to overlay layering and gesture handling. Comprehensive test requirements."
 		},
 		{
-			"taskId": 37,
-			"taskTitle": "Implement delete own articles (Firestore + UI)",
-			"complexityScore": 7,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Break down into: 1) Add deleteArticle to data source/repository/use case, 2) Create DeleteArticleCubit, 3) Update UI to show delete button for owned articles, 4) Handle auth limitations and post-delete UI refresh.",
-			"reasoning": "Spans multiple layers (data, domain, presentation), client-side ownership checks, Firestore operations, and UI updates across screens. Integration testing adds complexity."
-		},
-		{
-			"taskId": 38,
-			"taskTitle": "Implement ThemeCubit with shared_preferences persistence",
+			"taskId": 43,
+			"taskTitle": "Add SnackBar success feedback on publish completion",
 			"complexityScore": 3,
 			"recommendedSubtasks": 1,
-			"expansionPrompt": "Break down into: 1) Implement ThemeCubit with load/save logic using shared_preferences, wrap MaterialApp with BlocProvider, update MainScreen consumption.",
-			"reasoning": "Standard state persistence pattern with well-documented shared_preferences and BLoC integration. Minimal custom logic beyond pubspec update."
+			"expansionPrompt": "1. Implement BlocListener for ArticleUploadSuccess state. 2. Create SnackBar with View action navigation. 3. Add error SnackBar clearing logic.",
+			"reasoning": "Standard BlocListener + ScaffoldMessenger pattern with navigation action. Simple but requires proper state handling and dependency on loading overlay (42). Integration test needed."
+		},
+		{
+			"taskId": 44,
+			"taskTitle": "Handle Navigator.pop result in home screen for success feedback",
+			"complexityScore": 3,
+			"recommendedSubtasks": 1,
+			"expansionPrompt": "1. Update FAB onPressed to await Navigator result. 2. Implement conditional SnackBar + cubit refresh on true result. 3. Test null/false result handling.",
+			"reasoning": "Involves Navigator result handling, conditional UI feedback, and cubit refresh coordination. Requires careful result propagation from upload flow. Dependencies chain adds coordination complexity."
+		},
+		{
+			"taskId": 45,
+			"taskTitle": "Implement thumbnail preview tap-to-change functionality",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "1. Wrap thumbnail preview with InkWell/GestureDetector calling _pickImage. 2. Add 'Tap to change' hint text. 3. Implement performance optimizations (cacheWidth/Height). 4. Add accessibility semantics.",
+			"reasoning": "Gesture handling on existing preview, reuse of ImagePicker logic, performance considerations (cache sizing), and accessibility. Moderate complexity due to image handling and UI state coordination."
+		},
+		{
+			"taskId": 46,
+			"taskTitle": "Rename primary button to 'Publish Article'",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "No expansion needed - simple text change.",
+			"reasoning": "Trivial string replacement in button widget. Single widget test verification. No functional changes."
+		},
+		{
+			"taskId": 47,
+			"taskTitle": "Add error handling and overlay cleanup",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "1. Implement BlocListener for ArticleUploadFailure state handling. 2. Add overlay dismissal and form state preservation logic. 3. Implement upload timeout (30s). 4. Test network failure scenarios.",
+			"reasoning": "Complex state management across loading/failure transitions, overlay lifecycle, timeout implementation, and error preservation. Multiple dependencies (42,43) increase integration risk. Comprehensive integration testing required."
+		},
+		{
+			"taskId": 48,
+			"taskTitle": "Accessibility and styling polish",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently.",
+			"reasoning": "Cross-cutting concern spanning multiple components (40,42,43,45). Requires accessibility testing tools, screen reader verification, and theme consistency. Multiple dependencies increase scope and testing burden."
 		}
 	]
 }
