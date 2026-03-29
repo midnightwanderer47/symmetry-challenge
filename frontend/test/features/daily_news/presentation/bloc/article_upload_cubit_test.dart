@@ -71,8 +71,8 @@ void main() {
   });
 
   test('state is Success when upload with thumbnail succeeds', () async {
-    when(() => mockThumbnailUseCase(params: any(named: 'params')))
-        .thenAnswer((_) async => const DataSuccess('https://example.com/thumb.jpg'));
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess(null));
     final cubit = buildCubit();
@@ -114,7 +114,9 @@ void main() {
     expect(emitted, contains(const ArticleUploadLoading()));
   });
 
-  test('emits Failure with message when FirebaseAuthException thrown during upload', () async {
+  test(
+      'emits Failure with message when FirebaseAuthException thrown during upload',
+      () async {
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenThrow(FirebaseAuthException(code: 'operation-not-allowed'));
     final cubit = buildCubit();
@@ -126,7 +128,9 @@ void main() {
     );
   });
 
-  test('emits Failure with message when FirebaseAuthException thrown during thumbnail upload', () async {
+  test(
+      'emits Failure with message when FirebaseAuthException thrown during thumbnail upload',
+      () async {
     when(() => mockThumbnailUseCase(params: any(named: 'params')))
         .thenThrow(FirebaseAuthException(code: 'permission-denied'));
     final cubit = buildCubit();
@@ -153,7 +157,8 @@ void main() {
     );
   });
 
-  test('emits Failure with timeout message when thumbnail upload times out', () async {
+  test('emits Failure with timeout message when thumbnail upload times out',
+      () async {
     when(() => mockThumbnailUseCase(params: any(named: 'params')))
         .thenAnswer((_) async {
       await Future.delayed(const Duration(milliseconds: 200));

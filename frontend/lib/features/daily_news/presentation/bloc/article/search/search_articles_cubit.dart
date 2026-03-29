@@ -9,7 +9,8 @@ class SearchArticlesCubit extends Cubit<SearchArticlesState> {
   final SearchArticlesUseCase _searchArticlesUseCase;
   Timer? _debounce;
 
-  SearchArticlesCubit(this._searchArticlesUseCase) : super(const SearchArticlesInitial());
+  SearchArticlesCubit(this._searchArticlesUseCase)
+      : super(const SearchArticlesInitial());
 
   void queryChanged(String query) {
     _debounce?.cancel();
@@ -27,7 +28,8 @@ class SearchArticlesCubit extends Cubit<SearchArticlesState> {
           emit(SearchArticlesLoaded(result.data!));
         }
       } else if (result is DataFailed) {
-        emit(SearchArticlesError(result.error?.error?.toString() ?? 'Search failed'));
+        emit(SearchArticlesError(
+            result.error?.error?.toString() ?? 'Search failed'));
       }
     });
   }

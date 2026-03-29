@@ -50,17 +50,17 @@ class UserArticlesScreen extends StatelessWidget {
               if (state is UserArticlesLoaded) {
                 if (state.articles.isEmpty) {
                   final onSurface = Theme.of(context).colorScheme.onSurface;
-                  final mutedColor = onSurface.withValues(alpha: onSurface.a * 0.4);
+                  final mutedColor =
+                      onSurface.withValues(alpha: onSurface.a * 0.4);
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.article_outlined, size: 64,
-                            color: mutedColor),
+                        Icon(Icons.article_outlined,
+                            size: 64, color: mutedColor),
                         const SizedBox(height: 16),
                         Text('No articles yet',
-                            style: TextStyle(
-                                color: mutedColor)),
+                            style: TextStyle(color: mutedColor)),
                       ],
                     ),
                   );
@@ -72,7 +72,8 @@ class UserArticlesScreen extends StatelessWidget {
                   currentUid = null;
                 }
                 return RefreshIndicator(
-                  onRefresh: context.read<UserArticlesCubit>().fetchUserArticles,
+                  onRefresh:
+                      context.read<UserArticlesCubit>().fetchUserArticles,
                   child: ListView.builder(
                     itemCount: state.articles.length,
                     itemBuilder: (_, i) {
@@ -87,11 +88,14 @@ class UserArticlesScreen extends StatelessWidget {
                             ? (ArticleEntity a) =>
                                 showDeleteArticleConfirmation(
                                   context,
-                                  () => context.read<DeleteArticleCubit>().deleteArticle(a.firestoreId!),
+                                  () => context
+                                      .read<DeleteArticleCubit>()
+                                      .deleteArticle(a.firestoreId!),
                                 )
                             : null,
                         onArticlePressed: (ArticleEntity a) =>
-                            Navigator.pushNamed(context, '/ArticleDetails', arguments: a),
+                            Navigator.pushNamed(context, '/ArticleDetails',
+                                arguments: a),
                       );
                     },
                   ),

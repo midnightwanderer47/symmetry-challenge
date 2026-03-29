@@ -46,7 +46,9 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
           .where('isUserArticle', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .get();
-      return snapshot.docs.map((doc) => ArticleModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ArticleModel.fromFirestore(doc))
+          .toList();
     } on FirebaseException {
       rethrow;
     }

@@ -11,12 +11,36 @@ class ArticleMarkdownBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final h1Style = TextStyle(fontFamily: 'Butler', fontSize: 24, fontWeight: FontWeight.bold, color: onSurface);
-    final h2Style = TextStyle(fontFamily: 'Butler', fontSize: 20, fontWeight: FontWeight.bold, color: onSurface);
-    final h3Style = TextStyle(fontFamily: 'Butler', fontSize: 18, fontWeight: FontWeight.bold, color: onSurface);
-    final h4Style = TextStyle(fontFamily: 'Butler', fontSize: 16, fontWeight: FontWeight.bold, color: onSurface);
-    final h5Style = TextStyle(fontFamily: 'Butler', fontSize: 14, fontWeight: FontWeight.bold, color: onSurface);
-    final h6Style = TextStyle(fontFamily: 'Butler', fontSize: 13, fontWeight: FontWeight.bold, color: onSurface);
+    final h1Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
+    final h2Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
+    final h3Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
+    final h4Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
+    final h5Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
+    final h6Style = TextStyle(
+        fontFamily: 'Butler',
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: onSurface);
 
     return MarkdownBody(
       data: content,

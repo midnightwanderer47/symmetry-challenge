@@ -19,7 +19,8 @@ import 'package:news_app_clean_architecture/firebase_options.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 import 'package:news_app_clean_architecture/main.dart' as app;
 
-const bool _useEmulator = bool.fromEnvironment('USE_EMULATOR', defaultValue: false);
+const bool _useEmulator =
+    bool.fromEnvironment('USE_EMULATOR', defaultValue: false);
 
 Future<void> _connectToEmulators() async {
   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
@@ -30,7 +31,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
     if (_useEmulator) {
       await _connectToEmulators();
     }
@@ -53,12 +55,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Fill in the form fields.
-        await tester.enterText(
-            find.widgetWithText(TextFormField, 'Title *'), 'Integration Test Article');
+        await tester.enterText(find.widgetWithText(TextFormField, 'Title *'),
+            'Integration Test Article');
         await tester.enterText(
             find.widgetWithText(TextFormField, 'Author *'), 'Test Author');
-        await tester.enterText(
-            find.widgetWithText(TextFormField, 'Content *'), 'Integration test content body.');
+        await tester.enterText(find.widgetWithText(TextFormField, 'Content *'),
+            'Integration test content body.');
         await tester.pump();
 
         // Tap Publish Article – no thumbnail selected, so Firestore write will
@@ -80,7 +82,8 @@ void main() {
   });
 
   group('User Articles screen', () {
-    testWidgets('shows My Articles screen with loading then settled state', (tester) async {
+    testWidgets('shows My Articles screen with loading then settled state',
+        (tester) async {
       await tester.pumpWidget(const app.MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -91,10 +94,13 @@ void main() {
       // After loading, we should see either the empty state or article list.
       final emptyState = find.text('No articles yet');
       final articleList = find.byType(ListView);
-      expect(emptyState.evaluate().isNotEmpty || articleList.evaluate().isNotEmpty, isTrue);
+      expect(
+          emptyState.evaluate().isNotEmpty || articleList.evaluate().isNotEmpty,
+          isTrue);
     });
 
-    testWidgets('pull-to-refresh reloads the list without error', (tester) async {
+    testWidgets('pull-to-refresh reloads the list without error',
+        (tester) async {
       await tester.pumpWidget(const app.MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 3));
 

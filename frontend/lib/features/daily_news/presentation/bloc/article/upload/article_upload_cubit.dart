@@ -19,11 +19,13 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
     this._uploadThumbnailUseCase, {
     User? Function()? getCurrentUser,
     Duration uploadTimeout = const Duration(seconds: 30),
-  })  : _getCurrentUser = getCurrentUser ?? (() => FirebaseAuth.instance.currentUser),
+  })  : _getCurrentUser =
+            getCurrentUser ?? (() => FirebaseAuth.instance.currentUser),
         _uploadTimeout = uploadTimeout,
         super(const ArticleUploadInitial());
 
-  Future<void> upload(ArticleEntity article, {String? thumbnailFilePath}) async {
+  Future<void> upload(ArticleEntity article,
+      {String? thumbnailFilePath}) async {
     if (_getCurrentUser() == null) {
       emit(const ArticleUploadFailure('Authentication required'));
       return;
@@ -32,12 +34,14 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
     try {
       String? thumbnailUrl;
       if (thumbnailFilePath != null) {
-        final thumbResult = await _uploadThumbnailUseCase(params: thumbnailFilePath)
-            .timeout(_uploadTimeout);
+        final thumbResult =
+            await _uploadThumbnailUseCase(params: thumbnailFilePath)
+                .timeout(_uploadTimeout);
         if (thumbResult is DataSuccess) {
           thumbnailUrl = thumbResult.data;
         } else if (thumbResult is DataFailed) {
-          emit(ArticleUploadFailure(thumbResult.error?.error?.toString() ?? 'Thumbnail upload failed'));
+          emit(ArticleUploadFailure(thumbResult.error?.error?.toString() ??
+              'Thumbnail upload failed'));
           return;
         }
       }
@@ -54,7 +58,8 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
       if (result is DataSuccess) {
         emit(const ArticleUploadSuccess());
       } else if (result is DataFailed) {
-        emit(ArticleUploadFailure(result.error?.error?.toString() ?? 'Upload failed'));
+        emit(ArticleUploadFailure(
+            result.error?.error?.toString() ?? 'Upload failed'));
       }
     } on TimeoutException {
       emit(const ArticleUploadFailure('Upload timed out. Please try again.'));

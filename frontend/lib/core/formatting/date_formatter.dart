@@ -7,10 +7,10 @@ import 'package:intl/intl.dart';
 ///
 /// Returns the raw string unchanged when it cannot be parsed, and an empty
 /// string when both inputs are null/empty.
-String formatPublishedAt(String? publishedAt, String? createdAt, Locale locale) {
-  final raw = (publishedAt != null && publishedAt.isNotEmpty)
-      ? publishedAt
-      : createdAt;
+String formatPublishedAt(
+    String? publishedAt, String? createdAt, Locale locale) {
+  final raw =
+      (publishedAt != null && publishedAt.isNotEmpty) ? publishedAt : createdAt;
 
   if (raw == null || raw.isEmpty) return '';
 

@@ -11,7 +11,8 @@ import 'package:news_app_clean_architecture/injection_container.dart';
 class SearchScreen extends StatefulWidget {
   final List<ArticleEntity> feedSnapshot;
 
-  const SearchScreen({Key? key, this.feedSnapshot = const []}) : super(key: key);
+  const SearchScreen({Key? key, this.feedSnapshot = const []})
+      : super(key: key);
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -49,10 +50,12 @@ class _SearchScreenState extends State<SearchScreen> {
       decoration: InputDecoration(
         hintText: 'Search articles...',
         border: InputBorder.none,
-        hintStyle: TextStyle(color: onSurface.withValues(alpha: onSurface.a * 0.5)),
+        hintStyle:
+            TextStyle(color: onSurface.withValues(alpha: onSurface.a * 0.5)),
       ),
       style: TextStyle(color: onSurface),
-      onChanged: (query) => context.read<SearchArticlesCubit>().queryChanged(query),
+      onChanged: (query) =>
+          context.read<SearchArticlesCubit>().queryChanged(query),
     );
   }
 
@@ -87,8 +90,9 @@ class _SearchScreenState extends State<SearchScreen> {
       itemBuilder: (context, index) {
         return ArticleWidget(
           article: articles[index],
-          onArticlePressed: (article) =>
-              Navigator.pushNamed(context, AppRoutes.articleDetailsRoute, arguments: article),
+          onArticlePressed: (article) => Navigator.pushNamed(
+              context, AppRoutes.articleDetailsRoute,
+              arguments: article),
         );
       },
     );

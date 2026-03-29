@@ -146,8 +146,7 @@ void main() {
         _model(title: 'New Article', publishedAt: '2024-06-01'),
       ];
 
-      when(() => mockFirestore.getUserArticles())
-          .thenAnswer((_) async => []);
+      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -162,12 +161,14 @@ void main() {
 
     test('falls back to createdAt when publishedAt is null', () async {
       final newsApiModels = [
-        _model(title: 'No Published Date', publishedAt: null, createdAt: '2024-03-01'),
+        _model(
+            title: 'No Published Date',
+            publishedAt: null,
+            createdAt: '2024-03-01'),
         _model(title: 'Recent Article', publishedAt: '2024-05-01'),
       ];
 
-      when(() => mockFirestore.getUserArticles())
-          .thenAnswer((_) async => []);
+      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -179,7 +180,8 @@ void main() {
       expect(result.data!.first.title, 'Recent Article');
     });
 
-    test('returns DataSuccess with NewsAPI articles when Firestore fails', () async {
+    test('returns DataSuccess with NewsAPI articles when Firestore fails',
+        () async {
       final newsApiModels = [
         _model(title: 'NewsAPI Article'),
       ];
@@ -199,7 +201,8 @@ void main() {
       expect(result.data!.first.title, 'NewsAPI Article');
     });
 
-    test('returns DataSuccess with Firestore articles when NewsAPI fails', () async {
+    test('returns DataSuccess with Firestore articles when NewsAPI fails',
+        () async {
       final firestoreModels = [
         _model(title: 'Firestore Article', isUserArticle: true),
       ];
@@ -238,8 +241,7 @@ void main() {
         _model(title: 'API Article', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getUserArticles())
-          .thenAnswer((_) async => []);
+      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -270,8 +272,7 @@ void main() {
     });
 
     test('returns empty list when both sources return empty', () async {
-      when(() => mockFirestore.getUserArticles())
-          .thenAnswer((_) async => []);
+      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -392,7 +393,8 @@ void main() {
       expect(result.data!.length, 1);
     });
 
-    test('matches when query words appear in different order in title', () async {
+    test('matches when query words appear in different order in title',
+        () async {
       final firestoreModels = [
         _model(title: 'About the Article', isUserArticle: true),
       ];
@@ -449,12 +451,15 @@ void main() {
       final result = await resultFuture;
 
       expect(result.data!.length, 2);
-      final sharedArticle = result.data!.firstWhere((a) => a.title == 'Shared Title');
+      final sharedArticle =
+          result.data!.firstWhere((a) => a.title == 'Shared Title');
       expect(sharedArticle.isUserArticle, isTrue);
     });
 
     test('returns empty list when no matches found', () async {
-      final firestoreModels = [_model(title: 'Unrelated Article', isUserArticle: true)];
+      final firestoreModels = [
+        _model(title: 'Unrelated Article', isUserArticle: true)
+      ];
       when(() => mockFirestore.getUserArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(

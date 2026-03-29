@@ -40,7 +40,8 @@ void main() {
     return cubit;
   }
 
-  test('initial state before auto-fetch completes is RemoteArticlesLoading', () {
+  test('initial state before auto-fetch completes is RemoteArticlesLoading',
+      () {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([]));
     final cubit = RemoteArticlesCubit(mockUseCase);
@@ -49,12 +50,13 @@ void main() {
   });
 
   test('emits Loaded with articles when fetch succeeds', () async {
-    when(() => mockUseCase(params: any(named: 'params')))
-        .thenAnswer((_) async => const DataSuccess([_apiArticle, _userArticle]));
+    when(() => mockUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess([_apiArticle, _userArticle]));
     final cubit = await buildCubit();
     expect(
       cubit.state,
-      const RemoteArticlesLoaded([_apiArticle, _userArticle], isUserArticles: true),
+      const RemoteArticlesLoaded([_apiArticle, _userArticle],
+          isUserArticles: true),
     );
     cubit.close();
   });

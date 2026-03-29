@@ -49,8 +49,7 @@ class _SeededUploadCubit extends ArticleUploadCubit {
 
 /// Seeded UserArticlesCubit that stays idle.
 class _SeededUserCubit extends UserArticlesCubit {
-  _SeededUserCubit()
-      : super(GetUserArticlesUseCase(_MockRepository())) {
+  _SeededUserCubit() : super(GetUserArticlesUseCase(_MockRepository())) {
     emit(const UserArticlesInitial());
   }
 
@@ -87,7 +86,8 @@ void main() {
     await tester.pumpWidget(_buildApp());
     await tester.pump();
 
-    final nav = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
+    final nav =
+        tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
     expect(nav.currentIndex, 0);
     expect(find.text('Feed'), findsOneWidget);
   });
@@ -99,7 +99,8 @@ void main() {
     await tester.tap(find.text('Create'));
     await tester.pump();
 
-    final nav = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
+    final nav =
+        tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
     expect(nav.currentIndex, 1);
   });
 
@@ -110,11 +111,13 @@ void main() {
     await tester.tap(find.text('My Articles'));
     await tester.pump();
 
-    final nav = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
+    final nav =
+        tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
     expect(nav.currentIndex, 2);
   });
 
-  testWidgets('switching back to Feed after My Articles preserves index 0', (tester) async {
+  testWidgets('switching back to Feed after My Articles preserves index 0',
+      (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pump();
 
@@ -126,7 +129,8 @@ void main() {
     await tester.tap(find.text('Feed'));
     await tester.pump();
 
-    final nav = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
+    final nav =
+        tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
     expect(nav.currentIndex, 0);
   });
 

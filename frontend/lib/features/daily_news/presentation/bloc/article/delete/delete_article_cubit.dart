@@ -6,7 +6,8 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 class DeleteArticleCubit extends Cubit<DeleteArticleState> {
   final DeleteArticleUseCase _deleteArticleUseCase;
 
-  DeleteArticleCubit(this._deleteArticleUseCase) : super(const DeleteArticleInitial());
+  DeleteArticleCubit(this._deleteArticleUseCase)
+      : super(const DeleteArticleInitial());
 
   Future<void> deleteArticle(String firestoreId) async {
     emit(const DeleteArticleLoading());
@@ -15,7 +16,8 @@ class DeleteArticleCubit extends Cubit<DeleteArticleState> {
       if (result is DataSuccess) {
         emit(const DeleteArticleSuccess());
       } else if (result is DataFailed) {
-        emit(DeleteArticleFailure(result.error?.error?.toString() ?? 'Delete failed'));
+        emit(DeleteArticleFailure(
+            result.error?.error?.toString() ?? 'Delete failed'));
       }
     } catch (e) {
       emit(DeleteArticleFailure(e.toString()));

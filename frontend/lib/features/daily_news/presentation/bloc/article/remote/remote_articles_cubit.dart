@@ -6,19 +6,23 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 class RemoteArticlesCubit extends Cubit<RemoteArticlesState> {
   final GetArticleUseCase _getArticleUseCase;
 
-  RemoteArticlesCubit(this._getArticleUseCase) : super(const RemoteArticlesLoading()) {
+  RemoteArticlesCubit(this._getArticleUseCase)
+      : super(const RemoteArticlesLoading()) {
     fetchArticles();
   }
 
   Future<void> fetchArticles() async {
     emit(const RemoteArticlesLoading());
     final result = await _getArticleUseCase();
-    if (result is DataSuccess && result.data != null && result.data!.isNotEmpty) {
+    if (result is DataSuccess &&
+        result.data != null &&
+        result.data!.isNotEmpty) {
       final articles = result.data!;
       final hasUserArticles = articles.any((a) => a.isUserArticle);
       emit(RemoteArticlesLoaded(articles, isUserArticles: hasUserArticles));
     } else if (result is DataFailed) {
-      emit(RemoteArticlesError(result.error?.error?.toString() ?? 'Failed to load articles'));
+      emit(RemoteArticlesError(
+          result.error?.error?.toString() ?? 'Failed to load articles'));
     }
   }
 

@@ -19,7 +19,8 @@ class _AuthGateState extends State<AuthGate> {
     try {
       await FirebaseAuth.instance.signInAnonymously();
     } on FirebaseAuthException catch (e, stackTrace) {
-      if (e.code == 'operation-not-allowed' || e.code == 'network-request-failed') {
+      if (e.code == 'operation-not-allowed' ||
+          e.code == 'network-request-failed') {
         debugPrint('Auth error [${e.code}]: ${e.message}');
         debugPrintStack(stackTrace: stackTrace);
         if (context.mounted) {

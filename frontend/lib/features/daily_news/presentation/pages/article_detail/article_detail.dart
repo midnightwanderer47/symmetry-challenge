@@ -123,7 +123,8 @@ class ArticleDetailsView extends HookWidget {
           // Author
           Builder(builder: (context) {
             final author = article!.author;
-            if (author == null || author.trim().isEmpty) return const SizedBox.shrink();
+            if (author == null || author.trim().isEmpty)
+              return const SizedBox.shrink();
             return Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Row(
@@ -176,7 +177,8 @@ class ArticleDetailsView extends HookWidget {
 
   Widget _buildLedeDescription() {
     final description = article!.description;
-    if (description == null || description.trim().isEmpty) return const SizedBox.shrink();
+    if (description == null || description.trim().isEmpty)
+      return const SizedBox.shrink();
     return Builder(builder: (context) {
       final colorScheme = Theme.of(context).colorScheme;
       return Padding(
@@ -213,7 +215,8 @@ class ArticleDetailsView extends HookWidget {
 
   Widget _buildArticleContent() {
     final content = article!.content;
-    if (content == null || content.trim().isEmpty) return const SizedBox.shrink();
+    if (content == null || content.trim().isEmpty)
+      return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 18),
       child: ArticleMarkdownBody(content: content),
@@ -240,7 +243,8 @@ class ArticleDetailsView extends HookWidget {
       SnackBar(
         backgroundColor: Theme.of(context).colorScheme.inverseSurface,
         content: Text('Article saved successfully.',
-            style: TextStyle(color: Theme.of(context).colorScheme.onInverseSurface)),
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onInverseSurface)),
       ),
     );
   }
@@ -248,7 +252,9 @@ class ArticleDetailsView extends HookWidget {
   void _onDeleteTapped(BuildContext context) {
     showDeleteArticleConfirmation(
       context,
-      () => context.read<DeleteArticleCubit>().deleteArticle(article!.firestoreId!),
+      () => context
+          .read<DeleteArticleCubit>()
+          .deleteArticle(article!.firestoreId!),
     );
   }
 }

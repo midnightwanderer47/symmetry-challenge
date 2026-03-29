@@ -8,11 +8,11 @@ abstract class ArticleRepository {
   Future<DataState<List<ArticleEntity>>> searchArticles(String query);
 
   // Database methods
-  Future < List < ArticleEntity >> getSavedArticles();
+  Future<List<ArticleEntity>> getSavedArticles();
 
-  Future < void > saveArticle(ArticleEntity article);
+  Future<void> saveArticle(ArticleEntity article);
 
-  Future < void > removeArticle(ArticleEntity article);
+  Future<void> removeArticle(ArticleEntity article);
 
   // Firebase methods
   Future<DataState<void>> uploadArticle(ArticleEntity article);

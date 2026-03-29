@@ -29,7 +29,8 @@ class _SeededCubit extends ArticleUploadCubit {
   }
 
   @override
-  Future<void> upload(ArticleEntity article, {String? thumbnailFilePath}) async {
+  Future<void> upload(ArticleEntity article,
+      {String? thumbnailFilePath}) async {
     // no-op: state is seeded in constructor
   }
 }
@@ -46,7 +47,8 @@ class _EmittingCubit extends ArticleUploadCubit {
         );
 
   @override
-  Future<void> upload(ArticleEntity article, {String? thumbnailFilePath}) async {
+  Future<void> upload(ArticleEntity article,
+      {String? thumbnailFilePath}) async {
     emit(const ArticleUploadLoading());
     await Future.delayed(Duration.zero);
     emit(result);
@@ -65,7 +67,8 @@ class _CapturingCubit extends ArticleUploadCubit {
         );
 
   @override
-  Future<void> upload(ArticleEntity article, {String? thumbnailFilePath}) async {
+  Future<void> upload(ArticleEntity article,
+      {String? thumbnailFilePath}) async {
     lastArticle = article;
     emit(const ArticleUploadSuccess());
   }
@@ -83,8 +86,10 @@ void main() {
   tearDown(() => _sl.reset());
 
   group('UploadArticleView – form rendering', () {
-    testWidgets('shows Title, Author, Content fields and Upload button', (tester) async {
-      _sl.registerFactory<ArticleUploadCubit>(() => _SeededCubit(const ArticleUploadInitial()));
+    testWidgets('shows Title, Author, Content fields and Upload button',
+        (tester) async {
+      _sl.registerFactory<ArticleUploadCubit>(
+          () => _SeededCubit(const ArticleUploadInitial()));
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
@@ -93,13 +98,16 @@ void main() {
       expect(find.text('Content *'), findsOneWidget);
       expect(find.byKey(const Key('upload_article_content')), findsOneWidget);
       // AppBar contains "Upload Article"; ElevatedButton contains "Publish Article".
-      expect(find.widgetWithText(ElevatedButton, 'Publish Article'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Publish Article'),
+          findsOneWidget);
     });
   });
 
   group('UploadArticleView – form validation', () {
-    testWidgets('shows validation errors when submitting empty form', (tester) async {
-      _sl.registerFactory<ArticleUploadCubit>(() => _SeededCubit(const ArticleUploadInitial()));
+    testWidgets('shows validation errors when submitting empty form',
+        (tester) async {
+      _sl.registerFactory<ArticleUploadCubit>(
+          () => _SeededCubit(const ArticleUploadInitial()));
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
@@ -110,15 +118,19 @@ void main() {
       expect(find.text('Required'), findsWidgets);
     });
 
-    testWidgets('sets publishedAt automatically on valid submit', (tester) async {
+    testWidgets('sets publishedAt automatically on valid submit',
+        (tester) async {
       final cubit = _CapturingCubit();
       _sl.registerSingleton<ArticleUploadCubit>(cubit);
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
-      await tester.enterText(find.widgetWithText(TextFormField, 'Title *'), 'My Title');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
-      await tester.enterText(find.byKey(const Key('upload_article_content')), 'Some content here');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Title *'), 'My Title');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
+      await tester.enterText(
+          find.byKey(const Key('upload_article_content')), 'Some content here');
 
       final before = DateTime.now();
       await tester.ensureVisible(find.byType(ElevatedButton));
@@ -127,13 +139,17 @@ void main() {
 
       expect(cubit.lastArticle, isNotNull);
       final parsed = DateTime.parse(cubit.lastArticle!.publishedAt!);
-      expect(parsed.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
+      expect(
+          parsed.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
     });
   });
 
   group('UploadArticleView – loading state', () {
-    testWidgets('shows CircularProgressIndicator and disables button when loading', (tester) async {
-      _sl.registerFactory<ArticleUploadCubit>(() => _SeededCubit(const ArticleUploadLoading()));
+    testWidgets(
+        'shows CircularProgressIndicator and disables button when loading',
+        (tester) async {
+      _sl.registerFactory<ArticleUploadCubit>(
+          () => _SeededCubit(const ArticleUploadLoading()));
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
@@ -146,8 +162,10 @@ void main() {
   });
 
   group('UploadArticleView – failure state', () {
-    testWidgets('shows SnackBar with error message on Failure state', (tester) async {
-      final cubit = _EmittingCubit(const ArticleUploadFailure('Upload failed: network error'));
+    testWidgets('shows SnackBar with error message on Failure state',
+        (tester) async {
+      final cubit = _EmittingCubit(
+          const ArticleUploadFailure('Upload failed: network error'));
       // Use singleton so the widget's BlocProvider gets the same instance.
       _sl.registerSingleton<ArticleUploadCubit>(cubit);
 
@@ -162,7 +180,8 @@ void main() {
       expect(find.text('Upload failed: network error'), findsOneWidget);
     });
 
-    testWidgets('loading overlay absent and SnackBar shown after Failure state', (tester) async {
+    testWidgets('loading overlay absent and SnackBar shown after Failure state',
+        (tester) async {
       final cubit = _EmittingCubit(const ArticleUploadFailure('Network error'));
       _sl.registerSingleton<ArticleUploadCubit>(cubit);
 

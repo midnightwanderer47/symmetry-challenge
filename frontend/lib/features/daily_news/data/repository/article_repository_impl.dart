@@ -98,7 +98,8 @@ class ArticleRepositoryImpl implements ArticleRepository {
               q: query.trim(),
             );
             if (httpResponse.response.statusCode == HttpStatus.ok) {
-              newsApiResult = httpResponse.data.map((m) => m.toEntity()).toList();
+              newsApiResult =
+                  httpResponse.data.map((m) => m.toEntity()).toList();
             } else {
               throw DioError(
                 error: httpResponse.response.statusMessage,
@@ -199,18 +200,21 @@ class ArticleRepositoryImpl implements ArticleRepository {
 
   @override
   Future<void> removeArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.deleteArticle(ArticleModel.fromEntity(article));
+    return _appDatabase.articleDAO
+        .deleteArticle(ArticleModel.fromEntity(article));
   }
 
   @override
   Future<void> saveArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
+    return _appDatabase.articleDAO
+        .insertArticle(ArticleModel.fromEntity(article));
   }
 
   @override
   Future<DataState<void>> uploadArticle(ArticleEntity article) async {
     try {
-      await _firestoreDataSource.uploadArticle(ArticleModel.fromEntity(article));
+      await _firestoreDataSource
+          .uploadArticle(ArticleModel.fromEntity(article));
       return const DataSuccess(null);
     } catch (e) {
       return DataFailed(DioError(

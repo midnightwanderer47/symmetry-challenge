@@ -48,8 +48,7 @@ class DailyNews extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.bookmark),
-                    onPressed: () =>
-                        _onShowSavedArticlesViewTapped(context),
+                    onPressed: () => _onShowSavedArticlesViewTapped(context),
                   ),
                   IconButton(
                     icon: const Icon(Icons.settings_outlined),
@@ -121,7 +120,8 @@ class DailyNews extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.pushNamed(context, AppRoutes.uploadArticleRoute);
+          final result =
+              await Navigator.pushNamed(context, AppRoutes.uploadArticleRoute);
           if (result == true && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -148,7 +148,8 @@ class DailyNews extends StatelessWidget {
   }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
-    Navigator.pushNamed(context, AppRoutes.articleDetailsRoute, arguments: article);
+    Navigator.pushNamed(context, AppRoutes.articleDetailsRoute,
+        arguments: article);
   }
 
   void _onShowSavedArticlesViewTapped(BuildContext context) {

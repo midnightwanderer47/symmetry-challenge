@@ -71,5 +71,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'symmetry-challenge.firebasestorage.app',
     iosBundleId: 'com.example.newsAppCleanArchitecture',
   );
-
 }

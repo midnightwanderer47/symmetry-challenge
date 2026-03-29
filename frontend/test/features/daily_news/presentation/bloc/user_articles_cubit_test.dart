@@ -7,7 +7,8 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_state.dart';
 
-class MockGetUserArticlesUseCase extends Mock implements GetUserArticlesUseCase {}
+class MockGetUserArticlesUseCase extends Mock
+    implements GetUserArticlesUseCase {}
 
 DioError _dioError() => DioError(
       requestOptions: RequestOptions(path: ''),

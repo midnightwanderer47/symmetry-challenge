@@ -6,7 +6,8 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 class UserArticlesCubit extends Cubit<UserArticlesState> {
   final GetUserArticlesUseCase _getUserArticlesUseCase;
 
-  UserArticlesCubit(this._getUserArticlesUseCase) : super(const UserArticlesInitial());
+  UserArticlesCubit(this._getUserArticlesUseCase)
+      : super(const UserArticlesInitial());
 
   Future<void> fetchUserArticles() async {
     emit(const UserArticlesLoading());
@@ -14,7 +15,8 @@ class UserArticlesCubit extends Cubit<UserArticlesState> {
     if (result is DataSuccess && result.data != null) {
       emit(UserArticlesLoaded(result.data!));
     } else if (result is DataFailed) {
-      emit(UserArticlesError(result.error?.error?.toString() ?? 'Failed to load articles'));
+      emit(UserArticlesError(
+          result.error?.error?.toString() ?? 'Failed to load articles'));
     }
   }
 }

@@ -8,7 +8,6 @@ import '../../features/daily_news/presentation/pages/upload_article/upload_artic
 import '../../features/daily_news/presentation/pages/search/search_screen.dart';
 import '../../features/daily_news/presentation/pages/user_articles/user_articles_screen.dart';
 
-
 class AppRoutes {
   static const String homeRoute = '/';
   static const String articleDetailsRoute = '/ArticleDetails';
@@ -23,7 +22,8 @@ class AppRoutes {
         return _materialRoute(const MainScreen());
 
       case articleDetailsRoute:
-        return _materialRoute(ArticleDetailsView(article: settings.arguments as ArticleEntity));
+        return _materialRoute(
+            ArticleDetailsView(article: settings.arguments as ArticleEntity));
 
       case savedArticlesRoute:
         return _materialRoute(const SavedArticles());

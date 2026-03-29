@@ -15,8 +15,7 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/pag
 class _MockRepository extends Mock implements ArticleRepository {}
 
 class _NoOpDeleteArticleCubit extends DeleteArticleCubit {
-  _NoOpDeleteArticleCubit()
-      : super(DeleteArticleUseCase(_MockRepository()));
+  _NoOpDeleteArticleCubit() : super(DeleteArticleUseCase(_MockRepository()));
 }
 
 // Article with all force-unwrapped fields populated (ArticleWidget uses urlToImage! and publishedAt!)
@@ -74,8 +73,10 @@ void main() {
   });
   tearDown(() async => _sl.reset());
 
-  testWidgets('shows CupertinoActivityIndicator when state is Loading', (tester) async {
-    _sl.registerFactory<UserArticlesCubit>(() => _SeededCubit(const UserArticlesLoading()));
+  testWidgets('shows CupertinoActivityIndicator when state is Loading',
+      (tester) async {
+    _sl.registerFactory<UserArticlesCubit>(
+        () => _SeededCubit(const UserArticlesLoading()));
     await tester.pumpWidget(_buildScreen());
     await tester.pump();
 
@@ -91,8 +92,10 @@ void main() {
     expect(find.byIcon(Icons.refresh), findsOneWidget);
   });
 
-  testWidgets('shows "No articles yet" when Loaded with empty list', (tester) async {
-    _sl.registerFactory<UserArticlesCubit>(() => _SeededCubit(const UserArticlesLoaded([])));
+  testWidgets('shows "No articles yet" when Loaded with empty list',
+      (tester) async {
+    _sl.registerFactory<UserArticlesCubit>(
+        () => _SeededCubit(const UserArticlesLoaded([])));
     await tester.pumpWidget(_buildScreen());
     await tester.pump();
 

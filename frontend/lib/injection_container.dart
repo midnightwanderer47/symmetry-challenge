@@ -31,7 +31,6 @@ import 'features/daily_news/presentation/bloc/theme/theme_cubit.dart';
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
-
   final migration1to2 = Migration(1, 2, (database) async {
     await database.execute('ALTER TABLE article ADD COLUMN firestoreId TEXT');
     await database.execute('ALTER TABLE article ADD COLUMN userId TEXT');
@@ -39,10 +38,9 @@ Future<void> initializeDependencies() async {
 
   final database = await $FloorAppDatabase
       .databaseBuilder('app_database.db')
-      .addMigrations([migration1to2])
-      .build();
+      .addMigrations([migration1to2]).build();
   sl.registerSingleton<AppDatabase>(database);
-  
+
   // Dio
   sl.registerSingleton<Dio>(Dio(BaseOptions(baseUrl: newsAPIBaseURL)));
 
@@ -51,83 +49,49 @@ Future<void> initializeDependencies() async {
 
   // Firebase data sources
   sl.registerSingleton<FirestoreArticleDataSource>(
-    FirestoreArticleDataSourceImpl()
-  );
+      FirestoreArticleDataSourceImpl());
 
   sl.registerSingleton<FirebaseStorageDataSource>(
-    FirebaseStorageDataSourceImpl()
-  );
+      FirebaseStorageDataSourceImpl());
 
   sl.registerSingleton<ArticleRepository>(
-    ArticleRepositoryImpl(sl(), sl(), sl(), sl())
-  );
-  
+      ArticleRepositoryImpl(sl(), sl(), sl(), sl()));
+
   //UseCases
-  sl.registerSingleton<GetArticleUseCase>(
-    GetArticleUseCase(sl())
-  );
+  sl.registerSingleton<GetArticleUseCase>(GetArticleUseCase(sl()));
 
-  sl.registerSingleton<GetSavedArticleUseCase>(
-    GetSavedArticleUseCase(sl())
-  );
+  sl.registerSingleton<GetSavedArticleUseCase>(GetSavedArticleUseCase(sl()));
 
-  sl.registerSingleton<SaveArticleUseCase>(
-    SaveArticleUseCase(sl())
-  );
-  
-  sl.registerSingleton<RemoveArticleUseCase>(
-    RemoveArticleUseCase(sl())
-  );
+  sl.registerSingleton<SaveArticleUseCase>(SaveArticleUseCase(sl()));
 
-  sl.registerSingleton<UploadArticleUseCase>(
-    UploadArticleUseCase(sl())
-  );
+  sl.registerSingleton<RemoveArticleUseCase>(RemoveArticleUseCase(sl()));
+
+  sl.registerSingleton<UploadArticleUseCase>(UploadArticleUseCase(sl()));
 
   sl.registerSingleton<UploadArticleThumbnailUseCase>(
-    UploadArticleThumbnailUseCase(sl())
-  );
+      UploadArticleThumbnailUseCase(sl()));
 
-  sl.registerSingleton<GetUserArticlesUseCase>(
-    GetUserArticlesUseCase(sl())
-  );
+  sl.registerSingleton<GetUserArticlesUseCase>(GetUserArticlesUseCase(sl()));
 
-  sl.registerSingleton<SearchArticlesUseCase>(
-    SearchArticlesUseCase(sl())
-  );
+  sl.registerSingleton<SearchArticlesUseCase>(SearchArticlesUseCase(sl()));
 
-  sl.registerSingleton<DeleteArticleUseCase>(
-    DeleteArticleUseCase(sl())
-  );
+  sl.registerSingleton<DeleteArticleUseCase>(DeleteArticleUseCase(sl()));
 
   //Blocs
-  sl.registerFactory<ArticleUploadCubit>(
-    () => ArticleUploadCubit(sl(), sl())
-  );
+  sl.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(sl(), sl()));
 
-  sl.registerFactory<UserArticlesCubit>(
-    () => UserArticlesCubit(sl())
-  );
+  sl.registerFactory<UserArticlesCubit>(() => UserArticlesCubit(sl()));
 
-  sl.registerFactory<RemoteArticlesBloc>(
-    ()=> RemoteArticlesBloc(sl())
-  );
+  sl.registerFactory<RemoteArticlesBloc>(() => RemoteArticlesBloc(sl()));
 
-  sl.registerFactory<RemoteArticlesCubit>(
-    () => RemoteArticlesCubit(sl())
-  );
+  sl.registerFactory<RemoteArticlesCubit>(() => RemoteArticlesCubit(sl()));
 
   sl.registerFactory<LocalArticleBloc>(
-    ()=> LocalArticleBloc(sl(),sl(),sl())
-  );
+      () => LocalArticleBloc(sl(), sl(), sl()));
 
-  sl.registerFactory<SearchArticlesCubit>(
-    () => SearchArticlesCubit(sl())
-  );
+  sl.registerFactory<SearchArticlesCubit>(() => SearchArticlesCubit(sl()));
 
-  sl.registerFactory<DeleteArticleCubit>(
-    () => DeleteArticleCubit(sl())
-  );
+  sl.registerFactory<DeleteArticleCubit>(() => DeleteArticleCubit(sl()));
 
   sl.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
-
 }

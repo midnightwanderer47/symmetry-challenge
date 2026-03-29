@@ -86,163 +86,201 @@ class _UploadArticleViewState extends State<UploadArticleView> {
               body: Stack(
                 children: [
                   SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(labelText: 'Title *'),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _authorController,
-                      decoration: const InputDecoration(labelText: 'Author *'),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description'),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Content *',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    TextFormField(
-                      key: const Key('upload_article_content'),
-                      controller: _contentController,
-                      decoration: const InputDecoration.collapsed(hintText: ''),
-                      minLines: 6,
-                      maxLines: null,
-                      textAlignVertical: TextAlignVertical.top,
-                      keyboardType: TextInputType.multiline,
-                      stylusHandwritingEnabled: false,
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                    ),
-                    Divider(height: 1, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
-                    const SizedBox(height: 8),
-                    Text.rich(
-                      TextSpan(
-                        style: TextStyle(fontSize: 12,
-                            color: onSurface.withValues(alpha: onSurface.a * 0.5)),
-                        children: const [
-                          TextSpan(text: 'Supported: '),
-                          TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: ', **bold**, _italic_, - lists, line breaks'),
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _titleController,
+                            decoration:
+                                const InputDecoration(labelText: 'Title *'),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Required'
+                                : null,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _authorController,
+                            decoration:
+                                const InputDecoration(labelText: 'Author *'),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Required'
+                                : null,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _descriptionController,
+                            decoration:
+                                const InputDecoration(labelText: 'Description'),
+                            maxLines: 2,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Content *',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                          ),
+                          const SizedBox(height: 4),
+                          TextFormField(
+                            key: const Key('upload_article_content'),
+                            controller: _contentController,
+                            decoration:
+                                const InputDecoration.collapsed(hintText: ''),
+                            minLines: 6,
+                            maxLines: null,
+                            textAlignVertical: TextAlignVertical.top,
+                            keyboardType: TextInputType.multiline,
+                            stylusHandwritingEnabled: false,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Required'
+                                : null,
+                          ),
+                          Divider(
+                              height: 1,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.38)),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: onSurface.withValues(
+                                      alpha: onSurface.a * 0.5)),
+                              children: const [
+                                TextSpan(text: 'Supported: '),
+                                TextSpan(
+                                    text: '# Heading',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                    text:
+                                        ', **bold**, _italic_, - lists, line breaks'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: _pickImage,
+                            icon: const Icon(Icons.image),
+                            label: const Text('Pick Thumbnail'),
+                          ),
+                          if (_imageFile != null) ...[
+                            const SizedBox(height: 8),
+                            Semantics(
+                              label: 'Tap preview to change thumbnail',
+                              child: InkWell(
+                                onTap: _pickImage,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(
+                                        File(_imageFile!.path),
+                                        height: 180,
+                                        fit: BoxFit.cover,
+                                        cacheWidth: 240,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Tap to change',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: onSurface.withValues(
+                                              alpha: onSurface.a * 0.5)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'No thumbnail selected — placeholder will be used',
+                                style: TextStyle(
+                                    color: onSurface.withValues(
+                                        alpha: onSurface.a * 0.5)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          StreamBuilder<User?>(
+                            stream: widget.authStateStream ??
+                                FirebaseAuth.instance.authStateChanges(),
+                            builder: (context, authSnapshot) {
+                              final isAuthenticated = authSnapshot.data != null;
+                              return ElevatedButton(
+                                onPressed: (isLoading || !isAuthenticated)
+                                    ? null
+                                    : () => _submit(context),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2),
+                                      )
+                                    : const Text('Publish Article'),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.image),
-                      label: const Text('Pick Thumbnail'),
-                    ),
-                    if (_imageFile != null) ...[
-                      const SizedBox(height: 8),
-                      Semantics(
-                        label: 'Tap preview to change thumbnail',
-                        child: InkWell(
-                          onTap: _pickImage,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(
-                                  File(_imageFile!.path),
-                                  height: 180,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 240,
-                                ),
+                  ),
+                  if (isLoading)
+                    Positioned.fill(
+                      child: Semantics(
+                        label: 'Publishing article, please wait',
+                        liveRegion: true,
+                        child: IgnorePointer(
+                          child: Container(
+                            color: Colors.black54,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Publishing...',
+                                    style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(color: Colors.white) ??
+                                        const TextStyle(
+                                            fontSize: 20, color: Colors.white),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Tap to change',
-                                style: TextStyle(fontSize: 12,
-                                    color: onSurface.withValues(alpha: onSurface.a * 0.5)),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ] else ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'No thumbnail selected — placeholder will be used',
-                          style: TextStyle(
-                              color: onSurface.withValues(alpha: onSurface.a * 0.5)),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    StreamBuilder<User?>(
-                      stream: widget.authStateStream ?? FirebaseAuth.instance.authStateChanges(),
-                      builder: (context, authSnapshot) {
-                        final isAuthenticated = authSnapshot.data != null;
-                        return ElevatedButton(
-                          onPressed: (isLoading || !isAuthenticated) ? null : () => _submit(context),
-                          child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Publish Article'),
-                        );
-                      },
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
-            if (isLoading)
-              Positioned.fill(
-                child: Semantics(
-                  label: 'Publishing article, please wait',
-                  liveRegion: true,
-                  child: IgnorePointer(
-                    child: Container(
-                      color: Colors.black54,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CircularProgressIndicator(),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Publishing...',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white)
-                                  ?? const TextStyle(fontSize: 20, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+          );
         },
       ),
     );
