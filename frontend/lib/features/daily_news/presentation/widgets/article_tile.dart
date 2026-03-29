@@ -137,10 +137,14 @@ class ArticleWidget extends StatelessWidget {
               children: [
                 const Icon(Icons.timeline_outlined, size: 16),
                 const SizedBox(width: 4),
-                Text(
-                  article!.publishedAt!,
-                  style: const TextStyle(
-                    fontSize: 12,
+                Expanded(
+                  child: Text(
+                    article!.publishedAt!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],

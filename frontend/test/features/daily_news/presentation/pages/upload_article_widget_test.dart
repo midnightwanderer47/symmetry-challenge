@@ -90,7 +90,8 @@ void main() {
 
       expect(find.widgetWithText(TextFormField, 'Title *'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Author *'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Content *'), findsOneWidget);
+      expect(find.text('Content *'), findsOneWidget);
+      expect(find.byKey(const Key('upload_article_content')), findsOneWidget);
       // AppBar contains "Upload Article"; ElevatedButton contains "Publish Article".
       expect(find.widgetWithText(ElevatedButton, 'Publish Article'), findsOneWidget);
     });
@@ -117,7 +118,7 @@ void main() {
 
       await tester.enterText(find.widgetWithText(TextFormField, 'Title *'), 'My Title');
       await tester.enterText(find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Content *'), 'Some content here');
+      await tester.enterText(find.byKey(const Key('upload_article_content')), 'Some content here');
 
       final before = DateTime.now();
       await tester.ensureVisible(find.byType(ElevatedButton));

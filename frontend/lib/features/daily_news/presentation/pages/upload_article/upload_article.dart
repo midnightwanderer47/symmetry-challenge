@@ -110,14 +110,25 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                       maxLines: 2,
                     ),
                     const SizedBox(height: 12),
+                    Text(
+                      'Content *',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     TextFormField(
+                      key: const Key('upload_article_content'),
                       controller: _contentController,
-                      decoration: const InputDecoration(labelText: 'Content *'),
-                      minLines: 10,
+                      decoration: const InputDecoration.collapsed(hintText: ''),
+                      minLines: 6,
                       maxLines: null,
+                      textAlignVertical: TextAlignVertical.top,
                       keyboardType: TextInputType.multiline,
+                      stylusHandwritingEnabled: false,
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
+                    Divider(height: 1, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(

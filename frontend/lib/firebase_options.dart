@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -65,4 +62,14 @@ class DefaultFirebaseOptions {
     projectId: 'symmetry-challenge',
     storageBucket: 'symmetry-challenge.firebasestorage.app',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyABaJxcIgEk_Aq5Hcw_0ItuNgK7PMesDmo',
+    appId: '1:473460590616:ios:242081485b2fc8f2739b6d',
+    messagingSenderId: '473460590616',
+    projectId: 'symmetry-challenge',
+    storageBucket: 'symmetry-challenge.firebasestorage.app',
+    iosBundleId: 'com.example.newsAppCleanArchitecture',
+  );
+
 }
