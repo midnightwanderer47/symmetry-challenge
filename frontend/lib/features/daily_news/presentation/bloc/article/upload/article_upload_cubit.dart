@@ -40,6 +40,7 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
         thumbnailURL: thumbnailUrl,
         isUserArticle: true,
         createdAt: DateTime.now().toIso8601String(),
+        userId: _getCurrentUser()!.uid,
       );
 
       final result = await _uploadArticleUseCase(params: finalArticle);

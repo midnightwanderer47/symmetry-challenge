@@ -3,15 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/delete/delete_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/pages/user_articles/user_articles_screen.dart';
 
 class _MockRepository extends Mock implements ArticleRepository {}
+
+class _NoOpDeleteArticleCubit extends DeleteArticleCubit {
+  _NoOpDeleteArticleCubit()
+      : super(DeleteArticleUseCase(_MockRepository()));
+}
 
 // Article with all force-unwrapped fields populated (ArticleWidget uses urlToImage! and publishedAt!)
 const _testArticle = ArticleEntity(
@@ -62,8 +68,11 @@ Widget _buildScreen() => MaterialApp(
     );
 
 void main() {
-  setUp(() => _sl.reset());
-  tearDown(() => _sl.reset());
+  setUp(() async {
+    await _sl.reset();
+    _sl.registerFactory<DeleteArticleCubit>(() => _NoOpDeleteArticleCubit());
+  });
+  tearDown(() async => _sl.reset());
 
   testWidgets('shows CupertinoActivityIndicator when state is Loading', (tester) async {
     _sl.registerFactory<UserArticlesCubit>(() => _SeededCubit(const UserArticlesLoading()));

@@ -5,10 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article_thumbnail.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/delete/delete_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_articles_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_cubit.dart';
@@ -68,12 +70,14 @@ Widget _buildApp() {
 }
 
 void main() {
-  setUp(() {
-    _sl.reset();
+  setUp(() async {
+    await _sl.reset();
     _sl.registerFactory<ArticleUploadCubit>(() => _SeededUploadCubit());
     _sl.registerFactory<UserArticlesCubit>(() => _SeededUserCubit());
+    _sl.registerFactory<DeleteArticleCubit>(
+        () => DeleteArticleCubit(DeleteArticleUseCase(_MockRepository())));
   });
-  tearDown(() => _sl.reset());
+  tearDown(() async => _sl.reset());
 
   testWidgets('default selected tab is Feed (index 0)', (tester) async {
     await tester.pumpWidget(_buildApp());

@@ -13,6 +13,8 @@ class ArticleEntity extends Equatable{
   final String ? thumbnailURL;
   final bool isUserArticle;
   final String ? createdAt;
+  final String ? firestoreId;
+  final String ? userId;
 
   const ArticleEntity({
     this.id,
@@ -26,6 +28,8 @@ class ArticleEntity extends Equatable{
     this.thumbnailURL,
     this.isUserArticle = false,
     this.createdAt,
+    this.firestoreId,
+    this.userId,
   });
 
   String get displayImageUrl {
@@ -46,6 +50,8 @@ class ArticleEntity extends Equatable{
     String? thumbnailURL,
     bool? isUserArticle,
     String? createdAt,
+    String? firestoreId,
+    String? userId,
   }) => ArticleEntity(
     id: id ?? this.id,
     author: author ?? this.author,
@@ -58,6 +64,8 @@ class ArticleEntity extends Equatable{
     thumbnailURL: thumbnailURL ?? this.thumbnailURL,
     isUserArticle: isUserArticle ?? this.isUserArticle,
     createdAt: createdAt ?? this.createdAt,
+    firestoreId: firestoreId ?? this.firestoreId,
+    userId: userId ?? this.userId,
   );
 
   @override
@@ -74,6 +82,8 @@ class ArticleEntity extends Equatable{
       thumbnailURL,
       isUserArticle,
       createdAt,
+      firestoreId,
+      userId,
     ];
   }
 }

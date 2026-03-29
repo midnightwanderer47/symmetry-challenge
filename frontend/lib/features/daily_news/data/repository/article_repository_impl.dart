@@ -227,4 +227,17 @@ class ArticleRepositoryImpl implements ArticleRepository {
       ));
     }
   }
+
+  @override
+  Future<DataState<void>> deleteArticle(String firestoreId) async {
+    try {
+      await _firestoreDataSource.deleteArticle(firestoreId);
+      return const DataSuccess(null);
+    } catch (e) {
+      return DataFailed(DioError(
+        error: e,
+        requestOptions: RequestOptions(path: ''),
+      ));
+    }
+  }
 }

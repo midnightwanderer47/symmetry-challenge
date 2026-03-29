@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
+import '../../bloc/article/delete/delete_article_cubit.dart';
+import '../../bloc/article/delete/delete_article_state.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
 
@@ -14,17 +17,36 @@ class ArticleDetailsView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<LocalArticleBloc>(),
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: _buildBody(),
-        floatingActionButton: _buildFloatingActionButton(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<LocalArticleBloc>()),
+        BlocProvider(create: (_) => sl<DeleteArticleCubit>()),
+      ],
+      child: BlocListener<DeleteArticleCubit, DeleteArticleState>(
+        listener: (context, state) {
+          if (state is DeleteArticleSuccess) {
+            Navigator.pop(context);
+          } else if (state is DeleteArticleFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: _buildBody(),
+          floatingActionButton: _buildFloatingActionButton(),
+        ),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+    final isOwner = currentUid != null &&
+        article?.userId == currentUid &&
+        article?.firestoreId != null;
+
     return AppBar(
       leading: Builder(
         builder: (context) => GestureDetector(
@@ -33,6 +55,16 @@ class ArticleDetailsView extends HookWidget {
           child: const Icon(Ionicons.chevron_back, color: Colors.black),
         ),
       ),
+      actions: isOwner
+          ? [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: () => _onDeleteTapped(context),
+                ),
+              ),
+            ]
+          : null,
     );
   }
 
@@ -118,6 +150,29 @@ class ArticleDetailsView extends HookWidget {
       const SnackBar(
         backgroundColor: Colors.black,
         content: Text('Article saved successfully.'),
+      ),
+    );
+  }
+
+  void _onDeleteTapped(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete article'),
+        content: const Text('Are you sure you want to delete this article?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<DeleteArticleCubit>().deleteArticle(article!.firestoreId!);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

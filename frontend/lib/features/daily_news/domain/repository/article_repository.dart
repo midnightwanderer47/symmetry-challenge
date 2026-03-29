@@ -20,4 +20,6 @@ abstract class ArticleRepository {
   Future<DataState<String>> uploadArticleThumbnail(String filePath);
 
   Future<DataState<List<ArticleEntity>>> getUserArticles();
+
+  Future<DataState<void>> deleteArticle(String firestoreId);
 }

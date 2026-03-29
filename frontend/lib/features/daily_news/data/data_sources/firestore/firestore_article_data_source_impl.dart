@@ -51,4 +51,20 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deleteArticle(String firestoreId) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'unauthenticated',
+        message: 'User not authenticated',
+      );
+    }
+    try {
+      await _firestore.collection('articles').doc(firestoreId).delete();
+    } on FirebaseException {
+      rethrow;
+    }
+  }
 }

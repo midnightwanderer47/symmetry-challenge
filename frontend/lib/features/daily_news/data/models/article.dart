@@ -17,6 +17,8 @@ class ArticleModel extends ArticleEntity {
     String ? thumbnailURL,
     bool isUserArticle = false,
     String ? createdAt,
+    String ? firestoreId,
+    String ? userId,
   }): super(
     id: id,
     author: author,
@@ -29,6 +31,8 @@ class ArticleModel extends ArticleEntity {
     thumbnailURL: thumbnailURL,
     isUserArticle: isUserArticle,
     createdAt: createdAt,
+    firestoreId: firestoreId,
+    userId: userId,
   );
 
   factory ArticleModel.fromJson(Map < String, dynamic > map) {
@@ -56,6 +60,8 @@ class ArticleModel extends ArticleEntity {
       thumbnailURL: entity.thumbnailURL,
       isUserArticle: entity.isUserArticle,
       createdAt: entity.createdAt,
+      firestoreId: entity.firestoreId,
+      userId: entity.userId,
     );
   }
 
@@ -79,6 +85,8 @@ class ArticleModel extends ArticleEntity {
       thumbnailURL: rawThumbnail,
       isUserArticle: map['isUserArticle'] ?? false,
       createdAt: map['createdAt']?.toString(),
+      firestoreId: doc.id,
+      userId: map['userId'] as String?,
     );
   }
 
@@ -94,6 +102,8 @@ class ArticleModel extends ArticleEntity {
     thumbnailURL: thumbnailURL,
     isUserArticle: isUserArticle,
     createdAt: createdAt,
+    firestoreId: firestoreId,
+    userId: userId,
   );
 
   Map<String, dynamic> toFirestore() {
@@ -114,6 +124,7 @@ class ArticleModel extends ArticleEntity {
           : 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image',
       'isUserArticle': isUserArticle,
       'createdAt': FieldValue.serverTimestamp(),
+      'userId': userId ?? '',
     };
   }
 }

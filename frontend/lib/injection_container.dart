@@ -1,3 +1,4 @@
+import 'package:floor/floor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/firestore/firestore_article_data_source.dart';
@@ -7,6 +8,7 @@ import 'package:news_app_clean_architecture/features/daily_news/data/data_source
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/storage/firebase_storage_data_source_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/search_articles.dart';
@@ -21,13 +23,22 @@ import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
+import 'features/daily_news/presentation/bloc/article/delete/delete_article_cubit.dart';
 import 'features/daily_news/presentation/bloc/article/search/search_articles_cubit.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
 
-  final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  final migration1to2 = Migration(1, 2, (database) async {
+    await database.execute('ALTER TABLE article ADD COLUMN firestoreId TEXT');
+    await database.execute('ALTER TABLE article ADD COLUMN userId TEXT');
+  });
+
+  final database = await $FloorAppDatabase
+      .databaseBuilder('app_database.db')
+      .addMigrations([migration1to2])
+      .build();
   sl.registerSingleton<AppDatabase>(database);
   
   // Dio
@@ -82,6 +93,10 @@ Future<void> initializeDependencies() async {
     SearchArticlesUseCase(sl())
   );
 
+  sl.registerSingleton<DeleteArticleUseCase>(
+    DeleteArticleUseCase(sl())
+  );
+
   //Blocs
   sl.registerFactory<ArticleUploadCubit>(
     () => ArticleUploadCubit(sl(), sl())
@@ -107,5 +122,8 @@ Future<void> initializeDependencies() async {
     () => SearchArticlesCubit(sl())
   );
 
+  sl.registerFactory<DeleteArticleCubit>(
+    () => DeleteArticleCubit(sl())
+  );
 
 }

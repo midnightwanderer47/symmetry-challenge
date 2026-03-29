@@ -38,6 +38,7 @@ void main() {
     mockThumbnailUseCase = MockUploadArticleThumbnailUseCase();
     registerFallbackValue(_article);
     registerFallbackValue('');
+    when(() => mockUser.uid).thenReturn('test-uid');
   });
 
   ArticleUploadCubit buildCubit({bool authenticated = true}) =>
