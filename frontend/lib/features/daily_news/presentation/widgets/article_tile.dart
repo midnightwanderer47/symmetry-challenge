@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/formatting/date_formatter.dart';
 import '../../domain/entities/article.dart';
 
 class ArticleWidget extends StatelessWidget {
@@ -139,7 +140,11 @@ class ArticleWidget extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    article!.publishedAt!,
+                    formatPublishedAt(
+                      article!.publishedAt,
+                      article!.createdAt,
+                      Localizations.localeOf(context),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

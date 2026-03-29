@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../../../../core/formatting/date_formatter.dart';
 import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/delete/delete_article_cubit.dart';
@@ -101,16 +102,22 @@ class ArticleDetailsView extends HookWidget {
 
           const SizedBox(height: 14),
           // DateTime
-          Row(
-            children: [
-              const Icon(Ionicons.time_outline, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                article!.publishedAt!,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
+          Builder(builder: (context) {
+            return Row(
+              children: [
+                const Icon(Ionicons.time_outline, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  formatPublishedAt(
+                    article!.publishedAt,
+                    article!.createdAt,
+                    Localizations.localeOf(context),
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
