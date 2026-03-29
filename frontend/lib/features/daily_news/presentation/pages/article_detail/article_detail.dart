@@ -79,7 +79,8 @@ class ArticleDetailsView extends HookWidget {
         children: [
           _buildArticleTitleAndDate(),
           _buildArticleImage(),
-          _buildArticleDescription(),
+          _buildLedeDescription(),
+          _buildArticleContent(),
         ],
       ),
     );
@@ -118,6 +119,28 @@ class ArticleDetailsView extends HookWidget {
               ],
             );
           }),
+
+          // Author
+          Builder(builder: (context) {
+            final author = article!.author;
+            if (author == null || author.trim().isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(
+                children: [
+                  const Icon(Ionicons.person_outline, size: 16),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      author,
+                      style: const TextStyle(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -151,11 +174,48 @@ class ArticleDetailsView extends HookWidget {
     );
   }
 
-  Widget _buildArticleDescription() {
-    final content =
-        '${article!.description ?? ''}\n\n${article!.content ?? ''}';
+  Widget _buildLedeDescription() {
+    final description = article!.description;
+    if (description == null || description.trim().isEmpty) return const SizedBox.shrink();
+    return Builder(builder: (context) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(14, 18, 14, 0),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 3,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontStyle: FontStyle.italic,
+                    height: 1.55,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildArticleContent() {
+    final content = article!.content;
+    if (content == null || content.trim().isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+      padding: const EdgeInsets.fromLTRB(14, 18, 14, 18),
       child: ArticleMarkdownBody(content: content),
     );
   }
