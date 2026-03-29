@@ -4,9 +4,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /articles/{doc} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null &&
+      allow create, update: if request.auth != null &&
         request.resource.data.keys().hasAll(['title', 'content', 'author', 'thumbnailURL', 'publishedAt', 'createdAt']) &&
         request.resource.data.thumbnailURL is string && request.resource.data.thumbnailURL.size() > 0;
+      allow delete: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
     }
   }
 }
