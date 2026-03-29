@@ -8,6 +8,7 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/article_tile.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/delete_article_dialog.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 
 class UserArticlesScreen extends StatelessWidget {
@@ -48,16 +49,18 @@ class UserArticlesScreen extends StatelessWidget {
               }
               if (state is UserArticlesLoaded) {
                 if (state.articles.isEmpty) {
+                  final onSurface = Theme.of(context).colorScheme.onSurface;
+                  final mutedColor = onSurface.withValues(alpha: onSurface.a * 0.4);
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.article_outlined, size: 64,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
+                            color: mutedColor),
                         const SizedBox(height: 16),
                         Text('No articles yet',
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4))),
+                                color: mutedColor)),
                       ],
                     ),
                   );
@@ -82,7 +85,10 @@ class UserArticlesScreen extends StatelessWidget {
                         isRemovable: isOwner,
                         onRemove: isOwner
                             ? (ArticleEntity a) =>
-                                context.read<DeleteArticleCubit>().deleteArticle(a.firestoreId!)
+                                showDeleteArticleConfirmation(
+                                  context,
+                                  () => context.read<DeleteArticleCubit>().deleteArticle(a.firestoreId!),
+                                )
                             : null,
                         onArticlePressed: (ArticleEntity a) =>
                             Navigator.pushNamed(context, '/ArticleDetails', arguments: a),

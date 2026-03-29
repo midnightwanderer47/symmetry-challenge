@@ -49,7 +49,7 @@ class _SearchScreenState extends State<SearchScreen> {
       decoration: InputDecoration(
         hintText: 'Search articles...',
         border: InputBorder.none,
-        hintStyle: TextStyle(color: onSurface.withOpacity(0.5)),
+        hintStyle: TextStyle(color: onSurface.withValues(alpha: onSurface.a * 0.5)),
       ),
       style: TextStyle(color: onSurface),
       onChanged: (query) => context.read<SearchArticlesCubit>().queryChanged(query),

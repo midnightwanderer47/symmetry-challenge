@@ -76,6 +76,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
         },
         builder: (context, state) {
           final isLoading = state is ArticleUploadLoading;
+          final onSurface = Theme.of(context).colorScheme.onSurface;
           return PopScope(
             canPop: !isLoading,
             child: Scaffold(
@@ -121,7 +122,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                     Text.rich(
                       TextSpan(
                         style: TextStyle(fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                            color: onSurface.withValues(alpha: onSurface.a * 0.5)),
                         children: const [
                           TextSpan(text: 'Supported: '),
                           TextSpan(text: '# Heading', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -157,7 +158,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                               Text(
                                 'Tap to change',
                                 style: TextStyle(fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                                    color: onSurface.withValues(alpha: onSurface.a * 0.5)),
                               ),
                             ],
                           ),
@@ -175,7 +176,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                         child: Text(
                           'No thumbnail selected — placeholder will be used',
                           style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                              color: onSurface.withValues(alpha: onSurface.a * 0.5)),
                           textAlign: TextAlign.center,
                         ),
                       ),

@@ -157,7 +157,7 @@ class ArticleWidget extends StatelessWidget {
         onTap: _onRemove,
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Icon(Icons.remove_circle_outline, color: Colors.red),
+          child: Icon(Icons.delete_outline, color: Colors.red),
         ),
       );
     }

@@ -11,6 +11,7 @@ import '../../bloc/article/delete/delete_article_cubit.dart';
 import '../../bloc/article/delete/delete_article_state.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
+import '../../widgets/delete_article_dialog.dart';
 import '../../widgets/markdown_body_widget.dart';
 
 class ArticleDetailsView extends HookWidget {
@@ -178,25 +179,9 @@ class ArticleDetailsView extends HookWidget {
   }
 
   void _onDeleteTapped(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete article'),
-        content: const Text('Are you sure you want to delete this article?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<DeleteArticleCubit>().deleteArticle(article!.firestoreId!);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    showDeleteArticleConfirmation(
+      context,
+      () => context.read<DeleteArticleCubit>().deleteArticle(article!.firestoreId!),
     );
   }
 }
