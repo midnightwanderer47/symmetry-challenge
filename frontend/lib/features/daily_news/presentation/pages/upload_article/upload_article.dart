@@ -210,8 +210,8 @@ class _UploadArticleViewState extends State<UploadArticleView> {
               ),
             ),
             if (isLoading)
-              IgnorePointer(
-                child: Positioned.fill(
+              Positioned.fill(
+                child: IgnorePointer(
                   child: Container(
                     color: Colors.black54,
                     child: Center(

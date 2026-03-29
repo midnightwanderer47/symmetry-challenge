@@ -114,7 +114,8 @@ void main() {
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
+      expect(find.text('Publishing...'), findsOneWidget);
 
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
       expect(button.onPressed, isNull);
