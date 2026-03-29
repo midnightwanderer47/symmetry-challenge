@@ -86,6 +86,15 @@ class _UploadArticleViewState extends State<UploadArticleView> {
       child: BlocConsumer<ArticleUploadCubit, ArticleUploadState>(
         listener: (context, state) {
           if (state is ArticleUploadSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Article published!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 3),
+                ),
+              );
             Navigator.pop(context, true);
           } else if (state is ArticleUploadFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
