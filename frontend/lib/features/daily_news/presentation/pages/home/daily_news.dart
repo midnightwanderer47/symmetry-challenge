@@ -247,8 +247,8 @@ class _SettingsSheet extends StatelessWidget {
                   const SizedBox(width: 16),
                   Text(
                     'Sign Out',
-                    style: textTheme.bodyLarge
-                        ?.copyWith(color: colorScheme.error),
+                    style:
+                        textTheme.bodyLarge?.copyWith(color: colorScheme.error),
                   ),
                 ],
               ),

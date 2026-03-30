@@ -208,7 +208,8 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
                               child: Text(
                                 'Thumbnail required — tap "Pick thumbnail *" to choose an image',
                                 style: TextStyle(

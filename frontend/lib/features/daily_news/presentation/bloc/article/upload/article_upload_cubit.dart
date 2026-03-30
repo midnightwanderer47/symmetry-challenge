@@ -43,8 +43,8 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
       if (thumbResult is DataSuccess) {
         thumbnailUrl = thumbResult.data;
       } else if (thumbResult is DataFailed) {
-        emit(ArticleUploadFailure(thumbResult.error?.error?.toString() ??
-            'Thumbnail upload failed'));
+        emit(ArticleUploadFailure(
+            thumbResult.error?.error?.toString() ?? 'Thumbnail upload failed'));
         return;
       }
 

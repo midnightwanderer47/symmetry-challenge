@@ -110,7 +110,8 @@ void main() {
 
       expect(find.widgetWithText(TextFormField, 'Title *'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Author *'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Description *'), findsOneWidget);
+      expect(
+          find.widgetWithText(TextFormField, 'Description *'), findsOneWidget);
       expect(find.text('Content *'), findsOneWidget);
       expect(find.byKey(const Key('upload_article_content')), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'Publish Article'),
