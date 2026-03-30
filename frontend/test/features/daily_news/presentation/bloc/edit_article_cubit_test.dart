@@ -57,8 +57,7 @@ void main() {
     verifyNever(() => mockThumbnailUseCase(params: any(named: 'params')));
   });
 
-  test(
-      'uploads thumbnail and emits Success when thumbnailFilePath is provided',
+  test('uploads thumbnail and emits Success when thumbnailFilePath is provided',
       () async {
     const newUrl = 'https://storage.example.com/thumb.jpg';
     when(() => mockThumbnailUseCase(params: any(named: 'params')))
@@ -75,8 +74,8 @@ void main() {
 
     expect(states, [const EditArticleLoading(), const EditArticleSuccess()]);
     verify(() => mockThumbnailUseCase(params: '/tmp/thumb.jpg')).called(1);
-    verify(() => mockUpdateUseCase(
-            params: _article.copyWith(thumbnailURL: newUrl)))
+    verify(() =>
+            mockUpdateUseCase(params: _article.copyWith(thumbnailURL: newUrl)))
         .called(1);
   });
 
