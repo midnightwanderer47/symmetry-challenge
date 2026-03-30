@@ -36,12 +36,13 @@ class _MarkdownEditorWidgetState extends State<MarkdownEditorWidget> {
     final selection = _controller.selection;
     if (!selection.isValid) return;
     final selectedText = selection.textInside(text);
-    final newText = text.replaceRange(selection.start, selection.end,
-        '$left$selectedText$right');
+    final newText = text.replaceRange(
+        selection.start, selection.end, '$left$selectedText$right');
     _controller.value = _controller.value.copyWith(
       text: newText,
       selection: TextSelection.collapsed(
-        offset: selection.start + left.length + selectedText.length + right.length,
+        offset:
+            selection.start + left.length + selectedText.length + right.length,
       ),
     );
     widget.onChanged(_controller.text);

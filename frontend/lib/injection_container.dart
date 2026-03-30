@@ -91,7 +91,8 @@ Future<void> initializeDependencies() async {
 
   sl.registerFactory<RemoteArticlesBloc>(() => RemoteArticlesBloc(sl()));
 
-  sl.registerFactory<RemoteArticlesCubit>(() => RemoteArticlesCubit(sl(), sl()));
+  sl.registerFactory<RemoteArticlesCubit>(
+      () => RemoteArticlesCubit(sl(), sl()));
 
   sl.registerFactory<LocalArticleBloc>(
       () => LocalArticleBloc(sl(), sl(), sl()));

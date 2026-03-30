@@ -11,7 +11,8 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 
 class MockGetArticleUseCase extends Mock implements GetArticleUseCase {}
 
-class MockGetArticlesPageUseCase extends Mock implements GetArticlesPageUseCase {}
+class MockGetArticlesPageUseCase extends Mock
+    implements GetArticlesPageUseCase {}
 
 DioError _dioError() => DioError(
       requestOptions: RequestOptions(path: ''),
@@ -31,7 +32,8 @@ const _userArticle = ArticleEntity(
 );
 
 const _emptyPage = PaginatedArticles(articles: [], hasMore: false);
-const _pageWithUser = PaginatedArticles(articles: [_userArticle], hasMore: false);
+const _pageWithUser =
+    PaginatedArticles(articles: [_userArticle], hasMore: false);
 
 void main() {
   late MockGetArticleUseCase mockUseCase;
@@ -53,7 +55,8 @@ void main() {
       () {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
     final cubit = RemoteArticlesCubit(mockUseCase, mockPageUseCase);
     expect(cubit.state, const RemoteArticlesLoading());
@@ -63,7 +66,8 @@ void main() {
   test('emits Loaded with merged articles when fetch succeeds', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([_apiArticle]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_pageWithUser));
     final cubit = await buildCubit();
     final state = cubit.state as RemoteArticlesLoaded;
@@ -75,7 +79,8 @@ void main() {
   test('isUserArticles is false when no user articles in list', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([_apiArticle]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
     final cubit = await buildCubit();
     final state = cubit.state as RemoteArticlesLoaded;
@@ -86,7 +91,8 @@ void main() {
   test('emits Error when page fetch fails and news api also fails', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => DataFailed(_dioError()));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => DataFailed(_dioError()));
     final cubit = await buildCubit();
     expect(cubit.state, isA<RemoteArticlesError>());
@@ -96,7 +102,8 @@ void main() {
   test('fetchArticles emits Loading then Loaded', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([_apiArticle]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
     final cubit = await buildCubit();
 
@@ -114,7 +121,8 @@ void main() {
   test('refresh re-emits Loading then Loaded', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([_apiArticle]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
     final cubit = await buildCubit();
 
@@ -135,16 +143,19 @@ void main() {
       hasMore: true,
       cursor: 'cursor1',
     );
-    const secondPage = PaginatedArticles(articles: [_apiArticle], hasMore: false);
+    const secondPage =
+        PaginatedArticles(articles: [_apiArticle], hasMore: false);
 
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(firstPage));
     final cubit = await buildCubit();
 
     // Now set up second page response
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(secondPage));
 
     await cubit.loadMore();
@@ -159,7 +170,8 @@ void main() {
   test('loadMore is no-op when hasMore is false', () async {
     when(() => mockUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess([]));
-    when(() => mockPageUseCase(limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
+    when(() => mockPageUseCase(
+            limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
     final cubit = await buildCubit();
 

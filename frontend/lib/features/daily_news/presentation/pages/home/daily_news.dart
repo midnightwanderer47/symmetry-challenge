@@ -100,8 +100,7 @@ class DailyNews extends StatelessWidget {
     );
   }
 
-  Widget _buildArticlesPage(
-      BuildContext context, RemoteArticlesLoaded state) {
+  Widget _buildArticlesPage(BuildContext context, RemoteArticlesLoaded state) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     final articles = state.articles;
 
@@ -130,7 +129,8 @@ class DailyNews extends StatelessWidget {
             return ArticleWidget(
               article: articles[index],
               currentUserUid: currentUid,
-              onArticlePressed: (article) => _onArticlePressed(context, article),
+              onArticlePressed: (article) =>
+                  _onArticlePressed(context, article),
             );
           },
         ),
