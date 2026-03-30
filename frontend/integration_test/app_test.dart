@@ -1,15 +1,19 @@
 // Integration tests for the full article upload and listing flow.
 //
 // Prerequisites – run before executing these tests:
-//   firebase emulators:start --only firestore,storage --project demo-test
+//   firebase emulators:start --only auth,firestore,storage --project demo-test
 //
 // Run with:
 //   flutter test integration_test/app_test.dart --dart-define=USE_EMULATOR=true
 //
 // These tests exercise the real Firebase SDK connected to local emulators,
 // verifying the complete flow from UI interaction through to Firestore/Storage.
+//
+// Auth: a test user is created (or signed in) via the Auth emulator before
+// pumping MyApp, so the AuthGate passes through to the main app.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +26,33 @@ import 'package:news_app_clean_architecture/main.dart' as app;
 const bool _useEmulator =
     bool.fromEnvironment('USE_EMULATOR', defaultValue: false);
 
+const _testEmail = 'integration@test.local';
+const _testPassword = 'Test1234!';
+
 Future<void> _connectToEmulators() async {
+  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+}
+
+Future<void> _ensureTestUser() async {
+  final auth = FirebaseAuth.instance;
+  try {
+    await auth.signInWithEmailAndPassword(
+      email: _testEmail,
+      password: _testPassword,
+    );
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'user-not-found') {
+      final cred = await auth.createUserWithEmailAndPassword(
+        email: _testEmail,
+        password: _testPassword,
+      );
+      await cred.user?.updateDisplayName('Test User');
+    } else {
+      rethrow;
+    }
+  }
 }
 
 void main() {
@@ -35,6 +63,7 @@ void main() {
         options: DefaultFirebaseOptions.currentPlatform);
     if (_useEmulator) {
       await _connectToEmulators();
+      await _ensureTestUser();
     }
     await initializeDependencies();
   });
@@ -73,7 +102,7 @@ void main() {
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         await tester.pumpAndSettle(const Duration(seconds: 5));
 
-        // Without auth / thumbnailURL the security rule blocks the write.
+        // Without thumbnailURL the security rule blocks the write.
         // Verify failure SnackBar is shown (exact message depends on Firebase error).
         final snackBarFinder = find.byType(SnackBar);
         expect(snackBarFinder, findsOneWidget);
@@ -87,8 +116,8 @@ void main() {
       await tester.pumpWidget(const app.MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      // Navigate to My Articles via the person icon in AppBar.
-      await tester.tap(find.byIcon(Icons.person));
+      // Navigate to My Articles via the bottom nav.
+      await tester.tap(find.text('My Articles'));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // After loading, we should see either the empty state or article list.
@@ -104,7 +133,7 @@ void main() {
       await tester.pumpWidget(const app.MyApp());
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      await tester.tap(find.byIcon(Icons.person));
+      await tester.tap(find.text('My Articles'));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // Attempt pull-to-refresh if a scrollable view is present.

@@ -34,11 +34,17 @@ class ArticleEntity extends Equatable {
     this.userId,
   });
 
-  String get displayImageUrl {
-    if (urlToImage != null && urlToImage!.isNotEmpty) return urlToImage!;
-    if (thumbnailURL != null && thumbnailURL!.isNotEmpty) return thumbnailURL!;
-    return kDefaultImage;
+  /// Returns a real network image URL, or `null` when the article has no
+  /// uploaded image (i.e. empty / whitespace-only / placeholder URL).
+  String? get networkImageUrl {
+    final url = (urlToImage ?? '').trim();
+    if (url.isNotEmpty && url != kDefaultImage) return url;
+    final thumb = (thumbnailURL ?? '').trim();
+    if (thumb.isNotEmpty && thumb != kDefaultImage) return thumb;
+    return null;
   }
+
+  String get displayImageUrl => networkImageUrl ?? kDefaultImage;
 
   ArticleEntity copyWith({
     int? id,

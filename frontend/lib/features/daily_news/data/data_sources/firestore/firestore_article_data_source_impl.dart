@@ -1,24 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:news_app_clean_architecture/core/constants/constants.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/firestore/firestore_article_data_source.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/paginated_articles_result.dart';
 
 class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
   final FirebaseFirestore _firestore;
+  final FirebaseAuth? _authOverride;
 
-  static const _placeholderThumbnail =
-      'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image';
+  FirebaseAuth get _auth => _authOverride ?? FirebaseAuth.instance;
 
   static const int kDefaultPageSize = 20;
 
-  FirestoreArticleDataSourceImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreArticleDataSourceImpl({
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _authOverride = auth;
 
   ArticleModel _withValidThumbnail(ArticleModel article) {
     if (article.thumbnailURL == null || article.thumbnailURL!.isEmpty) {
       return ArticleModel.fromEntity(
-        article.toEntity().copyWith(thumbnailURL: _placeholderThumbnail),
+        article.toEntity().copyWith(thumbnailURL: kDefaultImage),
       );
     }
     return article;
@@ -26,7 +30,8 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
 
   @override
   Future<void> uploadArticle(ArticleModel article) async {
-    if (FirebaseAuth.instance.currentUser == null) {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
       throw FirebaseException(
         plugin: 'firestore',
         code: 'unauthenticated',
@@ -34,7 +39,10 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
       );
     }
     try {
-      final validArticle = _withValidThumbnail(article);
+      final withUid = ArticleModel.fromEntity(
+        article.toEntity().copyWith(userId: currentUser.uid),
+      );
+      final validArticle = _withValidThumbnail(withUid);
       await _firestore.collection('articles').add(validArticle.toFirestore());
     } on FirebaseException {
       rethrow;
@@ -43,28 +51,18 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
 
   @override
   Future<List<ArticleModel>> getUserArticles() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     if (user == null) return [];
     final uid = user.uid;
     try {
-      // Use the same query shape as getUserArticlesPage (isUserArticle + createdAt)
-      // so the existing Firestore composite index applies. Filter by userId in memory
-      // to avoid requiring a separate userId+createdAt index (and to match only
-      // documents whose userId equals the signed-in account).
       final snapshot = await _firestore
           .collection('articles')
-          .where('isUserArticle', isEqualTo: true)
+          .where('userId', isEqualTo: uid)
           .orderBy('createdAt', descending: true)
           .get();
-      final out = <ArticleModel>[];
-      for (final doc in snapshot.docs) {
-        final model = ArticleModel.fromFirestore(doc);
-        final id = (model.userId ?? '').trim();
-        if (id.isNotEmpty && id == uid) {
-          out.add(model);
-        }
-      }
-      return out;
+      return snapshot.docs
+          .map((doc) => ArticleModel.fromFirestore(doc))
+          .toList();
     } on FirebaseException {
       rethrow;
     }
@@ -122,7 +120,7 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
 
   @override
   Future<void> deleteArticle(String firestoreId) async {
-    if (FirebaseAuth.instance.currentUser == null) {
+    if (_auth.currentUser == null) {
       throw FirebaseException(
         plugin: 'firestore',
         code: 'unauthenticated',
@@ -138,7 +136,7 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
 
   @override
   Future<void> updateArticle(String firestoreId, ArticleModel patch) async {
-    if (FirebaseAuth.instance.currentUser == null) {
+    if (_auth.currentUser == null) {
       throw FirebaseException(
         plugin: 'firestore',
         code: 'unauthenticated',

@@ -45,7 +45,32 @@ class UserArticlesScreen extends StatelessWidget {
                 return const Center(child: CupertinoActivityIndicator());
               }
               if (state is UserArticlesError) {
-                return const Center(child: Icon(Icons.refresh));
+                final onSurface = Theme.of(context).colorScheme.onSurface;
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 48, color: onSurface),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: onSurface),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed: () => context
+                              .read<UserArticlesCubit>()
+                              .fetchUserArticles(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Try again'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               if (state is UserArticlesLoaded) {
                 if (state.articles.isEmpty) {

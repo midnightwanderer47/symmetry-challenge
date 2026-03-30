@@ -224,6 +224,36 @@ class _SettingsSheet extends StatelessWidget {
               ),
             ],
           ),
+          const Divider(height: 24),
+          Text(
+            'Account',
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () async {
+              Navigator.pop(context);
+              await FirebaseAuth.instance.signOut();
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.logout, color: colorScheme.error),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Sign Out',
+                    style: textTheme.bodyLarge
+                        ?.copyWith(color: colorScheme.error),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

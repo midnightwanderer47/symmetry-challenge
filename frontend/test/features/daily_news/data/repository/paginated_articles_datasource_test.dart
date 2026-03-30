@@ -1,8 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/firestore/firestore_article_data_source_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/paginated_articles_result.dart';
+
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class _MockUser extends Mock implements User {}
 
 void main() {
   late FakeFirebaseFirestore fakeFirestore;
@@ -130,6 +136,85 @@ void main() {
         ),
         returnsNormally,
       );
+    });
+  });
+
+  group('getUserArticles', () {
+    late _MockFirebaseAuth mockAuth;
+    late _MockUser mockUser;
+    late FirestoreArticleDataSourceImpl authDataSource;
+
+    setUp(() {
+      mockAuth = _MockFirebaseAuth();
+      mockUser = _MockUser();
+      when(() => mockUser.uid).thenReturn('uid-abc');
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+      authDataSource = FirestoreArticleDataSourceImpl(
+        firestore: fakeFirestore,
+        auth: mockAuth,
+      );
+    });
+
+    Future<void> seedWithUser({
+      required String userId,
+      required int count,
+    }) async {
+      for (int i = 0; i < count; i++) {
+        await fakeFirestore.collection('articles').add({
+          'title': '$userId article $i',
+          'author': 'Author',
+          'description': '',
+          'url': '',
+          'urlToImage': '',
+          'publishedAt': '',
+          'content': '',
+          'thumbnailURL': '',
+          'isUserArticle': true,
+          'createdAt': i,
+          'userId': userId,
+        });
+      }
+    }
+
+    test('returns only articles belonging to the current user', () async {
+      await seedWithUser(userId: 'uid-abc', count: 2);
+      await seedWithUser(userId: 'uid-other', count: 3);
+
+      final result = await authDataSource.getUserArticles();
+
+      expect(result.length, 2);
+      expect(result.every((a) => a.userId == 'uid-abc'), isTrue);
+    });
+
+    test('returns empty list when user has no articles', () async {
+      await seedWithUser(userId: 'uid-other', count: 3);
+
+      final result = await authDataSource.getUserArticles();
+
+      expect(result, isEmpty);
+    });
+
+    test('returns empty list when no user is signed in', () async {
+      when(() => mockAuth.currentUser).thenReturn(null);
+      await seedWithUser(userId: 'uid-abc', count: 2);
+
+      final result = await authDataSource.getUserArticles();
+
+      expect(result, isEmpty);
+    });
+
+    test('articles are ordered by createdAt descending', () async {
+      await seedWithUser(userId: 'uid-abc', count: 4);
+
+      final result = await authDataSource.getUserArticles();
+
+      final titles = result.map((a) => a.title).toList();
+      expect(titles, [
+        'uid-abc article 3',
+        'uid-abc article 2',
+        'uid-abc article 1',
+        'uid-abc article 0',
+      ]);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_state.dart';
 
 class UserArticlesCubit extends Cubit<UserArticlesState> {
@@ -12,11 +13,13 @@ class UserArticlesCubit extends Cubit<UserArticlesState> {
   Future<void> fetchUserArticles() async {
     emit(const UserArticlesLoading());
     final result = await _getUserArticlesUseCase();
-    if (result is DataSuccess && result.data != null) {
-      emit(UserArticlesLoaded(result.data!));
+    if (result is DataSuccess<List<ArticleEntity>>) {
+      emit(UserArticlesLoaded(result.data ?? const []));
     } else if (result is DataFailed) {
       emit(UserArticlesError(
           result.error?.error?.toString() ?? 'Failed to load articles'));
+    } else {
+      emit(const UserArticlesError('Failed to load articles'));
     }
   }
 }

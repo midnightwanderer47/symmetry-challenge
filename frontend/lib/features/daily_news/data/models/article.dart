@@ -72,13 +72,14 @@ class ArticleModel extends ArticleEntity {
 
   factory ArticleModel.fromFirestore(DocumentSnapshot doc) {
     final map = doc.data() as Map<String, dynamic>;
-    final rawUrlToImage = map['urlToImage'] as String?;
-    final rawThumbnail = map['thumbnailURL'] as String?;
-    final resolvedImage = (rawUrlToImage != null && rawUrlToImage.isNotEmpty)
-        ? rawUrlToImage
-        : (rawThumbnail != null && rawThumbnail.isNotEmpty)
-            ? rawThumbnail
-            : kDefaultImage;
+    final rawUrlToImage = (map['urlToImage'] as String?)?.trim();
+    final rawThumbnail = (map['thumbnailURL'] as String?)?.trim();
+    final resolvedImage =
+        (rawUrlToImage != null && rawUrlToImage.isNotEmpty)
+            ? rawUrlToImage
+            : (rawThumbnail != null && rawThumbnail.isNotEmpty)
+                ? rawThumbnail
+                : kDefaultImage;
     return ArticleModel(
       author: map['author'] ?? '',
       title: map['title'] ?? '',
@@ -92,7 +93,7 @@ class ArticleModel extends ArticleEntity {
       createdAt: map['createdAt']?.toString(),
       updatedAt: map['updatedAt']?.toString(),
       firestoreId: doc.id,
-      userId: map['userId'] as String?,
+      userId: map['userId']?.toString(),
     );
   }
 

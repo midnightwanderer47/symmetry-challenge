@@ -89,12 +89,7 @@ class _EditArticleViewState extends State<EditArticleView> {
         builder: (context, state) {
           final isLoading = state is EditArticleLoading;
           final onSurface = Theme.of(context).colorScheme.onSurface;
-          final existingImageUrl =
-              widget.article.thumbnailURL?.isNotEmpty == true
-                  ? widget.article.thumbnailURL
-                  : (widget.article.urlToImage?.isNotEmpty == true
-                      ? widget.article.urlToImage
-                      : null);
+          final existingImageUrl = widget.article.networkImageUrl;
 
           return PopScope(
             canPop: !isLoading,

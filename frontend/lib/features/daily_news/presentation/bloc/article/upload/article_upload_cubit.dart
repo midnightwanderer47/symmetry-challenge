@@ -30,20 +30,22 @@ class ArticleUploadCubit extends Cubit<ArticleUploadState> {
       emit(const ArticleUploadFailure('Authentication required'));
       return;
     }
+    final path = thumbnailFilePath?.trim();
+    if (path == null || path.isEmpty) {
+      emit(const ArticleUploadFailure('Thumbnail is required'));
+      return;
+    }
     emit(const ArticleUploadLoading());
     try {
       String? thumbnailUrl;
-      if (thumbnailFilePath != null) {
-        final thumbResult =
-            await _uploadThumbnailUseCase(params: thumbnailFilePath)
-                .timeout(_uploadTimeout);
-        if (thumbResult is DataSuccess) {
-          thumbnailUrl = thumbResult.data;
-        } else if (thumbResult is DataFailed) {
-          emit(ArticleUploadFailure(thumbResult.error?.error?.toString() ??
-              'Thumbnail upload failed'));
-          return;
-        }
+      final thumbResult =
+          await _uploadThumbnailUseCase(params: path).timeout(_uploadTimeout);
+      if (thumbResult is DataSuccess) {
+        thumbnailUrl = thumbResult.data;
+      } else if (thumbResult is DataFailed) {
+        emit(ArticleUploadFailure(thumbResult.error?.error?.toString() ??
+            'Thumbnail upload failed'));
+        return;
       }
 
       final finalArticle = article.copyWith(

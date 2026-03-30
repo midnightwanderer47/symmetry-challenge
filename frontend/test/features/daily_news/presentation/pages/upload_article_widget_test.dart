@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
@@ -76,17 +79,29 @@ class _CapturingCubit extends ArticleUploadCubit {
 
 final _sl = GetIt.instance;
 
-// Provide a stream that emits a signed-in user so the upload button is enabled.
-Widget _buildApp() => MaterialApp(
-      home: UploadArticleView(authStateStream: Stream.value(_MockUser())),
+Directory? _tempDir;
+
+Widget _buildApp({XFile? initialThumbnail}) => MaterialApp(
+      home: UploadArticleView(
+        authStateStream: Stream.value(_MockUser()),
+        initialThumbnail: initialThumbnail,
+      ),
     );
 
 void main() {
-  setUp(() => _sl.reset());
-  tearDown(() => _sl.reset());
+  setUp(() async {
+    _sl.reset();
+    _tempDir = await Directory.systemTemp.createTemp('upload_article_test_');
+  });
+  tearDown(() async {
+    _sl.reset();
+    if (_tempDir != null && _tempDir!.existsSync()) {
+      await _tempDir!.delete(recursive: true);
+    }
+  });
 
   group('UploadArticleView – form rendering', () {
-    testWidgets('shows Title, Author, Content fields and Upload button',
+    testWidgets('shows Title, Author, Description, Content fields and button',
         (tester) async {
       _sl.registerFactory<ArticleUploadCubit>(
           () => _SeededCubit(const ArticleUploadInitial()));
@@ -95,9 +110,9 @@ void main() {
 
       expect(find.widgetWithText(TextFormField, 'Title *'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Author *'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Description *'), findsOneWidget);
       expect(find.text('Content *'), findsOneWidget);
       expect(find.byKey(const Key('upload_article_content')), findsOneWidget);
-      // AppBar contains "Upload Article"; ElevatedButton contains "Publish Article".
       expect(find.widgetWithText(ElevatedButton, 'Publish Article'),
           findsOneWidget);
     });
@@ -118,10 +133,10 @@ void main() {
       expect(find.text('Required'), findsWidgets);
     });
 
-    testWidgets('sets publishedAt automatically on valid submit',
+    testWidgets('shows SnackBar when all text fields filled but no thumbnail',
         (tester) async {
-      final cubit = _CapturingCubit();
-      _sl.registerSingleton<ArticleUploadCubit>(cubit);
+      _sl.registerFactory<ArticleUploadCubit>(
+          () => _SeededCubit(const ArticleUploadInitial()));
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
@@ -129,6 +144,37 @@ void main() {
           find.widgetWithText(TextFormField, 'Title *'), 'My Title');
       await tester.enterText(
           find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Description *'), 'A description');
+      await tester.enterText(
+          find.byKey(const Key('upload_article_content')), 'Some content here');
+
+      await tester.ensureVisible(find.byType(ElevatedButton));
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Please add a thumbnail image to publish.'),
+          findsOneWidget);
+    });
+
+    testWidgets('sets publishedAt automatically on valid submit',
+        (tester) async {
+      final cubit = _CapturingCubit();
+      _sl.registerSingleton<ArticleUploadCubit>(cubit);
+      final thumbFile = File('${_tempDir!.path}/thumb.jpg');
+      thumbFile.writeAsBytesSync(const [0xff, 0xd8, 0xff]);
+      final thumb = XFile(thumbFile.path);
+
+      await tester.pumpWidget(_buildApp(initialThumbnail: thumb));
+      await tester.pump();
+
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Title *'), 'My Title');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Author *'), 'Jane Doe');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Description *'), 'Desc');
       await tester.enterText(
           find.byKey(const Key('upload_article_content')), 'Some content here');
 
@@ -166,13 +212,11 @@ void main() {
         (tester) async {
       final cubit = _EmittingCubit(
           const ArticleUploadFailure('Upload failed: network error'));
-      // Use singleton so the widget's BlocProvider gets the same instance.
       _sl.registerSingleton<ArticleUploadCubit>(cubit);
 
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
-      // Trigger the state transition directly on the cubit that the widget listens to.
       cubit.upload(const ArticleEntity(title: 'T', author: 'A', content: 'C'));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pump(const Duration(milliseconds: 50));
@@ -188,12 +232,10 @@ void main() {
       await tester.pumpWidget(_buildApp());
       await tester.pump();
 
-      // Trigger Loading → Failure transition.
       cubit.upload(const ArticleEntity(title: 'T', author: 'A', content: 'C'));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pump(const Duration(milliseconds: 50));
 
-      // After Failure: overlay must be gone and SnackBar shown.
       expect(find.text('Publishing...'), findsNothing);
       expect(find.text('Network error'), findsOneWidget);
     });

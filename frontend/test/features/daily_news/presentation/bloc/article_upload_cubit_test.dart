@@ -28,6 +28,8 @@ const _article = ArticleEntity(
   publishedAt: '2024-01-01T00:00:00.000Z',
 );
 
+const _thumbPath = '/path/img.jpg';
+
 void main() {
   late MockUploadArticleUseCase mockUploadUseCase;
   late MockUploadArticleThumbnailUseCase mockThumbnailUseCase;
@@ -58,16 +60,20 @@ void main() {
 
   test('state is Failure when not authenticated', () async {
     final cubit = buildCubit(authenticated: false);
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
   });
 
-  test('state is Success when upload without thumbnail succeeds', () async {
+  test('state is Failure when thumbnail path is missing', () async {
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess(null));
     final cubit = buildCubit();
     await cubit.upload(_article);
-    expect(cubit.state, const ArticleUploadSuccess());
+    expect(cubit.state, isA<ArticleUploadFailure>());
+    expect(
+      (cubit.state as ArticleUploadFailure).message,
+      'Thumbnail is required',
+    );
   });
 
   test('state is Success when upload with thumbnail succeeds', () async {
@@ -76,7 +82,7 @@ void main() {
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess(null));
     final cubit = buildCubit();
-    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, const ArticleUploadSuccess());
   });
 
@@ -84,43 +90,51 @@ void main() {
     when(() => mockThumbnailUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => DataFailed(_dioError()));
     final cubit = buildCubit();
-    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
   });
 
   test('state is Failure when article upload fails', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => DataFailed(_dioError()));
     final cubit = buildCubit();
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
   });
 
   test('state is Failure when upload use case throws', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenThrow(Exception('unexpected'));
     final cubit = buildCubit();
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
   });
 
   test('emits Loading before uploading', () async {
     final emitted = <ArticleUploadState>[];
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async => const DataSuccess(null));
     final cubit = buildCubit();
     cubit.stream.listen(emitted.add);
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(emitted, contains(const ArticleUploadLoading()));
   });
 
   test(
       'emits Failure with message when FirebaseAuthException thrown during upload',
       () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenThrow(FirebaseAuthException(code: 'operation-not-allowed'));
     final cubit = buildCubit();
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
     expect(
       (cubit.state as ArticleUploadFailure).message,
@@ -134,7 +148,7 @@ void main() {
     when(() => mockThumbnailUseCase(params: any(named: 'params')))
         .thenThrow(FirebaseAuthException(code: 'permission-denied'));
     final cubit = buildCubit();
-    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
     expect(
       (cubit.state as ArticleUploadFailure).message,
@@ -143,13 +157,15 @@ void main() {
   });
 
   test('emits Failure with timeout message when upload times out', () async {
+    when(() => mockThumbnailUseCase(params: any(named: 'params'))).thenAnswer(
+        (_) async => const DataSuccess('https://example.com/thumb.jpg'));
     when(() => mockUploadUseCase(params: any(named: 'params')))
         .thenAnswer((_) async {
       await Future.delayed(const Duration(milliseconds: 200));
       return const DataSuccess(null);
     });
     final cubit = buildCubit(uploadTimeout: const Duration(milliseconds: 50));
-    await cubit.upload(_article);
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
     expect(
       (cubit.state as ArticleUploadFailure).message,
@@ -165,7 +181,7 @@ void main() {
       return const DataSuccess('url');
     });
     final cubit = buildCubit(uploadTimeout: const Duration(milliseconds: 50));
-    await cubit.upload(_article, thumbnailFilePath: '/path/img.jpg');
+    await cubit.upload(_article, thumbnailFilePath: _thumbPath);
     expect(cubit.state, isA<ArticleUploadFailure>());
     expect(
       (cubit.state as ArticleUploadFailure).message,

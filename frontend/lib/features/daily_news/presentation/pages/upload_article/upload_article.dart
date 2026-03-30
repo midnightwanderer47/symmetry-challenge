@@ -14,7 +14,15 @@ class UploadArticleView extends StatefulWidget {
   @visibleForTesting
   final Stream<User?>? authStateStream;
 
-  const UploadArticleView({Key? key, this.authStateStream}) : super(key: key);
+  /// Pre-selected thumbnail for widget tests only.
+  @visibleForTesting
+  final XFile? initialThumbnail;
+
+  const UploadArticleView({
+    Key? key,
+    this.authStateStream,
+    this.initialThumbnail,
+  }) : super(key: key);
 
   @override
   State<UploadArticleView> createState() => _UploadArticleViewState();
@@ -27,6 +35,12 @@ class _UploadArticleViewState extends State<UploadArticleView> {
   final _descriptionController = TextEditingController();
   final _contentController = TextEditingController();
   XFile? _imageFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageFile = widget.initialThumbnail;
+  }
 
   @override
   void dispose() {
@@ -46,6 +60,14 @@ class _UploadArticleViewState extends State<UploadArticleView> {
 
   void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
+    if (_imageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add a thumbnail image to publish.'),
+        ),
+      );
+      return;
+    }
 
     final article = ArticleEntity(
       title: _titleController.text.trim(),
@@ -57,7 +79,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
 
     context.read<ArticleUploadCubit>().upload(
           article,
-          thumbnailFilePath: _imageFile?.path,
+          thumbnailFilePath: _imageFile!.path,
         );
   }
 
@@ -113,9 +135,13 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _descriptionController,
-                            decoration:
-                                const InputDecoration(labelText: 'Description'),
+                            decoration: const InputDecoration(
+                              labelText: 'Description *',
+                            ),
                             maxLines: 2,
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Required'
+                                : null,
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -139,7 +165,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                           OutlinedButton.icon(
                             onPressed: _pickImage,
                             icon: const Icon(Icons.image),
-                            label: const Text('Pick Thumbnail'),
+                            label: const Text('Pick thumbnail *'),
                           ),
                           if (_imageFile != null) ...[
                             const SizedBox(height: 8),
@@ -182,8 +208,9 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               alignment: Alignment.center,
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               child: Text(
-                                'No thumbnail selected — placeholder will be used',
+                                'Thumbnail required — tap "Pick thumbnail *" to choose an image',
                                 style: TextStyle(
                                     color: onSurface.withValues(
                                         alpha: onSurface.a * 0.5)),

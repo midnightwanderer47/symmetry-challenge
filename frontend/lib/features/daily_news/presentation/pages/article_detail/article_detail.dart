@@ -1,6 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -13,6 +11,7 @@ import '../../bloc/article/delete/delete_article_state.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
 import '../../../../../config/routes/routes.dart';
+import '../../widgets/article_network_image.dart';
 import '../../widgets/delete_article_dialog.dart';
 import '../../widgets/markdown_body_widget.dart';
 
@@ -156,29 +155,14 @@ class ArticleDetailsView extends HookWidget {
   }
 
   Widget _buildArticleImage() {
-    return Container(
-      width: double.maxFinite,
-      height: 250,
-      margin: const EdgeInsets.only(top: 14),
-      child: Builder(
-        builder: (context) {
-          final placeholderColor =
-              Theme.of(context).colorScheme.surfaceContainerHighest;
-          return CachedNetworkImage(
-            imageUrl: article!.displayImageUrl,
-            width: double.maxFinite,
-            height: 250,
-            fit: BoxFit.cover,
-            progressIndicatorBuilder: (context, url, progress) => Container(
-              color: placeholderColor,
-              child: const Center(child: CupertinoActivityIndicator()),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: placeholderColor,
-              child: const Center(child: Icon(Icons.error_outline)),
-            ),
-          );
-        },
+    final url = article!.networkImageUrl;
+    if (url == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: ArticleNetworkImage(
+        imageUrl: url,
+        width: double.maxFinite,
+        height: 250,
       ),
     );
   }

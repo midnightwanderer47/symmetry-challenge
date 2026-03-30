@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/formatting/date_formatter.dart';
 import '../../domain/entities/article.dart';
+import 'article_network_image.dart';
 
 String _displayAuthor(ArticleEntity article) {
   final name = (article.author ?? '').trim();
@@ -57,48 +56,19 @@ class ArticleWidget extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context) {
-    final placeholderColor =
-        Theme.of(context).colorScheme.surfaceContainerHighest;
-    return CachedNetworkImage(
-        imageUrl: article!.displayImageUrl,
-        imageBuilder: (context, imageProvider) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  decoration: BoxDecoration(
-                      color: placeholderColor,
-                      image: DecorationImage(
-                          image: imageProvider, fit: BoxFit.cover)),
-                ),
-              ),
-            ),
-        progressIndicatorBuilder: (context, url, downloadProgress) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  decoration: BoxDecoration(color: placeholderColor),
-                  child: const CupertinoActivityIndicator(),
-                ),
-              ),
-            ),
-        errorWidget: (context, url, error) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  decoration: BoxDecoration(color: placeholderColor),
-                  child: const Icon(Icons.error),
-                ),
-              ),
-            ));
+    final imageWidth = MediaQuery.of(context).size.width / 3;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 14),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: ArticleNetworkImage(
+          imageUrl: article!.networkImageUrl,
+          width: imageWidth,
+          height: double.maxFinite,
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+      ),
+    );
   }
 
   Widget _buildTitleAndDescription(BuildContext context) {
