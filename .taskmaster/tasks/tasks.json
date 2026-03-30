@@ -3870,7 +3870,7 @@
           "55",
           "57"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3878,9 +3878,10 @@
             "description": "Verify and add all required use cases, cubits, and routes in injection_container.dart and routes.dart as specified in task details.",
             "dependencies": [],
             "details": "Update frontend/lib/injection_container.dart with UpdateArticleUseCase, GetArticlesPageUseCase (lazySingleton), EditArticleCubit (factory), and home feed cubit to use GetArticlesPageUseCase. Add '/edit-article' route in frontend/lib/config/routes/routes.dart with BlocProvider for EditArticleCubit and EditArticleScreen. Test DI resolution by instantiating all cubits.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run flutter test on DI resolution; verify getIt<EditArticleCubit>() works without errors; navigate to edit route manually to confirm BlocProvider setup.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T04:57:39.490Z"
           },
           {
             "id": 2,
@@ -3890,21 +3891,23 @@
               1
             ],
             "details": "Test full upload→edit flow, pagination with load more, owner-only edit visibility (User A vs User B), direct Firestore security denial, markdown round-trip rendering, plus regression on upload/delete/News API/detail screens and performance checks for load time/memory leaks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use integration_test package; run all 9 scenarios on emulator/device; measure initial load time before/after pagination; use DevTools for memory leak detection during scroll/edit flows.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T04:57:45.445Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Split into: 1) Complete DI registrations and route configuration, 2) Comprehensive E2E testing across all features (upload→edit→pagination→security)."
+        "expansionPrompt": "Split into: 1) Complete DI registrations and route configuration, 2) Comprehensive E2E testing across all features (upload→edit→pagination→security).",
+        "updatedAt": "2026-03-30T04:57:45.445Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-30T02:27:09.664Z",
+      "lastModified": "2026-03-30T04:57:45.445Z",
       "taskCount": 58,
-      "completedCount": 57,
+      "completedCount": 58,
       "tags": [
         "master"
       ]

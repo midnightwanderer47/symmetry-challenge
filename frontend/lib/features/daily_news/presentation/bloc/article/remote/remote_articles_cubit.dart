@@ -26,6 +26,7 @@ class RemoteArticlesCubit extends Cubit<RemoteArticlesState> {
     }
 
     final pageResult = await _getArticlesPageUseCase(limit: 20);
+    if (isClosed) return;
     if (pageResult is DataSuccess && pageResult.data != null) {
       final page = pageResult.data!;
       final merged = [..._cachedNewsApiArticles, ...page.articles];

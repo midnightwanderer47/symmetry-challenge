@@ -16,15 +16,8 @@ class UserArticlesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => sl<UserArticlesCubit>()..fetchUserArticles(),
-        ),
-        BlocProvider(
-          create: (_) => sl<DeleteArticleCubit>(),
-        ),
-      ],
+    return BlocProvider(
+      create: (_) => sl<DeleteArticleCubit>(),
       child: BlocListener<DeleteArticleCubit, DeleteArticleState>(
         listener: (context, state) {
           if (state is DeleteArticleSuccess) {

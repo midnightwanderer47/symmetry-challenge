@@ -19,10 +19,13 @@ class UploadArticleView extends StatefulWidget {
   @visibleForTesting
   final XFile? initialThumbnail;
 
+  final VoidCallback? onSuccess;
+
   const UploadArticleView({
     Key? key,
     this.authStateStream,
     this.initialThumbnail,
+    this.onSuccess,
   }) : super(key: key);
 
   @override
@@ -36,11 +39,24 @@ class _UploadArticleViewState extends State<UploadArticleView> {
   final _descriptionController = TextEditingController();
   final _contentController = TextEditingController();
   XFile? _imageFile;
+  int _markdownResetKey = 0;
 
   @override
   void initState() {
     super.initState();
     _imageFile = widget.initialThumbnail;
+    _prefillAuthorFromCurrentUser();
+  }
+
+  void _resetForm() {
+    setState(() {
+      _titleController.clear();
+      _descriptionController.clear();
+      _contentController.clear();
+      _imageFile = null;
+      _markdownResetKey++;
+    });
+    _authorController.clear();
     _prefillAuthorFromCurrentUser();
   }
 
@@ -100,7 +116,11 @@ class _UploadArticleViewState extends State<UploadArticleView> {
       child: BlocConsumer<ArticleUploadCubit, ArticleUploadState>(
         listener: (context, state) {
           if (state is ArticleUploadSuccess) {
-            Navigator.pop(context, true);
+            _resetForm();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Article published successfully!')),
+            );
+            widget.onSuccess?.call();
           } else if (state is ArticleUploadFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -165,7 +185,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                           ),
                           const SizedBox(height: 4),
                           MarkdownEditorWidget(
-                            key: const Key('upload_article_content'),
+                            key: ValueKey('upload_article_content_$_markdownResetKey'),
                             onChanged: (val) => _contentController.text = val,
                             validator: (v) => v == null || v.trim().isEmpty
                                 ? 'Required'
