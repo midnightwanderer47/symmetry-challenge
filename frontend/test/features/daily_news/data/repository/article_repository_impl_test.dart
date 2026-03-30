@@ -146,7 +146,8 @@ void main() {
         _model(title: 'New Article', publishedAt: '2024-06-01'),
       ];
 
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -168,7 +169,8 @@ void main() {
         _model(title: 'Recent Article', publishedAt: '2024-05-01'),
       ];
 
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -241,7 +243,8 @@ void main() {
         _model(title: 'API Article', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -272,7 +275,8 @@ void main() {
     });
 
     test('returns empty list when both sources return empty', () async {
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -289,7 +293,8 @@ void main() {
   group('searchArticles', () {
     setUp(() {
       // Default stubs for getNewsArticles (used when query is empty)
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -414,7 +419,8 @@ void main() {
 
     test('passes raw (not pre-encoded) query to NewsAPI', () async {
       final newsApiModels = [_model(title: 'Search Result')];
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
             q: any(named: 'q'),
@@ -491,7 +497,8 @@ void main() {
     });
 
     test('debounce: rapid calls result in only one NewsAPI call', () async {
-      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles())
+          .thenAnswer((_) async => []);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
             q: any(named: 'q'),
