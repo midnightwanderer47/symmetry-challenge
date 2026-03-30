@@ -32,3 +32,7 @@ node_modules/
 .pub-cache/
 .pub/
 firepit-log.txt
+
+frontend/lib/firebase_options.dart
+frontend/android/app/google-services.json
+frontend/ios/Runner/GoogleService-Info.plist
