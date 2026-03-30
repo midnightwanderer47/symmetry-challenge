@@ -85,6 +85,7 @@ class UserArticlesScreen extends StatelessWidget {
                         article: article,
                         currentUserUid: currentUid,
                         isRemovable: isOwner,
+                        showYouBadge: false,
                         onRemove: isOwner
                             ? (ArticleEntity a) =>
                                 showDeleteArticleConfirmation(

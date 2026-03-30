@@ -43,6 +43,35 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
 
   @override
   Future<List<ArticleModel>> getUserArticles() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+    final uid = user.uid;
+    try {
+      // Use the same query shape as getUserArticlesPage (isUserArticle + createdAt)
+      // so the existing Firestore composite index applies. Filter by userId in memory
+      // to avoid requiring a separate userId+createdAt index (and to match only
+      // documents whose userId equals the signed-in account).
+      final snapshot = await _firestore
+          .collection('articles')
+          .where('isUserArticle', isEqualTo: true)
+          .orderBy('createdAt', descending: true)
+          .get();
+      final out = <ArticleModel>[];
+      for (final doc in snapshot.docs) {
+        final model = ArticleModel.fromFirestore(doc);
+        final id = (model.userId ?? '').trim();
+        if (id.isNotEmpty && id == uid) {
+          out.add(model);
+        }
+      }
+      return out;
+    } on FirebaseException {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ArticleModel>> getCommunityArticles() async {
     try {
       final snapshot = await _firestore
           .collection('articles')

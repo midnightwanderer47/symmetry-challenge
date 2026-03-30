@@ -82,7 +82,7 @@ void main() {
         _model(title: 'NewsAPI Article', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -104,7 +104,7 @@ void main() {
         _model(title: 'Duplicate Title', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -126,7 +126,7 @@ void main() {
         _model(title: 'hello world', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -146,7 +146,7 @@ void main() {
         _model(title: 'New Article', publishedAt: '2024-06-01'),
       ];
 
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -168,7 +168,7 @@ void main() {
         _model(title: 'Recent Article', publishedAt: '2024-05-01'),
       ];
 
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -186,7 +186,7 @@ void main() {
         _model(title: 'NewsAPI Article'),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenThrow(Exception('Firestore error'));
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -207,7 +207,7 @@ void main() {
         _model(title: 'Firestore Article', isUserArticle: true),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -223,7 +223,7 @@ void main() {
     });
 
     test('returns DataFailed when both sources fail', () async {
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenThrow(Exception('Firestore error'));
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -241,7 +241,7 @@ void main() {
         _model(title: 'API Article', isUserArticle: false),
       ];
 
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -258,7 +258,7 @@ void main() {
         _model(title: 'User Article', isUserArticle: true),
       ];
 
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -272,7 +272,7 @@ void main() {
     });
 
     test('returns empty list when both sources return empty', () async {
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -289,7 +289,7 @@ void main() {
   group('searchArticles', () {
     setUp(() {
       // Default stubs for getNewsArticles (used when query is empty)
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.getNewsArticles(
             apiKey: any(named: 'apiKey'),
             country: any(named: 'country'),
@@ -316,7 +316,7 @@ void main() {
         _model(title: 'Flutter News', isUserArticle: true),
         _model(title: 'Dart Programming', isUserArticle: true),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -340,7 +340,7 @@ void main() {
           isUserArticle: true,
         ),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModelsWithDesc);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -360,7 +360,7 @@ void main() {
         _model(title: 'Article: About Flutter', isUserArticle: true),
         _model(title: 'Unrelated Post', isUserArticle: true),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -379,7 +379,7 @@ void main() {
       final firestoreModels = [
         _model(title: 'Article — About  Something', isUserArticle: true),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -398,7 +398,7 @@ void main() {
       final firestoreModels = [
         _model(title: 'About the Article', isUserArticle: true),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -414,7 +414,7 @@ void main() {
 
     test('passes raw (not pre-encoded) query to NewsAPI', () async {
       final newsApiModels = [_model(title: 'Search Result')];
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
             q: any(named: 'q'),
@@ -439,7 +439,7 @@ void main() {
         _model(title: 'Shared Title', isUserArticle: false),
         _model(title: 'Unique API Article'),
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -460,7 +460,7 @@ void main() {
       final firestoreModels = [
         _model(title: 'Unrelated Article', isUserArticle: true)
       ];
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenAnswer((_) async => firestoreModels);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -476,7 +476,7 @@ void main() {
     });
 
     test('returns DataFailed when both sources fail', () async {
-      when(() => mockFirestore.getUserArticles())
+      when(() => mockFirestore.getCommunityArticles())
           .thenThrow(Exception('Firestore error'));
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
@@ -491,7 +491,7 @@ void main() {
     });
 
     test('debounce: rapid calls result in only one NewsAPI call', () async {
-      when(() => mockFirestore.getUserArticles()).thenAnswer((_) async => []);
+      when(() => mockFirestore.getCommunityArticles()).thenAnswer((_) async => []);
       when(() => mockNewsApiService.searchNewsArticles(
             apiKey: any(named: 'apiKey'),
             q: any(named: 'q'),

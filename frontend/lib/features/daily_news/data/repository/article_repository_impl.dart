@@ -152,7 +152,7 @@ class ArticleRepositoryImpl implements ArticleRepository {
   }
 
   Future<List<ArticleEntity>> _fetchFirestoreArticles() async {
-    final models = await _firestoreDataSource.getUserArticles();
+    final models = await _firestoreDataSource.getCommunityArticles();
     return models.map((m) => m.toEntity()).toList();
   }
 

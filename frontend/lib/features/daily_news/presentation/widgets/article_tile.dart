@@ -24,6 +24,7 @@ class ArticleWidget extends StatelessWidget {
   final void Function(ArticleEntity article)? onRemove;
   final void Function(ArticleEntity article)? onArticlePressed;
   final String? currentUserUid;
+  final bool showYouBadge;
 
   const ArticleWidget({
     Key? key,
@@ -32,6 +33,7 @@ class ArticleWidget extends StatelessWidget {
     this.isRemovable = false,
     this.onRemove,
     this.currentUserUid,
+    this.showYouBadge = true,
   }) : super(key: key);
 
   @override
@@ -142,7 +144,8 @@ class ArticleWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (_isCurrentUserArticle(article!, currentUserUid)) ...[
+                  if (showYouBadge &&
+                      _isCurrentUserArticle(article!, currentUserUid)) ...[
                     const SizedBox(width: 6),
                     DecoratedBox(
                       decoration: BoxDecoration(
