@@ -49,7 +49,6 @@ Adding `firestoreId` and `userId` to the local SQLite schema mid-development req
 - Replace anonymous auth with proper sign-in (Google/email) for article ownership.
 - Add offline-first support by syncing Firestore to the local Floor database.
 - Extract the `ArticleRepositoryImpl` merge logic into a dedicated `FeedAggregator` service — it's doing too much.
-- Add CI/CD with GitHub Actions to run tests on PR.
 
 ---
 
@@ -86,6 +85,7 @@ Key flows to demonstrate:
 | **Article Editing**      | Authors can update their own articles post-publish via `EditArticleCubit` + Firestore `update`  |
 | **Markdown Editor**      | `MarkdownEditorWidget` replaces plain text field on both upload and edit screens                |
 | **Test Suite**           | 9 test files covering unit, widget, cubit, and integration tests                                |
+| **GitHub Actions CI**    | PRs and pushes to `main` run `just ci` (tests, analyze, format check) via `.github/workflows/flutter-ci.yml` |
 
 ### Prototypes Created
 
