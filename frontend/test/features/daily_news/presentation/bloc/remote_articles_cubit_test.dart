@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -52,14 +54,19 @@ void main() {
   }
 
   test('initial state before auto-fetch completes is RemoteArticlesLoading',
-      () {
+      () async {
+    final completer = Completer<DataState<List<ArticleEntity>>>();
     when(() => mockUseCase(params: any(named: 'params')))
-        .thenAnswer((_) async => const DataSuccess([]));
+        .thenAnswer((_) => completer.future);
     when(() => mockPageUseCase(
             limit: any(named: 'limit'), startAfter: any(named: 'startAfter')))
         .thenAnswer((_) async => const DataSuccess(_emptyPage));
+
     final cubit = RemoteArticlesCubit(mockUseCase, mockPageUseCase);
     expect(cubit.state, const RemoteArticlesLoading());
+
+    completer.complete(const DataSuccess([]));
+    await pumpEventQueue();
     cubit.close();
   });
 

@@ -120,3 +120,60 @@ features/daily_news/
 **9 use cases** cover the full CRUD surface: upload, get, search, save, remove, delete, get user articles, upload thumbnail, and get single article.
 
 **GetIt** is used for dependency injection — all dependencies are registered at app startup in `injection_container.dart`.
+
+---
+
+## 8. Running the app (iOS and Android simulators)
+
+This section explains how to run the Flutter frontend on **iOS Simulator** and **Android Emulator** from a clone of this repository. It follows the same spirit as [Extra Sections](docs/REPORT_INSTRUCTIONS.md) in the report instructions.
+
+### Prerequisites
+
+- **Flutter** installed and on your `PATH` (`flutter doctor` should show Xcode / Android toolchain as configured for the platforms you use).
+- **Firebase client config** generated locally (these files are not committed; see [`frontend/README.md`](frontend/README.md)):
+  - `frontend/lib/firebase_options.dart`
+  - `frontend/android/app/google-services.json`
+  - `frontend/ios/Runner/GoogleService-Info.plist`
+- From the repo root, install dependencies: `just get` (runs `flutter pub get` in `frontend/`).
+
+### iOS Simulator (macOS only)
+
+1. Install **Xcode** from the App Store and accept the license; open Xcode once so components finish installing.
+2. Start a simulator: **Xcode → Open Developer Tool → Simulator**, or run `open -a Simulator`.
+3. From the **repository root**, list devices and confirm an iOS simulator appears:
+
+   ```bash
+   cd frontend && flutter devices
+   ```
+
+4. Run the app on the booted simulator (from repo root):
+
+   ```bash
+   just run -d ios
+   ```
+
+   If you have multiple iOS devices listed, pass a specific device id: `just run -d <device_id>` (use the id from `flutter devices`).
+
+### Android Emulator
+
+1. Install **Android Studio** and, via **SDK Manager**, install an Android SDK and at least one **system image** (e.g. Pixel API 34).
+2. Create and start a virtual device: **Android Studio → Device Manager →** create/start an AVD, or from a terminal:
+
+   ```bash
+   flutter emulators
+   flutter emulators --launch <emulator_id>
+   ```
+
+3. From the **repository root**, run:
+
+   ```bash
+   just run -d android
+   ```
+
+   Or target a specific device: `just run -d <device_id>` after `flutter devices`.
+
+### Troubleshooting
+
+- **`flutter doctor`** — fix any red items (licenses: `flutter doctor --android-licenses`).
+- **No devices** — boot the simulator or emulator *before* `flutter run`; only one command is needed if exactly one device is online.
+- **Firebase errors at startup** — ensure the three Firebase files above exist and match your Firebase project (`flutterfire configure` from `frontend/`).
