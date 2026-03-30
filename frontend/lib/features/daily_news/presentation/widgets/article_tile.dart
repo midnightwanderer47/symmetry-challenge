@@ -4,6 +4,20 @@ import 'package:flutter/material.dart';
 import '../../../../core/formatting/date_formatter.dart';
 import '../../domain/entities/article.dart';
 
+String _displayAuthor(ArticleEntity article) {
+  final name = (article.author ?? '').trim();
+  if (name.isEmpty) return 'Unknown author';
+  return name;
+}
+
+bool _isCurrentUserArticle(ArticleEntity article, String? currentUserUid) {
+  return article.isUserArticle &&
+      currentUserUid != null &&
+      article.userId != null &&
+      article.userId!.isNotEmpty &&
+      article.userId == currentUserUid;
+}
+
 class ArticleWidget extends StatelessWidget {
   final ArticleEntity? article;
   final bool? isRemovable;
@@ -96,7 +110,7 @@ class ArticleWidget extends StatelessWidget {
             // Title
             Text(
               article!.title ?? '',
-              maxLines: 3,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Butler',
@@ -106,27 +120,61 @@ class ArticleWidget extends StatelessWidget {
               ),
             ),
 
-            if (article!.isUserArticle &&
-                currentUserUid != null &&
-                article!.userId != null &&
-                article!.userId!.isNotEmpty &&
-                article!.userId == currentUserUid)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'YOU',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      _displayAuthor(article!),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  if (_isCurrentUserArticle(article!, currentUserUid)) ...[
+                    const SizedBox(width: 6),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withValues(alpha: 0.45),
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
+                        child: Text(
+                          'You',
+                          style: TextStyle(
+                            fontSize: 9,
+                            height: 1.2,
+                            letterSpacing: 0.2,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
+            ),
 
             // Description
             Expanded(
