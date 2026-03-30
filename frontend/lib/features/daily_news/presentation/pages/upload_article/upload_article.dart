@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/upload/article_upload_state.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/markdown_editor_widget.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 
 class UploadArticleView extends StatefulWidget {
@@ -127,44 +128,12 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                     ),
                           ),
                           const SizedBox(height: 4),
-                          TextFormField(
+                          MarkdownEditorWidget(
                             key: const Key('upload_article_content'),
-                            controller: _contentController,
-                            decoration:
-                                const InputDecoration.collapsed(hintText: ''),
-                            minLines: 6,
-                            maxLines: null,
-                            textAlignVertical: TextAlignVertical.top,
-                            keyboardType: TextInputType.multiline,
-                            stylusHandwritingEnabled: false,
+                            onChanged: (val) => _contentController.text = val,
                             validator: (v) => v == null || v.trim().isEmpty
                                 ? 'Required'
                                 : null,
-                          ),
-                          Divider(
-                              height: 1,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.38)),
-                          const SizedBox(height: 8),
-                          Text.rich(
-                            TextSpan(
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: onSurface.withValues(
-                                      alpha: onSurface.a * 0.5)),
-                              children: const [
-                                TextSpan(text: 'Supported: '),
-                                TextSpan(
-                                    text: '# Heading',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                TextSpan(
-                                    text:
-                                        ', **bold**, _italic_, - lists, line breaks'),
-                              ],
-                            ),
                           ),
                           const SizedBox(height: 12),
                           OutlinedButton.icon(

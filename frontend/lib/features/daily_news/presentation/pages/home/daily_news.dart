@@ -93,7 +93,7 @@ class DailyNews extends StatelessWidget {
               body: const Center(child: Icon(Icons.refresh)));
         }
         if (state is RemoteArticlesLoaded) {
-          return _buildArticlesPage(context, state.articles);
+          return _buildArticlesPage(context, state);
         }
         return const SizedBox();
       },
@@ -101,24 +101,38 @@ class DailyNews extends StatelessWidget {
   }
 
   Widget _buildArticlesPage(
-      BuildContext context, List<ArticleEntity> articles) {
+      BuildContext context, RemoteArticlesLoaded state) {
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    List<Widget> articleWidgets = [];
-    for (var article in articles) {
-      articleWidgets.add(ArticleWidget(
-        article: article,
-        currentUserUid: currentUid,
-        onArticlePressed: (article) => _onArticlePressed(context, article),
-      ));
-    }
+    final articles = state.articles;
 
     return Scaffold(
       appBar: _buildAppbar(context),
       body: RefreshIndicator(
         onRefresh: () => context.read<RemoteArticlesCubit>().refresh(),
-        child: ListView(
+        child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: articleWidgets,
+          itemCount: articles.length + (state.hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == articles.length) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: state.isLoadingMore
+                    ? const Center(child: CupertinoActivityIndicator())
+                    : Center(
+                        child: TextButton(
+                          onPressed: () =>
+                              context.read<RemoteArticlesCubit>().loadMore(),
+                          child: const Text('Load more'),
+                        ),
+                      ),
+              );
+            }
+            return ArticleWidget(
+              article: articles[index],
+              currentUserUid: currentUid,
+              onArticlePressed: (article) => _onArticlePressed(context, article),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -150,9 +164,13 @@ class DailyNews extends StatelessWidget {
     );
   }
 
-  void _onArticlePressed(BuildContext context, ArticleEntity article) {
-    Navigator.pushNamed(context, AppRoutes.articleDetailsRoute,
+  void _onArticlePressed(BuildContext context, ArticleEntity article) async {
+    final result = await Navigator.pushNamed(
+        context, AppRoutes.articleDetailsRoute,
         arguments: article);
+    if (result == true && context.mounted) {
+      context.read<RemoteArticlesCubit>().refresh();
+    }
   }
 
   void _onShowSavedArticlesViewTapped(BuildContext context) {

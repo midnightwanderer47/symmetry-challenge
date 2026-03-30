@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_articles_page.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/upload_article_thumbnail.dart';
@@ -27,7 +28,8 @@ class _MockUser extends Mock implements User {}
 /// Seeded RemoteArticlesCubit that never calls the use case.
 class _SeededRemoteCubit extends RemoteArticlesCubit {
   _SeededRemoteCubit(RemoteArticlesState initial)
-      : super(GetArticleUseCase(_MockRepository())) {
+      : super(GetArticleUseCase(_MockRepository()),
+            GetArticlesPageUseCase(_MockRepository())) {
     emit(initial);
   }
 

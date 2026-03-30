@@ -8,7 +8,9 @@ import 'package:news_app_clean_architecture/features/daily_news/data/data_source
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/storage/firebase_storage_data_source.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/entities/paginated_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 
 import '../data_sources/remote/news_api_service.dart';
@@ -255,6 +257,30 @@ class ArticleRepositoryImpl implements ArticleRepository {
     try {
       await _firestoreDataSource.deleteArticle(firestoreId);
       return const DataSuccess(null);
+    } catch (e) {
+      return DataFailed(DioError(
+        error: e,
+        requestOptions: RequestOptions(path: ''),
+      ));
+    }
+  }
+
+  @override
+  Future<DataState<PaginatedArticles>> getArticlesPage({
+    required int limit,
+    Object? startAfter,
+  }) async {
+    try {
+      final result = await _firestoreDataSource.getUserArticlesPage(
+        limit: limit,
+        startAfter: startAfter as DocumentSnapshot?,
+      );
+      final entities = result.articles.map((m) => m.toEntity()).toList();
+      return DataSuccess(PaginatedArticles(
+        articles: entities,
+        hasMore: result.hasMore,
+        cursor: result.lastDocument,
+      ));
     } catch (e) {
       return DataFailed(DioError(
         error: e,

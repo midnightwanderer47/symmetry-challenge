@@ -10,6 +10,7 @@ import 'package:news_app_clean_architecture/features/daily_news/data/data_source
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_articles_page.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/update_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
@@ -81,6 +82,8 @@ Future<void> initializeDependencies() async {
 
   sl.registerSingleton<UpdateArticleUseCase>(UpdateArticleUseCase(sl()));
 
+  sl.registerSingleton<GetArticlesPageUseCase>(GetArticlesPageUseCase(sl()));
+
   //Blocs
   sl.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(sl(), sl()));
 
@@ -88,7 +91,7 @@ Future<void> initializeDependencies() async {
 
   sl.registerFactory<RemoteArticlesBloc>(() => RemoteArticlesBloc(sl()));
 
-  sl.registerFactory<RemoteArticlesCubit>(() => RemoteArticlesCubit(sl()));
+  sl.registerFactory<RemoteArticlesCubit>(() => RemoteArticlesCubit(sl(), sl()));
 
   sl.registerFactory<LocalArticleBloc>(
       () => LocalArticleBloc(sl(), sl(), sl()));

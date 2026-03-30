@@ -3550,7 +3550,7 @@
         "dependencies": [
           "50"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3558,9 +3558,10 @@
             "description": "Implement the PaginatedArticlesResult class in the data models layer as specified.",
             "dependencies": [],
             "details": "Create file at frontend/lib/features/daily_news/data/models/paginated_articles_result.dart with the provided PaginatedArticlesResult class including List<ArticleModel> articles, DocumentSnapshot? lastDocument cursor, and bool hasMore flag. Ensure proper import of cloud_firestore and ArticleModel.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test model constructor and serialization: verify articles list, lastDocument null handling, and hasMore flag with valid/invalid inputs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T01:00:05.857Z"
           },
           {
             "id": 2,
@@ -3570,9 +3571,10 @@
               1
             ],
             "details": "In the FirestoreArticleDataSource interface file, add Future<PaginatedArticlesResult> getUserArticlesPage({required int limit, DocumentSnapshot? startAfter}) method exactly as specified. Ensure proper import of PaginatedArticlesResult model.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify interface compilation: ensure method signature is correctly declared and type-checks with implementation.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T01:00:07.578Z"
           },
           {
             "id": 3,
@@ -3583,9 +3585,10 @@
               2
             ],
             "details": "Add const int kDefaultPageSize = 20; then implement the provided query logic: collection('articles').where('isUserArticle', isEqualTo: true).orderBy('createdAt', descending: true).limit(limit).startAfterDocument if provided. Map to ArticleModel.fromFirestore and construct PaginatedArticlesResult with hasMore = querySnapshot.docs.length == limit.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test with fake_cloud_firestore: seed 25 user articles, test page size 20 returns 20 with hasMore=true and valid cursor, second page with startAfter returns 5 with hasMore=false.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T01:00:09.339Z"
           },
           {
             "id": 4,
@@ -3595,9 +3598,10 @@
               3
             ],
             "details": "Add try-catch for Firestore exceptions, validate ArticleModel.fromFirestore doesn't throw, handle empty querySnapshot gracefully (empty list, null lastDocument, hasMore=false), ensure querySnapshot.docs.last is safely accessed.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test edge cases: empty collection returns empty PaginatedArticlesResult, invalid startAfter document throws meaningful error, network failure handled gracefully.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T01:00:11.071Z"
           },
           {
             "id": 5,
@@ -3608,14 +3612,16 @@
               4
             ],
             "details": "Write tests for: 1) First page with >limit articles (hasMore=true, valid cursor), 2) Subsequent page with startAfter, 3) Last page (hasMore=false), 4) Empty collection, 5) Exactly limit articles (hasMore=false), 6) Invalid cursor handling. Use 25 seeded articles ordered by createdAt desc.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration-style unit tests with fake_cloud_firestore: verify article count, hasMore flag accuracy, lastDocument cursor validity for chaining pages, ArticleModel deserialization, query filters (isUserArticle=true only).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T01:00:12.845Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 0,
-        "expansionPrompt": ""
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-30T01:00:12.845Z"
       },
       {
         "id": "54",
@@ -3627,7 +3633,7 @@
         "dependencies": [
           "53"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3635,9 +3641,10 @@
             "description": "Create the domain-level PaginatedArticles entity and extend ArticleRepository interface and ArticleRepositoryImpl with getArticlesPage method implementing News API merge strategy.",
             "dependencies": [],
             "details": "1. Create paginated_articles.dart with PaginatedArticles class (List<ArticleEntity>, bool hasMore, dynamic cursor). 2. Add getArticlesPage method to ArticleRepository interface. 3. Implement getArticlesPage in ArticleRepositoryImpl: call _firestoreDataSource.getUserArticlesPage, convert to entities, handle News API cache merge (prepend on first page, append Firestore only on subsequent), document merge ordering, wrap in DataState.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test repository method: mock FirestoreDataSource, verify entity conversion, cursor passing, hasMore logic, News API merge (first page prepends cache, subsequent appends only Firestore), error handling with DataFailed.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:01:12.686Z"
           },
           {
             "id": 2,
@@ -3647,14 +3654,16 @@
               1
             ],
             "details": "1. Create GetArticlesPageUseCase class with constructor taking ArticleRepository, call method forwarding limit and startAfter parameters. 2. Add DI registration in injection_container.dart: getIt.registerLazySingleton<GetArticlesPageUseCase>(() => GetArticlesPageUseCase(getIt()));",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test use case: mock ArticleRepository, verify getArticlesPage called with correct limit/startAfter, returns DataSuccess/DataFailed states unchanged. Verify DI registration by resolving use case and checking non-null repository injection.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:01:14.428Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Split into: 1) Create domain PaginatedArticles entity and repository method with News API merge strategy, 2) Implement GetArticlesPageUseCase and DI registration."
+        "expansionPrompt": "Split into: 1) Create domain PaginatedArticles entity and repository method with News API merge strategy, 2) Implement GetArticlesPageUseCase and DI registration.",
+        "updatedAt": "2026-03-30T02:01:14.428Z"
       },
       {
         "id": "55",
@@ -3666,7 +3675,7 @@
         "dependencies": [
           "54"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3674,9 +3683,10 @@
             "description": "Add pagination state fields to RemoteArticlesState and implement modified getArticles() and new loadMore() methods in the home feed cubit.",
             "dependencies": [],
             "details": "Locate existing RemoteArticlesCubit, extend RemoteArticlesState with isLoadingMore, hasMore, cursor fields and their copyWith methods. Update getArticles() to fetch News API once and merge with first Firestore page. Add loadMore() that appends new pages using startAfter cursor without re-fetching News API.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit test initial load merges News API + Firestore correctly, loadMore() appends articles and updates state, no-op when isLoadingMore or !hasMore, News API cached (not called in loadMore).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:27:03.375Z"
           },
           {
             "id": 2,
@@ -3686,9 +3696,10 @@
               1
             ],
             "details": "In existing BlocBuilder, add conditional Load More button when hasMore (Option A) OR implement ScrollController listener triggering at 200px from bottom (Option B). Show CircularProgressIndicator during isLoadingMore. Add ScaffoldMessenger for error retry snackbar.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test renders button/listener correctly, button tap/scroll triggers loadMore(), shows loading indicator, error snackbar displays with retry action.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:27:07.812Z"
           },
           {
             "id": 3,
@@ -3698,14 +3709,16 @@
               1
             ],
             "details": "In DI config (getIt or similar), register GetArticlesPageUseCase and inject into RemoteArticlesCubit constructor. Add private field _cachedNewsApiArticles to cubit. Test that getArticles() stores News API once, loadMore() uses cached without re-fetch.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify DI resolves cubit with use case, unit test cubit confirms News API called only in getArticles(), loadMore() uses cached list, integration test full flow.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:27:09.664Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divide into: 1) Update RemoteArticlesState and cubit methods (getArticles, loadMore), 2) Implement UI pagination trigger (button or scroll listener), 3) Update DI and test News API caching."
+        "expansionPrompt": "Divide into: 1) Update RemoteArticlesState and cubit methods (getArticles, loadMore), 2) Implement UI pagination trigger (button or scroll listener), 3) Update DI and test News API caching.",
+        "updatedAt": "2026-03-30T02:27:09.664Z"
       },
       {
         "id": "56",
@@ -3715,7 +3728,7 @@
         "testStrategy": "1. Widget test: verify `MarkdownEditorWidget` renders with initial value.\n2. Widget test: verify toolbar buttons are present (bold, italic, heading, list).\n3. Widget test: tap bold button with text selected → verify `**` wrapping is inserted.\n4. Widget test: tap italic button → verify `_` wrapping.\n5. Widget test: verify `onChanged` callback fires with the correct markdown string.\n6. Widget test: verify character counter displays and updates.\n7. Smoke test on iOS and Android emulators to verify no platform-specific rendering issues.\n8. Test that the output string is valid markdown that renders correctly in `ArticleMarkdownBody`.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3723,9 +3736,10 @@
             "description": "Research and evaluate the specified packages (markdown_editable_textinput, simple_markdown_editor, flutter_quill) against criteria: null-safety, Flutter 3.x+ support, toolbar with bold/italic/heading/list, plain markdown output, minimal dependencies. Add selected package to pubspec.yaml.",
             "dependencies": [],
             "details": "Check pub.dev for each package's latest version, null-safety status, dependencies count, last publish date, and example usage. Verify toolbar features via demos/docs. Run `flutter pub get` after adding to pubspec.yaml. Prioritize lightweight options per task spec.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify package installs without conflicts via `flutter pub get`. Check app compiles with import statement. Confirm package version supports Flutter 3.x+ via CHANGELOG.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:27.447Z"
           },
           {
             "id": 2,
@@ -3735,9 +3749,10 @@
               1
             ],
             "details": "Follow provided skeleton code. Configure package-specific widget (e.g., MarkdownFormField) with enableToolBar: true. Ensure outputs plain markdown string. Handle controller lifecycle properly. Test with initialValue to verify state preservation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: renders with initialValue. Integration test: toolbar buttons visible and functional. Verify onChanged callback emits markdown-formatted string.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:29.194Z"
           },
           {
             "id": 3,
@@ -3747,14 +3762,16 @@
               2
             ],
             "details": "Build _MarkdownToolbar with IconButtons using _wrapSelection for wrapping selection (**bold**, _italic_) and line manipulation (## heading, - bullet). Add Text below editor: '${_controller.text.length}/50000'. Wrap toolbar in SingleChildScrollView(horizontal).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: toolbar scrolls horizontally on small screens. Test _wrapSelection: select text → tap bold → verify **wrapping**. Verify counter updates live. Test heading/bullet inserts at line start.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:31.138Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down: 1) Evaluate and select markdown editor package, 2) Create MarkdownEditorWidget with toolbar integration, 3) Implement custom toolbar fallback and character counter."
+        "expansionPrompt": "Break down: 1) Evaluate and select markdown editor package, 2) Create MarkdownEditorWidget with toolbar integration, 3) Implement custom toolbar fallback and character counter.",
+        "updatedAt": "2026-03-30T02:23:31.138Z"
       },
       {
         "id": "57",
@@ -3767,7 +3784,7 @@
           "52",
           "56"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -3775,9 +3792,10 @@
             "description": "Locate the content TextFormField in upload_article.dart and replace it with MarkdownEditorWidget using empty initialValue.",
             "dependencies": [],
             "details": "In frontend/lib/features/daily_news/presentation/pages/upload_article/upload_article.dart, replace the existing TextFormField for _content with MarkdownEditorWidget(initialValue: '', onChanged: (value) { setState(() => _content = value); }, validator: same as original). Check if using shared ArticleFormWidget from task 52.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Verify upload screen renders MarkdownEditorWidget instead of TextFormField. Test onChanged updates _content state correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:38.699Z"
           },
           {
             "id": 2,
@@ -3785,9 +3803,10 @@
             "description": "Replace content field in edit_article.dart with MarkdownEditorWidget pre-filled with existing article content.",
             "dependencies": [],
             "details": "In edit_article.dart, replace TextFormField with MarkdownEditorWidget(initialValue: widget.article.content, onChanged: (value) => setState(() => _content = value), validator: check for empty/null and length >50000). Ensure state updates properly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Verify edit screen renders MarkdownEditorWidget with pre-filled widget.article.content. Test editing updates _content.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:40.496Z"
           },
           {
             "id": 3,
@@ -3798,9 +3817,10 @@
               2
             ],
             "details": "If MarkdownEditorWidget is not a FormField, wrap it in FormField or manually trigger validation before form submission. Implement validator that checks for null/empty content and length exceeding 50,000 characters. Test form submission with invalid content.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Submit form with empty content (should show error), with content >50k chars (error), valid content (success).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:42.296Z"
           },
           {
             "id": 4,
@@ -3811,9 +3831,10 @@
               2
             ],
             "details": "Add character counter below MarkdownEditorWidget showing current length / 50,000. Color code counter (green <80%, yellow 80-95%, red >95%). Update counter in onChanged callback. Ensure real-time feedback during typing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Widget test: Verify counter updates on typing, shows correct length, changes color at thresholds, prevents submission over limit.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:44.097Z"
           },
           {
             "id": 5,
@@ -3826,14 +3847,16 @@
               4
             ],
             "details": "Create test article with markdown (headers, bold, lists), save via upload screen, verify renders correctly in detail view via ArticleMarkdownBody. Edit article, verify markdown preserves round-trip integrity. Test with Firestore emulator if available.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration test: Write markdown in editor → save → navigate to detail → verify rendered output matches input. Test edit → resave → verify no corruption.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T02:23:45.907Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 0,
-        "expansionPrompt": ""
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-30T02:23:45.907Z"
       },
       {
         "id": "58",
@@ -3879,9 +3902,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-30T00:08:05.020Z",
+      "lastModified": "2026-03-30T02:27:09.664Z",
       "taskCount": 58,
-      "completedCount": 52,
+      "completedCount": 57,
       "tags": [
         "master"
       ]
