@@ -53,7 +53,7 @@ Adding `firestoreId` and `userId` to the local SQLite schema mid-development req
 
 ## 5. Proof of the Project
 
-> A [screen recording](https://drive.google.com/file/d/1h8nXDJVWfGTPRjJaxyneXyUF0Sysy-EY/view?usp=drive_link) is available on Google Drive.
+> A screen recording: https://drive.google.com/file/d/1h8nXDJVWfGTPRjJaxyneXyUF0Sysy-EY/view?usp=drive_link is available on Google Drive.
 
 Key flows to demonstrate:
 
