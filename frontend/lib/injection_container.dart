@@ -10,6 +10,7 @@ import 'package:news_app_clean_architecture/features/daily_news/data/data_source
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/delete_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/update_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_user_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/search_articles.dart';
@@ -25,6 +26,7 @@ import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'features/daily_news/presentation/bloc/article/delete/delete_article_cubit.dart';
+import 'features/daily_news/presentation/bloc/article/edit/edit_article_cubit.dart';
 import 'features/daily_news/presentation/bloc/article/search/search_articles_cubit.dart';
 import 'features/daily_news/presentation/bloc/theme/theme_cubit.dart';
 
@@ -77,6 +79,8 @@ Future<void> initializeDependencies() async {
 
   sl.registerSingleton<DeleteArticleUseCase>(DeleteArticleUseCase(sl()));
 
+  sl.registerSingleton<UpdateArticleUseCase>(UpdateArticleUseCase(sl()));
+
   //Blocs
   sl.registerFactory<ArticleUploadCubit>(() => ArticleUploadCubit(sl(), sl()));
 
@@ -92,6 +96,8 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<SearchArticlesCubit>(() => SearchArticlesCubit(sl()));
 
   sl.registerFactory<DeleteArticleCubit>(() => DeleteArticleCubit(sl()));
+
+  sl.registerFactory<EditArticleCubit>(() => EditArticleCubit(sl(), sl()));
 
   sl.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
 }

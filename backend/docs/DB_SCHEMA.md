@@ -15,6 +15,7 @@ articles/{docId}
 ├── content: string (required)
 ├── thumbnailURL: string (Cloud Storage path: media/articles/{filename})
 ├── createdAt: timestamp (required)
+├── updatedAt: timestamp? (set server-side on update, absent on initial creation)
 └── isUserArticle: boolean (true for user uploads)
 ```
 
@@ -33,6 +34,7 @@ articles/{docId}
 | `content`      | string    | ✅        | Full article body text. Must be non-empty.                                  |
 | `thumbnailURL` | string    | ❌        | Cloud Storage path to the article thumbnail image (see format below).       |
 | `createdAt`    | timestamp | ✅        | Timestamp when this Firestore document was created.                         |
+| `updatedAt`    | timestamp | ❌        | Timestamp of the last update. Set server-side via `FieldValue.serverTimestamp()` on edit; absent until first update. |
 | `isUserArticle`| boolean   | ✅        | `true` for user-uploaded articles; `false` for articles fetched from external APIs. |
 
 ---
@@ -47,6 +49,7 @@ articles/{docId}
 | `url`          | Optional; if present, must be a valid URL string    |
 | `publishedAt`  | Valid Firestore Timestamp, must not be in the future |
 | `createdAt`    | Valid Firestore Timestamp; set server-side on write  |
+| `updatedAt`    | Valid Firestore Timestamp; set server-side on update via `FieldValue.serverTimestamp()`; optional |
 | `isUserArticle`| Must be explicitly set; no default assumed           |
 
 ---
@@ -114,4 +117,5 @@ This schema maps to the Flutter `ArticleEntity` domain model:
 | `content`        | `content`              |                                       |
 | `thumbnailURL`   | `thumbnailURL`         | New field — Cloud Storage path         |
 | `createdAt`      | `createdAt`            | New field                             |
+| `updatedAt`      | `updatedAt`            | Optional; absent until first update   |
 | `isUserArticle`  | `isUserArticle`        | New field                             |

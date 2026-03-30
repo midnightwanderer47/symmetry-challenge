@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,11 +56,13 @@ class SavedArticles extends HookWidget {
       return const Center(child: Text('NO SAVED ARTICLES'));
     }
 
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
     return ListView.builder(
       itemCount: articles.length,
       itemBuilder: (context, index) {
         return ArticleWidget(
           article: articles[index],
+          currentUserUid: currentUid,
           isRemovable: true,
           onRemove: (article) => _onRemoveArticle(context, article),
           onArticlePressed: (article) => _onArticlePressed(context, article),

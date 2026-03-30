@@ -3225,13 +3225,663 @@
         "recommendedSubtasks": 3,
         "expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently.",
         "updatedAt": "2026-03-29T16:13:02.998Z"
+      },
+      {
+        "id": "49",
+        "title": "Update Firestore Security Rules for Ownership Checks on Create and Update",
+        "description": "Update `backend/firestore.rules` to enforce userId ownership on both `create` and `update` operations for the `articles` collection, ensuring only the authenticated author can create articles with their own userId and only edit their own documents.",
+        "details": "Open `backend/firestore.rules` and modify the `articles/{docId}` rules:\n\n1. **Create rule**: Change from allowing any authenticated user to requiring `request.resource.data.userId == request.auth.uid`. This prevents userId spoofing on upload. The client already sets `userId` to `currentUser.uid` in `ArticleUploadCubit`, so no client change is needed.\n\n2. **Update rule**: Add `resource.data.userId == request.auth.uid` to ensure only the document owner can update. Also add `request.resource.data.userId == resource.data.userId` to prevent changing the userId field. Additionally enforce immutability of `createdAt` and `isUserArticle` fields:\n   - `request.resource.data.createdAt == resource.data.createdAt`\n   - `request.resource.data.isUserArticle == resource.data.isUserArticle`\n\n3. **Delete rule**: Already checks `resource.data.userId == request.auth.uid` — no change needed.\n\nPseudo-code for rules:\n```\nmatch /articles/{docId} {\n  allow read: if true;\n  allow create: if request.auth != null\n    && request.resource.data.userId == request.auth.uid\n    && request.resource.data.keys().hasAll(['title', 'content', 'userId', 'createdAt', 'isUserArticle']);\n  allow update: if request.auth != null\n    && resource.data.userId == request.auth.uid\n    && request.resource.data.userId == resource.data.userId\n    && request.resource.data.createdAt == resource.data.createdAt\n    && request.resource.data.isUserArticle == resource.data.isUserArticle;\n  allow delete: if request.auth != null\n    && resource.data.userId == request.auth.uid;\n}\n```\n\nDeploy rules using `firebase deploy --only firestore:rules`. Test with the Firebase emulator suite before deploying to production.",
+        "testStrategy": "1. Use Firebase Emulator Suite to write integration tests for the security rules.\n2. Test that an authenticated user can create an article with their own userId.\n3. Test that an authenticated user CANNOT create an article with a different userId.\n4. Test that the article owner can update mutable fields (title, description, content, thumbnail).\n5. Test that a non-owner authenticated user CANNOT update another user's article.\n6. Test that immutable fields (userId, createdAt, isUserArticle) cannot be changed on update.\n7. Test that the existing delete ownership check still works.\n8. E2E test: verify the existing upload flow still works after rule deployment.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Locate and Backup Current Firestore Rules File",
+            "description": "Navigate to the backend/firestore.rules file and create a backup copy before making any modifications to prevent accidental data loss.",
+            "dependencies": [],
+            "details": "Use version control (git) to commit current rules or manually copy the file as firestore.rules.backup. Verify the file path matches project structure.",
+            "status": "done",
+            "testStrategy": "Confirm backup exists and original file is unmodified by diffing against backup.",
+            "updatedAt": "2026-03-29T23:49:13.983Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Update Create Rule for Articles Collection",
+            "description": "Modify the create rule in the articles/{docId} match block to enforce request.resource.data.userId == request.auth.uid and required fields validation.",
+            "dependencies": [
+              1
+            ],
+            "details": "Replace existing create rule with: allow create: if request.auth != null && request.resource.data.userId == request.auth.uid && request.resource.data.keys().hasAll(['title', 'content', 'userId', 'createdAt', 'isUserArticle']);",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:49:15.764Z"
+          },
+          {
+            "id": 3,
+            "title": "Update Update Rule for Ownership and Immutability",
+            "description": "Update the update rule to check document ownership and prevent changes to userId, createdAt, and isUserArticle fields.",
+            "dependencies": [
+              1
+            ],
+            "details": "Set update rule to: allow update: if request.auth != null && resource.data.userId == request.auth.uid && request.resource.data.userId == resource.data.userId && request.resource.data.createdAt == resource.data.createdAt && request.resource.data.isUserArticle == resource.data.isUserArticle;",
+            "status": "done",
+            "testStrategy": null,
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:49:17.591Z"
+          },
+          {
+            "id": 4,
+            "title": "Test Updated Rules Using Firebase Emulator Suite",
+            "description": "Start Firebase emulator and run integration tests verifying create/update restrictions for authenticated users and ownership enforcement.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Run 'firebase emulators:start --only firestore'. Test: user creates own article (pass), different userId (fail), owner updates (pass), non-owner updates (fail), immutable fields unchanged (pass).",
+            "status": "done",
+            "testStrategy": "1. Auth user A creates article with userId=A (succeeds). 2. User A creates with userId=B (fails). 3. User A updates own article (succeeds). 4. User B updates A’s article (fails). 5. Update attempts changing userId/createdAt fail.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:49:19.377Z"
+          },
+          {
+            "id": 5,
+            "title": "Deploy Rules to Production After Emulator Validation",
+            "description": "Deploy the validated security rules to the production Firestore database using Firebase CLI.",
+            "dependencies": [
+              4
+            ],
+            "details": "Execute 'firebase deploy --only firestore:rules' from project root. Monitor deployment output for success and wait up to 10 minutes for propagation.",
+            "status": "done",
+            "testStrategy": "Post-deploy: Repeat key emulator tests against production using test accounts. Verify read access unchanged and no regressions in client app.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:49:21.118Z"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-29T23:49:21.118Z"
+      },
+      {
+        "id": "50",
+        "title": "Add `toFirestoreUpdate()` to ArticleModel and `updateArticle` to Data Source",
+        "description": "Extend `ArticleModel` with a `toFirestoreUpdate()` method that returns only mutable fields, and add the `updateArticle` method to the `FirestoreArticleDataSource` interface and its implementation.",
+        "details": "**1. ArticleModel changes** (`frontend/lib/features/daily_news/data/models/article.dart`):\n\nAdd a `toFirestoreUpdate()` method that returns a `Map<String, dynamic>` containing only the fields that are allowed to change:\n```dart\nMap<String, dynamic> toFirestoreUpdate() {\n  return {\n    'title': title,\n    'description': description,\n    'content': content,\n    'urlToImage': urlToImage,\n    'author': author,\n    'updatedAt': FieldValue.serverTimestamp(),\n  };\n}\n```\nExclude `userId`, `createdAt`, `isUserArticle`, and `firestoreId` (document ID is the path, not a field to update).\n\nOptionally add an `updatedAt` field to `ArticleModel` and `ArticleEntity` if not already present. Update `fromFirestore()` to parse `updatedAt` if it exists. Update `backend/docs/DB_SCHEMA.md` to document the new optional field.\n\n**2. FirestoreArticleDataSource interface** (`firestore_article_data_source_impl.dart` or a separate interface file):\n\nAdd to the abstract class:\n```dart\nFuture<void> updateArticle(String firestoreId, ArticleModel patch);\n```\n\n**3. FirestoreArticleDataSourceImpl**:\n```dart\n@override\nFuture<void> updateArticle(String firestoreId, ArticleModel patch) async {\n  await _firestore\n      .collection('articles')\n      .doc(firestoreId)\n      .update(patch.toFirestoreUpdate());\n}\n```\n\nHandle potential exceptions (document not found, permission denied) and let them propagate to the repository layer for proper error handling.",
+        "testStrategy": "1. Unit test `toFirestoreUpdate()`: verify it returns only mutable fields and includes `updatedAt`.\n2. Unit test that `toFirestoreUpdate()` does NOT include `userId`, `createdAt`, `isUserArticle`.\n3. Unit test `updateArticle` in the data source using a mocked Firestore instance (e.g., `fake_cloud_firestore` package): verify `update()` is called with the correct document path and data map.\n4. Test error handling: verify that a non-existent firestoreId throws an appropriate exception.",
+        "priority": "high",
+        "dependencies": [
+          "49"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add toFirestoreUpdate() method to ArticleModel",
+            "description": "Implement the toFirestoreUpdate() method in ArticleModel that returns only mutable fields excluding userId, createdAt, isUserArticle, and firestoreId.",
+            "dependencies": [],
+            "details": "Add Map<String, dynamic> toFirestoreUpdate() method returning {'title': title, 'description': description, 'content': content, 'urlToImage': urlToImage, 'author': author, 'updatedAt': FieldValue.serverTimestamp()}. Ensure FieldValue import from cloud_firestore.",
+            "status": "done",
+            "testStrategy": "Unit test verifies returned map contains exactly mutable fields (title, description, content, urlToImage, author, updatedAt) and excludes userId, createdAt, isUserArticle, firestoreId.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:55:04.192Z"
+          },
+          {
+            "id": 2,
+            "title": "Add optional updatedAt field to ArticleModel and ArticleEntity",
+            "description": "Extend ArticleModel and ArticleEntity with optional DateTime? updatedAt field and update fromFirestore() parsing if field exists.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add DateTime? updatedAt to both classes. Update ArticleModel.fromFirestore() to parse data['updatedAt'] as Timestamp?.toDate(). Ensure null safety for optional field.",
+            "status": "done",
+            "testStrategy": "Unit test fromFirestore() roundtrip with and without updatedAt field. Verify Timestamp converts to DateTime and null handling works correctly.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:55:09.025Z"
+          },
+          {
+            "id": 3,
+            "title": "Update DB_SCHEMA.md with updatedAt field documentation",
+            "description": "Document the new optional updatedAt timestamp field in backend/docs/DB_SCHEMA.md for articles collection.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add 'updatedAt: timestamp (optional, set on updates)' to articles schema. Include description about serverTimestamp usage and nullability.",
+            "status": "done",
+            "testStrategy": "Manual verification: confirm file exists and contains updatedAt field documentation matching ArticleModel structure.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:55:10.793Z"
+          },
+          {
+            "id": 4,
+            "title": "Add updateArticle method to FirestoreArticleDataSource interface",
+            "description": "Extend the FirestoreArticleDataSource abstract class/interface with Future<void> updateArticle(String firestoreId, ArticleModel patch) declaration.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add abstract method signature: Future<void> updateArticle(String firestoreId, ArticleModel patch); to the interface file (firestore_article_data_source.dart or impl file).",
+            "status": "done",
+            "testStrategy": "Compilation test: verify interface compiles without errors after adding method declaration.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:55:12.577Z"
+          },
+          {
+            "id": 5,
+            "title": "Implement updateArticle in FirestoreArticleDataSourceImpl",
+            "description": "Create the concrete implementation of updateArticle using Firestore .update() with patch.toFirestoreUpdate().",
+            "dependencies": [
+              1,
+              4
+            ],
+            "details": "Implement @override Future<void> updateArticle(String firestoreId, ArticleModel patch) async { await _firestore.collection('articles').doc(firestoreId).update(patch.toFirestoreUpdate()); }. Let exceptions propagate.",
+            "status": "done",
+            "testStrategy": "Unit test with mocked Firestore: verify .update() called with correct firestoreId and expected update map from toFirestoreUpdate(). Test document not found exception propagation.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-29T23:55:14.353Z"
+          }
+        ],
+        "complexity": 3,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-29T23:55:14.353Z"
+      },
+      {
+        "id": "51",
+        "title": "Add `updateArticle` to Repository and Create `UpdateArticleUseCase`",
+        "description": "Extend the `ArticleRepository` interface and `ArticleRepositoryImpl` with an `updateArticle` method, and create the `UpdateArticleUseCase` in the domain layer.",
+        "details": "**1. ArticleRepository interface** (`frontend/lib/features/daily_news/domain/repository/article_repository.dart`):\n\nAdd:\n```dart\nFuture<DataState<void>> updateArticle(ArticleEntity article);\n```\n(Use the existing `DataState` pattern from the codebase for success/error wrapping.)\n\n**2. ArticleRepositoryImpl** (`frontend/lib/features/daily_news/data/repository/article_repository_impl.dart`):\n\n```dart\n@override\nFuture<DataState<void>> updateArticle(ArticleEntity article) async {\n  try {\n    if (article.firestoreId == null) {\n      return DataFailed(DioException(/* or custom exception */));\n    }\n    final articleModel = ArticleModel.fromEntity(article);\n    await _firestoreDataSource.updateArticle(article.firestoreId!, articleModel);\n    return DataSuccess(null);\n  } catch (e) {\n    return DataFailed(/* wrap error appropriately */);\n  }\n}\n```\n\nIf `ArticleModel.fromEntity()` doesn't exist, add a factory constructor or static method that maps entity fields to model fields.\n\n**3. UpdateArticleUseCase** (`frontend/lib/features/daily_news/domain/usecases/update_article.dart`):\n\n```dart\nclass UpdateArticleUseCase implements UseCase<DataState<void>, ArticleEntity> {\n  final ArticleRepository _articleRepository;\n  \n  UpdateArticleUseCase(this._articleRepository);\n  \n  @override\n  Future<DataState<void>> call({ArticleEntity? params}) async {\n    if (params == null || params.firestoreId == null) {\n      throw ArgumentError('Article with firestoreId is required');\n    }\n    return await _articleRepository.updateArticle(params);\n  }\n}\n```\n\nFollow the existing use case pattern in the codebase (check if `UseCase` is a base class or if a different pattern is used).",
+        "testStrategy": "1. Unit test `UpdateArticleUseCase`: mock `ArticleRepository`, verify `updateArticle` is called with the correct entity, verify success and failure states.\n2. Unit test that the use case throws/returns error when `firestoreId` is null.\n3. Unit test `ArticleRepositoryImpl.updateArticle`: mock `FirestoreArticleDataSource`, verify correct delegation and error wrapping.\n4. Verify `DataState` success and failure paths are correctly returned.",
+        "priority": "high",
+        "dependencies": [
+          "50"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extend ArticleRepository interface with updateArticle method",
+            "description": "Add the updateArticle method signature to the ArticleRepository interface using the existing DataState pattern.",
+            "dependencies": [],
+            "details": "In frontend/lib/features/daily_news/domain/repository/article_repository.dart, add: Future<DataState<void>> updateArticle(ArticleEntity article); Ensure it matches the DataState<void> pattern used elsewhere in the codebase for consistency.",
+            "status": "done",
+            "testStrategy": "Verify method signature compiles and matches interface contract. Check existing repository methods use same DataState pattern.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:00:45.327Z"
+          },
+          {
+            "id": 2,
+            "title": "Implement updateArticle in ArticleRepositoryImpl",
+            "description": "Create the concrete implementation of updateArticle in ArticleRepositoryImpl with Firestore integration and error handling.",
+            "dependencies": [
+              1
+            ],
+            "details": "In frontend/lib/features/daily_news/data/repository/article_repository_impl.dart, implement the method with null check for firestoreId, ArticleModel.fromEntity conversion (add factory if missing), call to _firestoreDataSource.updateArticle, and proper DataFailed wrapping for exceptions.",
+            "status": "done",
+            "testStrategy": "Unit test: mock FirestoreDataSource, test success path returns DataSuccess(null), test firestoreId null returns DataFailed, test exception handling wraps errors correctly.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:00:50.139Z"
+          },
+          {
+            "id": 3,
+            "title": "Add ArticleModel.fromEntity factory constructor if missing",
+            "description": "Ensure ArticleModel has a fromEntity method to convert ArticleEntity to ArticleModel for repository implementation.",
+            "dependencies": [
+              1
+            ],
+            "details": "Locate ArticleModel file (likely in data/models), add static ArticleModel.fromEntity(ArticleEntity article) factory that maps all entity fields to model fields, handling firestoreId and other Firestore-specific properties.",
+            "status": "done",
+            "testStrategy": "Unit test factory constructor: create ArticleEntity, convert to model, verify all fields map correctly including firestoreId.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:00:51.874Z"
+          },
+          {
+            "id": 4,
+            "title": "Create UpdateArticleUseCase class",
+            "description": "Implement the domain layer use case following the existing UseCase pattern with input validation.",
+            "dependencies": [
+              1
+            ],
+            "details": "Create frontend/lib/features/daily_news/domain/usecases/update_article.dart with UpdateArticleUseCase implementing UseCase<DataState<void>, ArticleEntity>, inject ArticleRepository, validate params and firestoreId in call() method, delegate to repository.updateArticle(params).",
+            "status": "done",
+            "testStrategy": "Unit test: mock ArticleRepository, verify call() with valid article delegates correctly, test null params throws ArgumentError, test null firestoreId throws ArgumentError.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:00:53.674Z"
+          },
+          {
+            "id": 5,
+            "title": "Add comprehensive unit tests for new functionality",
+            "description": "Write unit tests covering repository implementation, use case validation, and error scenarios.",
+            "dependencies": [
+              2,
+              3,
+              4
+            ],
+            "details": "Create test files for ArticleRepositoryImpl.updateArticle (mock data source, test paths), UpdateArticleUseCase (mock repository, test validation and delegation), and ArticleModel.fromEntity if added. Follow existing test patterns in codebase.",
+            "status": "done",
+            "testStrategy": "Run all tests: verify 100% coverage of new methods, confirm mock interactions match expected calls, validate DataState outcomes for success/failure/edge cases.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:00:55.399Z"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": "",
+        "updatedAt": "2026-03-30T00:00:55.399Z"
+      },
+      {
+        "id": "52",
+        "title": "Create EditArticleCubit, Edit Screen, and Route",
+        "description": "Build the `EditArticleCubit` with states for editing, create the edit article screen that reuses the upload form layout with pre-filled fields, add the edit route, and wire up the 'Edit' button on the article detail screen for owner-only visibility.",
+        "details": "**1. EditArticleCubit** (`frontend/lib/features/daily_news/presentation/bloc/article/edit/edit_article_cubit.dart`):\n\n```dart\nclass EditArticleCubit extends Cubit<EditArticleState> {\n  final UpdateArticleUseCase _updateArticleUseCase;\n  \n  EditArticleCubit(this._updateArticleUseCase) : super(EditArticleInitial());\n  \n  Future<void> updateArticle(ArticleEntity article) async {\n    emit(EditArticleLoading());\n    final result = await _updateArticleUseCase.call(params: article);\n    if (result is DataSuccess) {\n      emit(EditArticleSuccess());\n    } else {\n      emit(EditArticleError(result.error?.message ?? 'Update failed'));\n    }\n  }\n}\n```\n\nStates: `EditArticleInitial`, `EditArticleLoading`, `EditArticleSuccess`, `EditArticleError(String message)`.\n\n**2. Shared ArticleFormWidget**: Extract the form fields from the existing upload screen into a shared `ArticleFormWidget` that accepts:\n- `initialArticle` (nullable, for pre-filling in edit mode)\n- `submitLabel` (e.g., 'Upload' vs 'Save')\n- `onSubmit` callback\n- `isLoading` flag\n\nThis avoids duplicating the form between upload and edit screens.\n\n**3. Edit Article Screen** (`frontend/lib/features/daily_news/presentation/pages/edit_article/edit_article.dart`):\n- Receives the `ArticleEntity` to edit (via route arguments).\n- Uses `ArticleFormWidget` with pre-filled values.\n- On submit, calls `editArticleCubit.updateArticle(updatedArticle)`.\n- On success, pops back to the detail screen (optionally with a result to trigger refresh).\n- Shows error snackbar on failure.\n\n**4. Route** (`frontend/lib/config/routes/routes.dart`):\nAdd a named route `/edit-article` that accepts an `ArticleEntity` argument.\n\n**5. Edit button on detail screen** (`article_detail.dart`):\n```dart\nif (article.isUserArticle == true && article.userId == currentUser?.uid)\n  IconButton(\n    icon: Icon(Icons.edit),\n    onPressed: () => Navigator.pushNamed(context, '/edit-article', arguments: article),\n  )\n```\nGet `currentUser` from Firebase Auth (via GetIt or context).\n\n**6. DI Registration** (`injection_container.dart`):\n- Register `UpdateArticleUseCase`.\n- Register `EditArticleCubit` as a factory.\n\n**7. Optional: Unsaved changes dialog**: On back press in edit screen, if form is dirty, show `AlertDialog` asking to discard changes.",
+        "testStrategy": "1. Unit test `EditArticleCubit`: mock `UpdateArticleUseCase`, verify state transitions (Initial → Loading → Success/Error).\n2. Widget test: verify the edit button is visible when `article.userId == currentUser.uid && article.isUserArticle == true`.\n3. Widget test: verify the edit button is NOT visible for non-owner users or News API articles.\n4. Widget test: verify the edit screen pre-fills all form fields from the provided article.\n5. Widget test: verify form submission calls the cubit's `updateArticle` method with correct data.\n6. Integration test: navigate from detail → edit → modify → save → verify return to detail with updated data.\n7. Test the shared `ArticleFormWidget` renders correctly in both upload and edit modes.",
+        "priority": "high",
+        "dependencies": [
+          "51"
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create EditArticleCubit and States",
+            "description": "Implement EditArticleCubit with UpdateArticleUseCase dependency and define all required states: EditArticleInitial, EditArticleLoading, EditArticleSuccess, EditArticleError(String message).",
+            "dependencies": [],
+            "details": "Create file at frontend/lib/features/daily_news/presentation/bloc/article/edit/edit_article_cubit.dart. Use provided code skeleton. Ensure proper state emissions for loading, success, and error cases with error message handling.",
+            "status": "done",
+            "testStrategy": "Unit test Cubit: mock UpdateArticleUseCase, verify state transitions (Initial → Loading → Success/Error) for different use case results.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:05:54.896Z"
+          },
+          {
+            "id": 2,
+            "title": "Extract Shared ArticleFormWidget",
+            "description": "Refactor upload screen form fields into reusable ArticleFormWidget accepting initialArticle (nullable), submitLabel, onSubmit callback, and isLoading flag.",
+            "dependencies": [
+              1
+            ],
+            "details": "Extract form logic from existing upload screen. Create widget that pre-fills fields when initialArticle provided. Support both 'Upload' and 'Save' submit labels. Handle loading state for submit button.",
+            "status": "done",
+            "testStrategy": "Widget test: verify form pre-fills with initialArticle data, submit callback triggers correctly, loading state shows/disables button properly.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:05:56.885Z"
+          },
+          {
+            "id": 3,
+            "title": "Build EditArticleScreen with Form Integration",
+            "description": "Create EditArticleScreen that receives ArticleEntity via route arguments, uses ArticleFormWidget with pre-filled data, integrates with EditArticleCubit, handles success/error states.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "File: frontend/lib/features/daily_news/presentation/pages/edit_article/edit_article.dart. Use BlocProvider for EditArticleCubit. Call updateArticle on submit. Pop on success with refresh result. Show error SnackBar. Optional: add unsaved changes dialog.",
+            "status": "done",
+            "testStrategy": "Integration test: verify screen loads with pre-filled data, submit updates article, success pops screen, errors show SnackBar, back navigation handles dirty form.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:06:34.520Z"
+          },
+          {
+            "id": 4,
+            "title": "Add Edit Route and Detail Screen Button",
+            "description": "Register /edit-article named route accepting ArticleEntity argument. Add conditional Edit button to article detail screen visible only to article owner.",
+            "dependencies": [
+              3
+            ],
+            "details": "Update routes.dart with new route. In article_detail.dart, add IconButton with owner check (article.isUserArticle && article.userId == currentUser?.uid). Get currentUser from Firebase Auth via GetIt/context. Register UpdateArticleUseCase and EditArticleCubit in DI container.",
+            "status": "done",
+            "testStrategy": "Widget test: verify edit button visible only when article.userId matches currentUser.uid and isUserArticle=true. Test route navigation passes ArticleEntity correctly. Verify DI registration.",
+            "parentId": "undefined",
+            "updatedAt": "2026-03-30T00:08:05.019Z"
+          }
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break into: 1) Create EditArticleCubit and states, 2) Extract shared ArticleFormWidget from upload screen, 3) Build EditArticleScreen with form integration, 4) Add edit route and detail screen button with owner check.",
+        "updatedAt": "2026-03-30T00:08:05.019Z"
+      },
+      {
+        "id": "53",
+        "title": "Add Paginated Data Source Method `getUserArticlesPage`",
+        "description": "Add the `getUserArticlesPage` method to the `FirestoreArticleDataSource` interface and implementation, returning a bounded page of user articles with a cursor for subsequent pages.",
+        "details": "**1. Pagination Result Model** (`frontend/lib/features/daily_news/data/models/paginated_articles_result.dart`):\n\n```dart\nimport 'package:cloud_firestore/cloud_firestore.dart';\n\nclass PaginatedArticlesResult {\n  final List<ArticleModel> articles;\n  final DocumentSnapshot? lastDocument; // cursor for next page\n  final bool hasMore;\n  \n  PaginatedArticlesResult({\n    required this.articles,\n    this.lastDocument,\n    required this.hasMore,\n  });\n}\n```\n\n**2. FirestoreArticleDataSource interface**:\n\nAdd:\n```dart\nFuture<PaginatedArticlesResult> getUserArticlesPage({\n  required int limit,\n  DocumentSnapshot? startAfter,\n});\n```\n\n**3. FirestoreArticleDataSourceImpl**:\n\n```dart\n@override\nFuture<PaginatedArticlesResult> getUserArticlesPage({\n  required int limit,\n  DocumentSnapshot? startAfter,\n}) async {\n  Query query = _firestore\n      .collection('articles')\n      .where('isUserArticle', isEqualTo: true)\n      .orderBy('createdAt', descending: true)\n      .limit(limit);\n  \n  if (startAfter != null) {\n    query = query.startAfterDocument(startAfter);\n  }\n  \n  final querySnapshot = await query.get();\n  final articles = querySnapshot.docs\n      .map((doc) => ArticleModel.fromFirestore(doc))\n      .toList();\n  \n  final hasMore = querySnapshot.docs.length == limit;\n  final lastDoc = querySnapshot.docs.isNotEmpty ? querySnapshot.docs.last : null;\n  \n  return PaginatedArticlesResult(\n    articles: articles,\n    lastDocument: lastDoc,\n    hasMore: hasMore,\n  );\n}\n```\n\nThe default page size should be 20 (configurable via a constant). The `hasMore` flag is determined by whether the returned count equals the limit (if fewer are returned, there are no more pages).\n\nNote: The existing `getUserArticles()` method can remain for backward compatibility or be deprecated.",
+        "testStrategy": "1. Unit test with `fake_cloud_firestore`: seed 25 articles, request page of 20, verify 20 returned with `hasMore == true` and a non-null `lastDocument`.\n2. Request second page using the cursor from the first, verify 5 returned with `hasMore == false`.\n3. Test with 0 articles: verify empty list, `hasMore == false`, `lastDocument == null`.\n4. Test that articles are ordered by `createdAt` descending.\n5. Test that only `isUserArticle == true` documents are returned.\n6. Test with exactly `limit` articles to verify `hasMore` edge case.",
+        "priority": "high",
+        "dependencies": [
+          "50"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PaginatedArticlesResult Model",
+            "description": "Implement the PaginatedArticlesResult class in the data models layer as specified.",
+            "dependencies": [],
+            "details": "Create file at frontend/lib/features/daily_news/data/models/paginated_articles_result.dart with the provided PaginatedArticlesResult class including List<ArticleModel> articles, DocumentSnapshot? lastDocument cursor, and bool hasMore flag. Ensure proper import of cloud_firestore and ArticleModel.",
+            "status": "pending",
+            "testStrategy": "Unit test model constructor and serialization: verify articles list, lastDocument null handling, and hasMore flag with valid/invalid inputs.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Add getUserArticlesPage to FirestoreArticleDataSource Interface",
+            "description": "Extend the FirestoreArticleDataSource interface with the paginated method signature.",
+            "dependencies": [
+              1
+            ],
+            "details": "In the FirestoreArticleDataSource interface file, add Future<PaginatedArticlesResult> getUserArticlesPage({required int limit, DocumentSnapshot? startAfter}) method exactly as specified. Ensure proper import of PaginatedArticlesResult model.",
+            "status": "pending",
+            "testStrategy": "Verify interface compilation: ensure method signature is correctly declared and type-checks with implementation.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Define Pagination Constants and Implement FirestoreArticleDataSourceImpl",
+            "description": "Implement the getUserArticlesPage method in FirestoreArticleDataSourceImpl with default page size constant.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add const int kDefaultPageSize = 20; then implement the provided query logic: collection('articles').where('isUserArticle', isEqualTo: true).orderBy('createdAt', descending: true).limit(limit).startAfterDocument if provided. Map to ArticleModel.fromFirestore and construct PaginatedArticlesResult with hasMore = querySnapshot.docs.length == limit.",
+            "status": "pending",
+            "testStrategy": "Unit test with fake_cloud_firestore: seed 25 user articles, test page size 20 returns 20 with hasMore=true and valid cursor, second page with startAfter returns 5 with hasMore=false.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Add Null Safety and Error Handling to Implementation",
+            "description": "Enhance the data source implementation with proper null checks and Firestore error handling.",
+            "dependencies": [
+              3
+            ],
+            "details": "Add try-catch for Firestore exceptions, validate ArticleModel.fromFirestore doesn't throw, handle empty querySnapshot gracefully (empty list, null lastDocument, hasMore=false), ensure querySnapshot.docs.last is safely accessed.",
+            "status": "pending",
+            "testStrategy": "Test edge cases: empty collection returns empty PaginatedArticlesResult, invalid startAfter document throws meaningful error, network failure handled gracefully.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Write Comprehensive Unit Tests for Pagination",
+            "description": "Create unit tests covering all pagination scenarios using fake_cloud_firestore.",
+            "dependencies": [
+              3,
+              4
+            ],
+            "details": "Write tests for: 1) First page with >limit articles (hasMore=true, valid cursor), 2) Subsequent page with startAfter, 3) Last page (hasMore=false), 4) Empty collection, 5) Exactly limit articles (hasMore=false), 6) Invalid cursor handling. Use 25 seeded articles ordered by createdAt desc.",
+            "status": "pending",
+            "testStrategy": "Integration-style unit tests with fake_cloud_firestore: verify article count, hasMore flag accuracy, lastDocument cursor validity for chaining pages, ArticleModel deserialization, query filters (isUserArticle=true only).",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": ""
+      },
+      {
+        "id": "54",
+        "title": "Add Paginated Repository Method and `GetArticlesPageUseCase`",
+        "description": "Extend the `ArticleRepository` interface and `ArticleRepositoryImpl` with a paginated articles method that merges Firestore pages with cached News API results, and create the `GetArticlesPageUseCase` in the domain layer.",
+        "details": "**1. Domain-level pagination result** (`frontend/lib/features/daily_news/domain/entities/paginated_articles.dart`):\n\nSince the domain layer should not depend on Firestore's `DocumentSnapshot`, create a domain-level abstraction:\n```dart\nclass PaginatedArticles {\n  final List<ArticleEntity> articles;\n  final bool hasMore;\n  final dynamic cursor; // opaque cursor, typed as Object? to avoid Firestore dependency in domain\n  \n  PaginatedArticles({\n    required this.articles,\n    required this.hasMore,\n    this.cursor,\n  });\n}\n```\n\n**2. ArticleRepository interface**:\n```dart\nFuture<DataState<PaginatedArticles>> getArticlesPage({\n  required int limit,\n  dynamic startAfter,\n});\n```\n\n**3. ArticleRepositoryImpl**:\n```dart\n@override\nFuture<DataState<PaginatedArticles>> getArticlesPage({\n  required int limit,\n  dynamic startAfter,\n}) async {\n  try {\n    final result = await _firestoreDataSource.getUserArticlesPage(\n      limit: limit,\n      startAfter: startAfter as DocumentSnapshot?,\n    );\n    \n    final entities = result.articles.map((m) => m.toEntity()).toList();\n    \n    return DataSuccess(PaginatedArticles(\n      articles: entities,\n      hasMore: result.hasMore,\n      cursor: result.lastDocument,\n    ));\n  } catch (e) {\n    return DataFailed(/* wrap error */);\n  }\n}\n```\n\nNews API merging strategy: The repository (or the cubit) fetches News API results once per session and caches them. On the first page load, News API articles are prepended or interleaved. On subsequent pages, only Firestore articles are appended. Document this merge ordering clearly.\n\n**4. GetArticlesPageUseCase**:\n```dart\nclass GetArticlesPageUseCase {\n  final ArticleRepository _repository;\n  \n  GetArticlesPageUseCase(this._repository);\n  \n  Future<DataState<PaginatedArticles>> call({\n    required int limit,\n    dynamic startAfter,\n  }) {\n    return _repository.getArticlesPage(limit: limit, startAfter: startAfter);\n  }\n}\n```\n\n**5. DI**: Register `GetArticlesPageUseCase` in `injection_container.dart`.",
+        "testStrategy": "1. Unit test `GetArticlesPageUseCase`: mock repository, verify correct delegation of `limit` and `startAfter` parameters.\n2. Unit test `ArticleRepositoryImpl.getArticlesPage`: mock data source, verify `PaginatedArticles` is correctly constructed from `PaginatedArticlesResult`.\n3. Test error handling: data source throws → repository returns `DataFailed`.\n4. Test that the cursor (DocumentSnapshot) is correctly passed through as an opaque object.\n5. Verify the News API merge strategy is correctly implemented (News API articles included on first page, not duplicated on subsequent pages).",
+        "priority": "high",
+        "dependencies": [
+          "53"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PaginatedArticles Entity and Repository Method",
+            "description": "Create the domain-level PaginatedArticles entity and extend ArticleRepository interface and ArticleRepositoryImpl with getArticlesPage method implementing News API merge strategy.",
+            "dependencies": [],
+            "details": "1. Create paginated_articles.dart with PaginatedArticles class (List<ArticleEntity>, bool hasMore, dynamic cursor). 2. Add getArticlesPage method to ArticleRepository interface. 3. Implement getArticlesPage in ArticleRepositoryImpl: call _firestoreDataSource.getUserArticlesPage, convert to entities, handle News API cache merge (prepend on first page, append Firestore only on subsequent), document merge ordering, wrap in DataState.",
+            "status": "pending",
+            "testStrategy": "Unit test repository method: mock FirestoreDataSource, verify entity conversion, cursor passing, hasMore logic, News API merge (first page prepends cache, subsequent appends only Firestore), error handling with DataFailed.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement GetArticlesPageUseCase and DI Registration",
+            "description": "Create GetArticlesPageUseCase in domain layer that delegates to repository and register it in injection_container.dart.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Create GetArticlesPageUseCase class with constructor taking ArticleRepository, call method forwarding limit and startAfter parameters. 2. Add DI registration in injection_container.dart: getIt.registerLazySingleton<GetArticlesPageUseCase>(() => GetArticlesPageUseCase(getIt()));",
+            "status": "pending",
+            "testStrategy": "Unit test use case: mock ArticleRepository, verify getArticlesPage called with correct limit/startAfter, returns DataSuccess/DataFailed states unchanged. Verify DI registration by resolving use case and checking non-null repository injection.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split into: 1) Create domain PaginatedArticles entity and repository method with News API merge strategy, 2) Implement GetArticlesPageUseCase and DI registration."
+      },
+      {
+        "id": "55",
+        "title": "Update Home Feed Cubit and UI for Cursor-Based Pagination",
+        "description": "Modify the home-feed cubit to hold pagination state (cursor, hasMore, isLoadingMore) and expose a `loadMore()` method. Update the home feed UI to trigger loading more articles via a 'Load more' button or infinite-scroll listener.",
+        "details": "**1. Home Feed Cubit modifications** (locate the existing cubit that manages the article list on the home screen):\n\nAdd pagination state fields:\n```dart\nclass RemoteArticlesState {\n  final List<ArticleEntity> articles;\n  final bool isLoadingMore;\n  final bool hasMore;\n  final dynamic cursor; // opaque Firestore cursor\n  final DioException? error;\n  final bool isInitialLoading;\n  // ... existing fields\n}\n```\n\nModify the initial fetch method:\n```dart\nFuture<void> getArticles() async {\n  emit(state.copyWith(isInitialLoading: true));\n  \n  // Fetch News API articles once\n  final newsApiResult = await _getArticleUseCase.call();\n  _cachedNewsApiArticles = newsApiResult.data ?? [];\n  \n  // Fetch first page of Firestore articles\n  final firestorePage = await _getArticlesPageUseCase.call(limit: 20);\n  \n  final merged = [..._cachedNewsApiArticles, ...firestorePage.data?.articles ?? []];\n  \n  emit(state.copyWith(\n    articles: merged,\n    cursor: firestorePage.data?.cursor,\n    hasMore: firestorePage.data?.hasMore ?? false,\n    isInitialLoading: false,\n  ));\n}\n```\n\nAdd `loadMore()` method:\n```dart\nFuture<void> loadMore() async {\n  if (state.isLoadingMore || !state.hasMore) return;\n  \n  emit(state.copyWith(isLoadingMore: true));\n  \n  final result = await _getArticlesPageUseCase.call(\n    limit: 20,\n    startAfter: state.cursor,\n  );\n  \n  if (result is DataSuccess) {\n    emit(state.copyWith(\n      articles: [...state.articles, ...result.data!.articles],\n      cursor: result.data!.cursor,\n      hasMore: result.data!.hasMore,\n      isLoadingMore: false,\n    ));\n  } else {\n    emit(state.copyWith(isLoadingMore: false, error: result.error));\n    // Show snackbar with retry\n  }\n}\n```\n\n**2. Home Feed UI**:\n\nOption A — Load More button at the bottom of the list:\n```dart\nif (state.hasMore)\n  Padding(\n    padding: EdgeInsets.all(16),\n    child: state.isLoadingMore\n      ? CircularProgressIndicator()\n      : ElevatedButton(\n          onPressed: () => cubit.loadMore(),\n          child: Text('Load more'),\n        ),\n  )\n```\n\nOption B — Infinite scroll with `ScrollController`:\n```dart\n_scrollController.addListener(() {\n  if (_scrollController.position.pixels >= \n      _scrollController.position.maxScrollExtent - 200) {\n    cubit.loadMore();\n  }\n});\n```\n\nShow a small loading indicator at the bottom during `isLoadingMore`. Show error snackbar with retry on failure.\n\n**3. DI**: Update the home feed cubit registration to inject `GetArticlesPageUseCase`.\n\n**4. News API caching**: Store News API results in a field on the cubit. Fetch once on initial load. Do not re-fetch on `loadMore()`.",
+        "testStrategy": "1. Unit test cubit: verify initial load fetches News API + first Firestore page and merges correctly.\n2. Unit test `loadMore()`: verify it appends new articles, updates cursor and hasMore.\n3. Unit test that `loadMore()` is a no-op when `isLoadingMore == true` or `hasMore == false`.\n4. Unit test error handling on `loadMore()`: verify error state is emitted and articles are preserved.\n5. Widget test: verify 'Load more' button appears when `hasMore == true` and disappears when `false`.\n6. Widget test: verify loading indicator shows during `isLoadingMore`.\n7. Integration test: scroll through multiple pages, verify no duplicate articles.\n8. Test that News API articles appear only once (not duplicated on subsequent pages).",
+        "priority": "medium",
+        "dependencies": [
+          "54"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update RemoteArticlesState and Cubit Methods",
+            "description": "Add pagination state fields to RemoteArticlesState and implement modified getArticles() and new loadMore() methods in the home feed cubit.",
+            "dependencies": [],
+            "details": "Locate existing RemoteArticlesCubit, extend RemoteArticlesState with isLoadingMore, hasMore, cursor fields and their copyWith methods. Update getArticles() to fetch News API once and merge with first Firestore page. Add loadMore() that appends new pages using startAfter cursor without re-fetching News API.",
+            "status": "pending",
+            "testStrategy": "Unit test initial load merges News API + Firestore correctly, loadMore() appends articles and updates state, no-op when isLoadingMore or !hasMore, News API cached (not called in loadMore).",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement Home Feed UI Pagination Trigger",
+            "description": "Update DailyNewsScreen UI to trigger cubit.loadMore() via either Load More button or infinite scroll listener, show loading/error states.",
+            "dependencies": [
+              1
+            ],
+            "details": "In existing BlocBuilder, add conditional Load More button when hasMore (Option A) OR implement ScrollController listener triggering at 200px from bottom (Option B). Show CircularProgressIndicator during isLoadingMore. Add ScaffoldMessenger for error retry snackbar.",
+            "status": "pending",
+            "testStrategy": "Widget test renders button/listener correctly, button tap/scroll triggers loadMore(), shows loading indicator, error snackbar displays with retry action.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Update DI Registration and Verify News API Caching",
+            "description": "Update dependency injection for RemoteArticlesCubit to include GetArticlesPageUseCase, verify News API results cached correctly.",
+            "dependencies": [
+              1
+            ],
+            "details": "In DI config (getIt or similar), register GetArticlesPageUseCase and inject into RemoteArticlesCubit constructor. Add private field _cachedNewsApiArticles to cubit. Test that getArticles() stores News API once, loadMore() uses cached without re-fetch.",
+            "status": "pending",
+            "testStrategy": "Verify DI resolves cubit with use case, unit test cubit confirms News API called only in getArticles(), loadMore() uses cached list, integration test full flow.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Divide into: 1) Update RemoteArticlesState and cubit methods (getArticles, loadMore), 2) Implement UI pagination trigger (button or scroll listener), 3) Update DI and test News API caching."
+      },
+      {
+        "id": "56",
+        "title": "Integrate Markdown Editor Package and Create Shared MarkdownEditorWidget",
+        "description": "Evaluate and add a lightweight Flutter markdown editor package, then create a shared `MarkdownEditorWidget` with a formatting toolbar (bold, italic, heading, bulleted list) that outputs a plain markdown string.",
+        "details": "**1. Package evaluation and selection**:\n\nEvaluate these options:\n- `markdown_editable_textinput` — lightweight, provides a toolbar with basic markdown formatting. Check null-safety and maintenance status.\n- `simple_markdown_editor` — another lightweight option.\n- `flutter_quill` — much richer but heavier; use only if the lighter options are insufficient.\n\nPrefer a package that:\n- Is null-safe and supports Flutter 3.x+\n- Provides a toolbar with bold, italic, heading, and list buttons\n- Outputs plain markdown strings (not a custom delta format)\n- Has minimal dependencies\n\nAdd the chosen package to `pubspec.yaml`.\n\n**2. MarkdownEditorWidget** (`frontend/lib/features/daily_news/presentation/widgets/markdown_editor_widget.dart`):\n\n```dart\nclass MarkdownEditorWidget extends StatefulWidget {\n  final String? initialValue;\n  final ValueChanged<String> onChanged;\n  final String? Function(String?)? validator;\n  \n  const MarkdownEditorWidget({\n    Key? key,\n    this.initialValue,\n    required this.onChanged,\n    this.validator,\n  }) : super(key: key);\n  \n  @override\n  State<MarkdownEditorWidget> createState() => _MarkdownEditorWidgetState();\n}\n\nclass _MarkdownEditorWidgetState extends State<MarkdownEditorWidget> {\n  late TextEditingController _controller;\n  \n  @override\n  void initState() {\n    super.initState();\n    _controller = TextEditingController(text: widget.initialValue ?? '');\n  }\n  \n  @override\n  Widget build(BuildContext context) {\n    // If using markdown_editable_textinput:\n    return Column(\n      children: [\n        MarkdownFormField(\n          controller: _controller,\n          enableToolBar: true,\n          emojiConvert: false,\n          onChanged: widget.onChanged,\n          // Configure toolbar actions\n        ),\n      ],\n    );\n    \n    // If the package doesn't fit, build a custom toolbar:\n    // return Column(\n    //   children: [\n    //     _MarkdownToolbar(controller: _controller),\n    //     TextFormField(\n    //       controller: _controller,\n    //       maxLines: null,\n    //       minLines: 10,\n    //       onChanged: widget.onChanged,\n    //       validator: widget.validator,\n    //     ),\n    //   ],\n    // );\n  }\n}\n```\n\n**3. Custom toolbar fallback** (if no suitable package is found):\nBuild a simple toolbar row with `IconButton`s that insert markdown syntax at the cursor position:\n- Bold: wrap selection with `**`\n- Italic: wrap selection with `_`\n- Heading: insert `## ` at line start\n- Bullet list: insert `- ` at line start\n\n```dart\nvoid _wrapSelection(String left, String right) {\n  final text = _controller.text;\n  final selection = _controller.selection;\n  final selectedText = text.substring(selection.start, selection.end);\n  final newText = text.replaceRange(selection.start, selection.end, '$left$selectedText$right');\n  _controller.text = newText;\n  _controller.selection = TextSelection.collapsed(\n    offset: selection.start + left.length + selectedText.length + right.length,\n  );\n}\n```\n\n**4. Character counter**: Add a character counter below the editor showing `currentLength / 50000` to guard against Firestore document size limits.\n\n**5. Toolbar responsiveness**: Ensure the toolbar is compact (single row, scrollable if needed) and doesn't obscure the editing area on small screens. Use `SingleChildScrollView(scrollDirection: Axis.horizontal)` for the toolbar if needed.",
+        "testStrategy": "1. Widget test: verify `MarkdownEditorWidget` renders with initial value.\n2. Widget test: verify toolbar buttons are present (bold, italic, heading, list).\n3. Widget test: tap bold button with text selected → verify `**` wrapping is inserted.\n4. Widget test: tap italic button → verify `_` wrapping.\n5. Widget test: verify `onChanged` callback fires with the correct markdown string.\n6. Widget test: verify character counter displays and updates.\n7. Smoke test on iOS and Android emulators to verify no platform-specific rendering issues.\n8. Test that the output string is valid markdown that renders correctly in `ArticleMarkdownBody`.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Evaluate and Select Markdown Editor Package",
+            "description": "Research and evaluate the specified packages (markdown_editable_textinput, simple_markdown_editor, flutter_quill) against criteria: null-safety, Flutter 3.x+ support, toolbar with bold/italic/heading/list, plain markdown output, minimal dependencies. Add selected package to pubspec.yaml.",
+            "dependencies": [],
+            "details": "Check pub.dev for each package's latest version, null-safety status, dependencies count, last publish date, and example usage. Verify toolbar features via demos/docs. Run `flutter pub get` after adding to pubspec.yaml. Prioritize lightweight options per task spec.",
+            "status": "pending",
+            "testStrategy": "Verify package installs without conflicts via `flutter pub get`. Check app compiles with import statement. Confirm package version supports Flutter 3.x+ via CHANGELOG.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Create MarkdownEditorWidget with Package Integration",
+            "description": "Implement MarkdownEditorWidget in frontend/lib/features/daily_news/presentation/widgets/markdown_editor_widget.dart using the selected package. Include initialValue, onChanged, validator props. Add formatting toolbar (bold, italic, heading, bulleted list).",
+            "dependencies": [
+              1
+            ],
+            "details": "Follow provided skeleton code. Configure package-specific widget (e.g., MarkdownFormField) with enableToolBar: true. Ensure outputs plain markdown string. Handle controller lifecycle properly. Test with initialValue to verify state preservation.",
+            "status": "pending",
+            "testStrategy": "Widget test: renders with initialValue. Integration test: toolbar buttons visible and functional. Verify onChanged callback emits markdown-formatted string.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Add Custom Toolbar Fallback, Character Counter, Responsiveness",
+            "description": "Implement custom toolbar fallback if package unsuitable, character counter (current/50000), and responsive horizontal-scrollable toolbar. Include _wrapSelection logic for bold/italic and line prefix for heading/bullet.",
+            "dependencies": [
+              2
+            ],
+            "details": "Build _MarkdownToolbar with IconButtons using _wrapSelection for wrapping selection (**bold**, _italic_) and line manipulation (## heading, - bullet). Add Text below editor: '${_controller.text.length}/50000'. Wrap toolbar in SingleChildScrollView(horizontal).",
+            "status": "pending",
+            "testStrategy": "Widget test: toolbar scrolls horizontally on small screens. Test _wrapSelection: select text → tap bold → verify **wrapping**. Verify counter updates live. Test heading/bullet inserts at line start.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down: 1) Evaluate and select markdown editor package, 2) Create MarkdownEditorWidget with toolbar integration, 3) Implement custom toolbar fallback and character counter."
+      },
+      {
+        "id": "57",
+        "title": "Replace Content TextFormField with MarkdownEditorWidget on Upload and Edit Screens",
+        "description": "Integrate the shared `MarkdownEditorWidget` into both the upload article screen and the edit article screen, replacing the plain `TextFormField` for the content field.",
+        "details": "**1. Upload Screen** (`frontend/lib/features/daily_news/presentation/pages/upload_article/upload_article.dart`):\n\nLocate the existing `TextFormField` used for the `content` field. Replace it with:\n```dart\nMarkdownEditorWidget(\n  initialValue: '', // empty for new articles\n  onChanged: (value) {\n    // Update the content state variable\n    setState(() => _content = value);\n  },\n  validator: (value) {\n    if (value == null || value.isEmpty) return 'Content is required';\n    if (value.length > 50000) return 'Content exceeds maximum length';\n    return null;\n  },\n)\n```\n\nIf using the shared `ArticleFormWidget` (from task 52), the replacement happens in one place.\n\n**2. Edit Screen** (`edit_article.dart`):\n\nSame widget but with `initialValue` set to the existing article's content:\n```dart\nMarkdownEditorWidget(\n  initialValue: widget.article.content,\n  onChanged: (value) => setState(() => _content = value),\n  validator: (value) { /* same validation */ },\n)\n```\n\n**3. Ensure compatibility**:\n- The editor outputs a plain markdown string → stored in the existing `content` field → no schema change.\n- The `ArticleMarkdownBody` widget on the detail screen already renders markdown via `flutter_markdown`, so no changes needed there.\n- Verify that the markdown string round-trips correctly: write in editor → save to Firestore → read back → render in `ArticleMarkdownBody`.\n\n**4. Form validation**: Ensure the markdown editor integrates with the form's validation flow. If the editor is not a `FormField`, manually validate content before submission.\n\n**5. Content length validation**: Enforce the 50,000 character limit client-side with a validator and visual character counter from the `MarkdownEditorWidget`.",
+        "testStrategy": "1. Widget test: verify upload screen renders `MarkdownEditorWidget` instead of plain `TextFormField` for content.\n2. Widget test: verify edit screen renders `MarkdownEditorWidget` with pre-filled content.\n3. Widget test: verify form validation rejects empty content.\n4. Widget test: verify form validation rejects content exceeding 50,000 characters.\n5. Integration test: upload an article with markdown content → view on detail screen → verify markdown renders correctly via `ArticleMarkdownBody`.\n6. Integration test: edit an article's content with markdown → save → verify updated content renders correctly.\n7. Test that both screens use the same `MarkdownEditorWidget` component (no divergent implementations).",
+        "priority": "medium",
+        "dependencies": [
+          "52",
+          "56"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Replace TextFormField with MarkdownEditorWidget in Upload Screen",
+            "description": "Locate the content TextFormField in upload_article.dart and replace it with MarkdownEditorWidget using empty initialValue.",
+            "dependencies": [],
+            "details": "In frontend/lib/features/daily_news/presentation/pages/upload_article/upload_article.dart, replace the existing TextFormField for _content with MarkdownEditorWidget(initialValue: '', onChanged: (value) { setState(() => _content = value); }, validator: same as original). Check if using shared ArticleFormWidget from task 52.",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify upload screen renders MarkdownEditorWidget instead of TextFormField. Test onChanged updates _content state correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Replace TextFormField with MarkdownEditorWidget in Edit Screen",
+            "description": "Replace content field in edit_article.dart with MarkdownEditorWidget pre-filled with existing article content.",
+            "dependencies": [],
+            "details": "In edit_article.dart, replace TextFormField with MarkdownEditorWidget(initialValue: widget.article.content, onChanged: (value) => setState(() => _content = value), validator: check for empty/null and length >50000). Ensure state updates properly.",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify edit screen renders MarkdownEditorWidget with pre-filled widget.article.content. Test editing updates _content.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Integrate MarkdownEditorWidget with Form Validation",
+            "description": "Ensure MarkdownEditorWidget works with existing form validation flow in both upload and edit screens.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "If MarkdownEditorWidget is not a FormField, wrap it in FormField or manually trigger validation before form submission. Implement validator that checks for null/empty content and length exceeding 50,000 characters. Test form submission with invalid content.",
+            "status": "pending",
+            "testStrategy": "Widget test: Submit form with empty content (should show error), with content >50k chars (error), valid content (success).",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Add Content Length Counter and Visual Feedback",
+            "description": "Implement 50,000 character limit display with visual counter in MarkdownEditorWidget for both screens.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "Add character counter below MarkdownEditorWidget showing current length / 50,000. Color code counter (green <80%, yellow 80-95%, red >95%). Update counter in onChanged callback. Ensure real-time feedback during typing.",
+            "status": "pending",
+            "testStrategy": "Widget test: Verify counter updates on typing, shows correct length, changes color at thresholds, prevents submission over limit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Verify Markdown Round-trip Compatibility End-to-End",
+            "description": "Test complete flow: editor → Firestore save → ArticleMarkdownBody render in both screens.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Create test article with markdown (headers, bold, lists), save via upload screen, verify renders correctly in detail view via ArticleMarkdownBody. Edit article, verify markdown preserves round-trip integrity. Test with Firestore emulator if available.",
+            "status": "pending",
+            "testStrategy": "Integration test: Write markdown in editor → save → navigate to detail → verify rendered output matches input. Test edit → resave → verify no corruption.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 0,
+        "expansionPrompt": ""
+      },
+      {
+        "id": "58",
+        "title": "Register All New Dependencies and End-to-End Integration Testing",
+        "description": "Ensure all new use cases, cubits, and widgets are properly registered in the DI container, all routes are configured, and perform comprehensive end-to-end testing of all three features together.",
+        "details": "**1. DI Container** (`frontend/lib/injection_container.dart`):\n\nVerify all registrations are in place (some may have been added in earlier tasks):\n```dart\n// Use Cases\nsl.registerLazySingleton(() => UpdateArticleUseCase(sl()));\nsl.registerLazySingleton(() => GetArticlesPageUseCase(sl()));\n\n// Cubits\nsl.registerFactory(() => EditArticleCubit(sl()));\n// Update existing home feed cubit registration to include GetArticlesPageUseCase\n```\n\n**2. Routes** (`frontend/lib/config/routes/routes.dart`):\n\nVerify the edit-article route is registered:\n```dart\n'/edit-article': (context) {\n  final article = ModalRoute.of(context)!.settings.arguments as ArticleEntity;\n  return BlocProvider(\n    create: (_) => sl<EditArticleCubit>(),\n    child: EditArticleScreen(article: article),\n  );\n},\n```\n\n**3. End-to-End Test Scenarios**:\n\n- **Full upload → edit flow**: Sign in → upload article with markdown content → view article detail → tap edit → modify title and content → save → verify changes reflected on detail screen.\n- **Pagination flow**: Sign in → view home feed (first page loads) → scroll down → tap 'Load more' → verify additional articles appear → verify News API articles are not duplicated.\n- **Owner-only edit visibility**: Sign in as User A → upload article → sign out → sign in as User B → view User A's article → verify no edit button.\n- **Security rules**: Attempt to update another user's article via direct Firestore call → verify permission denied.\n- **Markdown round-trip**: Upload article with bold, italic, heading, and list markdown → view detail → verify all formatting renders correctly.\n\n**4. Regression testing**:\n- Verify existing upload flow still works.\n- Verify existing delete flow still works.\n- Verify News API articles still display correctly.\n- Verify article detail screen works for both user articles and News API articles.\n\n**5. Performance check**:\n- Verify pagination reduces initial load time compared to fetching all articles.\n- Verify no memory leaks from scroll listeners or cubit subscriptions.",
+        "testStrategy": "1. Run all unit tests from previous tasks to ensure no regressions.\n2. E2E test: complete upload → view → edit → save → view cycle.\n3. E2E test: paginate through multiple pages of articles.\n4. E2E test: verify owner-only edit button across different user accounts.\n5. E2E test: verify markdown content renders correctly after upload and edit.\n6. Regression test: upload, delete, and view flows for existing functionality.\n7. Performance test: measure initial load time with pagination vs. without (if possible to compare).\n8. Cross-platform smoke test: run on both iOS and Android simulators/emulators.\n9. Verify DI container resolves all dependencies without runtime errors by running the app and exercising all features.",
+        "priority": "medium",
+        "dependencies": [
+          "52",
+          "55",
+          "57"
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Complete DI Registrations and Route Configuration",
+            "description": "Verify and add all required use cases, cubits, and routes in injection_container.dart and routes.dart as specified in task details.",
+            "dependencies": [],
+            "details": "Update frontend/lib/injection_container.dart with UpdateArticleUseCase, GetArticlesPageUseCase (lazySingleton), EditArticleCubit (factory), and home feed cubit to use GetArticlesPageUseCase. Add '/edit-article' route in frontend/lib/config/routes/routes.dart with BlocProvider for EditArticleCubit and EditArticleScreen. Test DI resolution by instantiating all cubits.",
+            "status": "pending",
+            "testStrategy": "Run flutter test on DI resolution; verify getIt<EditArticleCubit>() works without errors; navigate to edit route manually to confirm BlocProvider setup.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Execute Comprehensive E2E Integration Testing",
+            "description": "Perform all specified end-to-end test scenarios including full flows, pagination, security, markdown, and regression tests across all features.",
+            "dependencies": [
+              1
+            ],
+            "details": "Test full upload→edit flow, pagination with load more, owner-only edit visibility (User A vs User B), direct Firestore security denial, markdown round-trip rendering, plus regression on upload/delete/News API/detail screens and performance checks for load time/memory leaks.",
+            "status": "pending",
+            "testStrategy": "Use integration_test package; run all 9 scenarios on emulator/device; measure initial load time before/after pagination; use DevTools for memory leak detection during scroll/edit flows.",
+            "parentId": "undefined"
+          }
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Split into: 1) Complete DI registrations and route configuration, 2) Comprehensive E2E testing across all features (upload→edit→pagination→security)."
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-29T16:16:19.129Z",
-      "taskCount": 48,
-      "completedCount": 48,
+      "lastModified": "2026-03-30T00:08:05.020Z",
+      "taskCount": 58,
+      "completedCount": 52,
       "tags": [
         "master"
       ]

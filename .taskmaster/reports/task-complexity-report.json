@@ -1,8 +1,8 @@
 {
 	"meta": {
-		"generatedAt": "2026-03-29T03:16:32.155Z",
+		"generatedAt": "2026-03-29T23:40:14.795Z",
 		"tasksAnalyzed": 10,
-		"totalTasks": 48,
+		"totalTasks": 58,
 		"analysisCount": 10,
 		"thresholdScore": 5,
 		"projectName": "Taskmaster",
@@ -10,84 +10,84 @@
 	},
 	"complexityAnalysis": [
 		{
-			"taskId": 39,
-			"taskTitle": "Add flutter_markdown dependency and basic setup",
-			"complexityScore": 2,
-			"recommendedSubtasks": 0,
-			"expansionPrompt": "No expansion needed - straightforward dependency addition and basic widget test.",
-			"reasoning": "Simple pubspec.yaml update, flutter pub get, and basic MarkdownBody test widget. Minimal risk, standard Flutter package integration with clear test strategy. No architectural changes or complex logic."
-		},
-		{
-			"taskId": 40,
-			"taskTitle": "Implement markdown rendering in ArticleDetailsView",
+			"taskId": 49,
+			"taskTitle": "Update Firestore Security Rules for Ownership Checks on Create and Update",
 			"complexityScore": 4,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "1. Create custom MarkdownStyleSheet matching app typography. 2. Replace Text widget with MarkdownBody Column in ArticleDetailsView. 3. Add GitHub Flavored Markdown extension support.",
-			"reasoning": "Involves UI refactoring, custom styling with MarkdownStyleSheet, extension sets, and typography matching. Requires widget tests and golden tests. Moderate complexity due to styling precision and dependency on task 39."
-		},
-		{
-			"taskId": 41,
-			"taskTitle": "Add markdown helper text to UploadArticleView content field",
-			"complexityScore": 1,
 			"recommendedSubtasks": 0,
-			"expansionPrompt": "No expansion needed - simple Text.rich addition.",
-			"reasoning": "Purely cosmetic UI addition of helper text with basic styling. Single widget test. No logic, state management, or integration concerns."
+			"expansionPrompt": "",
+			"reasoning": "Straightforward rule updates with detailed pseudo-code provided. Requires careful testing with Firebase emulator but follows Firestore best practices for ownership checks. Low risk of breaking existing reads, high precision needed for security."
 		},
 		{
-			"taskId": 42,
-			"taskTitle": "Implement full-screen loading overlay for ArticleUploadLoading state",
+			"taskId": 50,
+			"taskTitle": "Add `toFirestoreUpdate()` to ArticleModel and `updateArticle` to Data Source",
+			"complexityScore": 3,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Simple model method addition and data source extension. Standard clean architecture pattern with clear field exclusions. Minimal dependencies, straightforward unit testing with fake_firestore."
+		},
+		{
+			"taskId": 51,
+			"taskTitle": "Add `updateArticle` to Repository and Create `UpdateArticleUseCase`",
+			"complexityScore": 4,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Standard repository/use case layer extension following existing DataState pattern. Includes input validation and error handling. Straightforward dependency injection integration."
+		},
+		{
+			"taskId": 52,
+			"taskTitle": "Create EditArticleCubit, Edit Screen, and Route",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break into: 1) Create EditArticleCubit and states, 2) Extract shared ArticleFormWidget from upload screen, 3) Build EditArticleScreen with form integration, 4) Add edit route and detail screen button with owner check.",
+			"reasoning": "Most complex task: new cubit, shared widget extraction (refactoring risk), new screen, route integration, owner-only UI logic, DI registration. High coordination across layers with potential UI duplication issues."
+		},
+		{
+			"taskId": 53,
+			"taskTitle": "Add Paginated Data Source Method `getUserArticlesPage`",
 			"complexityScore": 5,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "1. Create full-screen Stack overlay with Positioned.fill and IgnorePointer. 2. Implement BlocBuilder state detection for ArticleUploadLoading. 3. Add back button interception with WillPopScope. 4. Style loading UI matching app theme.",
-			"reasoning": "Involves Stack positioning, interaction blocking (IgnorePointer), navigation interception (WillPopScope), and BlocBuilder integration. Moderate complexity due to overlay layering and gesture handling. Comprehensive test requirements."
-		},
-		{
-			"taskId": 43,
-			"taskTitle": "Add SnackBar success feedback on publish completion",
-			"complexityScore": 3,
-			"recommendedSubtasks": 1,
-			"expansionPrompt": "1. Implement BlocListener for ArticleUploadSuccess state. 2. Create SnackBar with View action navigation. 3. Add error SnackBar clearing logic.",
-			"reasoning": "Standard BlocListener + ScaffoldMessenger pattern with navigation action. Simple but requires proper state handling and dependency on loading overlay (42). Integration test needed."
-		},
-		{
-			"taskId": 44,
-			"taskTitle": "Handle Navigator.pop result in home screen for success feedback",
-			"complexityScore": 3,
-			"recommendedSubtasks": 1,
-			"expansionPrompt": "1. Update FAB onPressed to await Navigator result. 2. Implement conditional SnackBar + cubit refresh on true result. 3. Test null/false result handling.",
-			"reasoning": "Involves Navigator result handling, conditional UI feedback, and cubit refresh coordination. Requires careful result propagation from upload flow. Dependencies chain adds coordination complexity."
-		},
-		{
-			"taskId": 45,
-			"taskTitle": "Implement thumbnail preview tap-to-change functionality",
-			"complexityScore": 4,
-			"recommendedSubtasks": 2,
-			"expansionPrompt": "1. Wrap thumbnail preview with InkWell/GestureDetector calling _pickImage. 2. Add 'Tap to change' hint text. 3. Implement performance optimizations (cacheWidth/Height). 4. Add accessibility semantics.",
-			"reasoning": "Gesture handling on existing preview, reuse of ImagePicker logic, performance considerations (cache sizing), and accessibility. Moderate complexity due to image handling and UI state coordination."
-		},
-		{
-			"taskId": 46,
-			"taskTitle": "Rename primary button to 'Publish Article'",
-			"complexityScore": 1,
 			"recommendedSubtasks": 0,
-			"expansionPrompt": "No expansion needed - simple text change.",
-			"reasoning": "Trivial string replacement in button widget. Single widget test verification. No functional changes."
+			"expansionPrompt": "",
+			"reasoning": "Standard Firestore pagination implementation with cursor-based queries. New model required but well-specified. Follows Firestore best practices for pagination with startAfterDocument."
 		},
 		{
-			"taskId": 47,
-			"taskTitle": "Add error handling and overlay cleanup",
+			"taskId": 54,
+			"taskTitle": "Add Paginated Repository Method and `GetArticlesPageUseCase`",
 			"complexityScore": 6,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "1. Implement BlocListener for ArticleUploadFailure state handling. 2. Add overlay dismissal and form state preservation logic. 3. Implement upload timeout (30s). 4. Test network failure scenarios.",
-			"reasoning": "Complex state management across loading/failure transitions, overlay lifecycle, timeout implementation, and error preservation. Multiple dependencies (42,43) increase integration risk. Comprehensive integration testing required."
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into: 1) Create domain PaginatedArticles entity and repository method with News API merge strategy, 2) Implement GetArticlesPageUseCase and DI registration.",
+			"reasoning": "Adds domain abstraction for pagination, complex News API + Firestore merge logic, opaque cursor handling to avoid Firestore dependency in domain. Requires careful state management design."
 		},
 		{
-			"taskId": 48,
-			"taskTitle": "Accessibility and styling polish",
-			"complexityScore": 5,
+			"taskId": 55,
+			"taskTitle": "Update Home Feed Cubit and UI for Cursor-Based Pagination",
+			"complexityScore": 7,
 			"recommendedSubtasks": 3,
-			"expansionPrompt": "1. Add Semantics labels to loading overlay, SnackBar, markdown components. 2. Align all TextStyles to app typography (Butler fonts). 3. Test with TalkBack/VoiceOver screen readers. 4. Apply Material Design spacing consistently.",
-			"reasoning": "Cross-cutting concern spanning multiple components (40,42,43,45). Requires accessibility testing tools, screen reader verification, and theme consistency. Multiple dependencies increase scope and testing burden."
+			"expansionPrompt": "Divide into: 1) Update RemoteArticlesState and cubit methods (getArticles, loadMore), 2) Implement UI pagination trigger (button or scroll listener), 3) Update DI and test News API caching.",
+			"reasoning": "Refactors existing cubit (risk of regressions), adds pagination state management, News API caching logic, UI integration with scroll detection or button. Complex state transitions to test."
+		},
+		{
+			"taskId": 56,
+			"taskTitle": "Integrate Markdown Editor Package and Create Shared MarkdownEditorWidget",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down: 1) Evaluate and select markdown editor package, 2) Create MarkdownEditorWidget with toolbar integration, 3) Implement custom toolbar fallback and character counter.",
+			"reasoning": "Package evaluation/selection, potential custom toolbar implementation, text selection manipulation logic, cross-platform rendering concerns. High uncertainty around package quality and integration."
+		},
+		{
+			"taskId": 57,
+			"taskTitle": "Replace Content TextFormField with MarkdownEditorWidget on Upload and Edit Screens",
+			"complexityScore": 4,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Simple widget replacement once MarkdownEditorWidget exists. Form validation integration straightforward. Low risk if using shared ArticleFormWidget from task 52."
+		},
+		{
+			"taskId": 58,
+			"taskTitle": "Register All New Dependencies and End-to-End Integration Testing",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Split into: 1) Complete DI registrations and route configuration, 2) Comprehensive E2E testing across all features (upload→edit→pagination→security).",
+			"reasoning": "Integration task with risk of missing DI registrations causing runtime errors. Extensive E2E test scenarios across multiple user flows and security boundaries. Critical for feature completion."
 		}
 	]
 }

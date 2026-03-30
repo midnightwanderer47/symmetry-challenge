@@ -262,4 +262,25 @@ class ArticleRepositoryImpl implements ArticleRepository {
       ));
     }
   }
+
+  @override
+  Future<DataState<void>> updateArticle(ArticleEntity article) async {
+    if (article.firestoreId == null) {
+      return DataFailed(DioError(
+        error: 'Article firestoreId is required',
+        requestOptions: RequestOptions(path: ''),
+      ));
+    }
+    try {
+      final articleModel = ArticleModel.fromEntity(article);
+      await _firestoreDataSource.updateArticle(
+          article.firestoreId!, articleModel);
+      return const DataSuccess(null);
+    } catch (e) {
+      return DataFailed(DioError(
+        error: e,
+        requestOptions: RequestOptions(path: ''),
+      ));
+    }
+  }
 }

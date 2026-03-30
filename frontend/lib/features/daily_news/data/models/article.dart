@@ -17,6 +17,7 @@ class ArticleModel extends ArticleEntity {
     String? thumbnailURL,
     bool isUserArticle = false,
     String? createdAt,
+    String? updatedAt,
     String? firestoreId,
     String? userId,
   }) : super(
@@ -31,6 +32,7 @@ class ArticleModel extends ArticleEntity {
           thumbnailURL: thumbnailURL,
           isUserArticle: isUserArticle,
           createdAt: createdAt,
+          updatedAt: updatedAt,
           firestoreId: firestoreId,
           userId: userId,
         );
@@ -62,6 +64,7 @@ class ArticleModel extends ArticleEntity {
       thumbnailURL: entity.thumbnailURL,
       isUserArticle: entity.isUserArticle,
       createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
       firestoreId: entity.firestoreId,
       userId: entity.userId,
     );
@@ -87,6 +90,7 @@ class ArticleModel extends ArticleEntity {
       thumbnailURL: rawThumbnail,
       isUserArticle: map['isUserArticle'] ?? false,
       createdAt: map['createdAt']?.toString(),
+      updatedAt: map['updatedAt']?.toString(),
       firestoreId: doc.id,
       userId: map['userId'] as String?,
     );
@@ -104,9 +108,30 @@ class ArticleModel extends ArticleEntity {
         thumbnailURL: thumbnailURL,
         isUserArticle: isUserArticle,
         createdAt: createdAt,
+        updatedAt: updatedAt,
         firestoreId: firestoreId,
         userId: userId,
       );
+
+  Map<String, dynamic> toFirestoreUpdate() {
+    final thumb = (thumbnailURL != null && thumbnailURL!.isNotEmpty)
+        ? thumbnailURL!
+        : null;
+    return {
+      'author': author ?? '',
+      'title': title ?? '',
+      'description': description ?? '',
+      'content': content ?? '',
+      'urlToImage': thumb ??
+          (urlToImage != null && urlToImage!.isNotEmpty
+              ? urlToImage!
+              : kDefaultImage),
+      'publishedAt': publishedAt ?? '',
+      'thumbnailURL': thumb ??
+          'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image',
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
 
   Map<String, dynamic> toFirestore() {
     return {

@@ -4,6 +4,7 @@ import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/daily_news/presentation/pages/main/main_screen.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
+import '../../features/daily_news/presentation/pages/edit_article/edit_article.dart';
 import '../../features/daily_news/presentation/pages/upload_article/upload_article.dart';
 import '../../features/daily_news/presentation/pages/search/search_screen.dart';
 import '../../features/daily_news/presentation/pages/user_articles/user_articles_screen.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String savedArticlesRoute = '/SavedArticles';
   static const String uploadArticleRoute = '/UploadArticle';
   static const String userArticlesRoute = '/UserArticles';
+  static const String editArticleRoute = '/EditArticle';
   static const String searchRoute = '/Search';
 
   static Route onGenerateRoutes(RouteSettings settings) {
@@ -30,6 +32,10 @@ class AppRoutes {
 
       case uploadArticleRoute:
         return _materialRoute(const UploadArticleView());
+
+      case editArticleRoute:
+        return _materialRoute(
+            EditArticleView(article: settings.arguments as ArticleEntity));
 
       case userArticlesRoute:
         return _materialRoute(const UserArticlesScreen());

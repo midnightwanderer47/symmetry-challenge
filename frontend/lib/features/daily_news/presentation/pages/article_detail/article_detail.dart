@@ -12,6 +12,7 @@ import '../../bloc/article/delete/delete_article_cubit.dart';
 import '../../bloc/article/delete/delete_article_state.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
+import '../../../../../config/routes/routes.dart';
 import '../../widgets/delete_article_dialog.dart';
 import '../../widgets/markdown_body_widget.dart';
 
@@ -62,6 +63,12 @@ class ArticleDetailsView extends HookWidget {
       ),
       actions: isOwner
           ? [
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _onEditTapped(context),
+                ),
+              ),
               Builder(
                 builder: (context) => IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -250,6 +257,17 @@ class ArticleDetailsView extends HookWidget {
                 color: Theme.of(context).colorScheme.onInverseSurface)),
       ),
     );
+  }
+
+  void _onEditTapped(BuildContext context) async {
+    final result = await Navigator.pushNamed(
+      context,
+      AppRoutes.editArticleRoute,
+      arguments: article,
+    );
+    if (result == true && context.mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   void _onDeleteTapped(BuildContext context) {

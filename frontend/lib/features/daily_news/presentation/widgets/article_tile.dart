@@ -9,6 +9,7 @@ class ArticleWidget extends StatelessWidget {
   final bool? isRemovable;
   final void Function(ArticleEntity article)? onRemove;
   final void Function(ArticleEntity article)? onArticlePressed;
+  final String? currentUserUid;
 
   const ArticleWidget({
     Key? key,
@@ -16,6 +17,7 @@ class ArticleWidget extends StatelessWidget {
     this.onArticlePressed,
     this.isRemovable = false,
     this.onRemove,
+    this.currentUserUid,
   }) : super(key: key);
 
   @override
@@ -104,7 +106,11 @@ class ArticleWidget extends StatelessWidget {
               ),
             ),
 
-            if (article!.isUserArticle)
+            if (article!.isUserArticle &&
+                currentUserUid != null &&
+                article!.userId != null &&
+                article!.userId!.isNotEmpty &&
+                article!.userId == currentUserUid)
               Container(
                 margin: const EdgeInsets.only(top: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

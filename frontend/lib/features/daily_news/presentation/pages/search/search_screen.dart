@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,11 +86,13 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildResults(BuildContext context, List<ArticleEntity> articles) {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
     return ListView.builder(
       itemCount: articles.length,
       itemBuilder: (context, index) {
         return ArticleWidget(
           article: articles[index],
+          currentUserUid: currentUid,
           onArticlePressed: (article) => Navigator.pushNamed(
               context, AppRoutes.articleDetailsRoute,
               arguments: article),

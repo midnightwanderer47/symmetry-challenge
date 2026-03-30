@@ -22,4 +22,6 @@ abstract class ArticleRepository {
   Future<DataState<List<ArticleEntity>>> getUserArticles();
 
   Future<DataState<void>> deleteArticle(String firestoreId);
+
+  Future<DataState<void>> updateArticle(ArticleEntity article);
 }

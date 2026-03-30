@@ -13,6 +13,7 @@ class ArticleEntity extends Equatable {
   final String? thumbnailURL;
   final bool isUserArticle;
   final String? createdAt;
+  final String? updatedAt;
   final String? firestoreId;
   final String? userId;
 
@@ -28,6 +29,7 @@ class ArticleEntity extends Equatable {
     this.thumbnailURL,
     this.isUserArticle = false,
     this.createdAt,
+    this.updatedAt,
     this.firestoreId,
     this.userId,
   });
@@ -50,6 +52,7 @@ class ArticleEntity extends Equatable {
     String? thumbnailURL,
     bool? isUserArticle,
     String? createdAt,
+    String? updatedAt,
     String? firestoreId,
     String? userId,
   }) =>
@@ -65,6 +68,7 @@ class ArticleEntity extends Equatable {
         thumbnailURL: thumbnailURL ?? this.thumbnailURL,
         isUserArticle: isUserArticle ?? this.isUserArticle,
         createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
         firestoreId: firestoreId ?? this.firestoreId,
         userId: userId ?? this.userId,
       );
@@ -83,6 +87,7 @@ class ArticleEntity extends Equatable {
       thumbnailURL,
       isUserArticle,
       createdAt,
+      updatedAt,
       firestoreId,
       userId,
     ];

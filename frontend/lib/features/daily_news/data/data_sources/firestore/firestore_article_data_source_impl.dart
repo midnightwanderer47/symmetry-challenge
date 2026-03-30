@@ -69,4 +69,23 @@ class FirestoreArticleDataSourceImpl implements FirestoreArticleDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<void> updateArticle(String firestoreId, ArticleModel patch) async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      throw FirebaseException(
+        plugin: 'firestore',
+        code: 'unauthenticated',
+        message: 'User not authenticated',
+      );
+    }
+    try {
+      await _firestore
+          .collection('articles')
+          .doc(firestoreId)
+          .update(patch.toFirestoreUpdate());
+    } on FirebaseException {
+      rethrow;
+    }
+  }
 }

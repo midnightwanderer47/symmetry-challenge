@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -101,10 +102,12 @@ class DailyNews extends StatelessWidget {
 
   Widget _buildArticlesPage(
       BuildContext context, List<ArticleEntity> articles) {
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
     List<Widget> articleWidgets = [];
     for (var article in articles) {
       articleWidgets.add(ArticleWidget(
         article: article,
+        currentUserUid: currentUid,
         onArticlePressed: (article) => _onArticlePressed(context, article),
       ));
     }

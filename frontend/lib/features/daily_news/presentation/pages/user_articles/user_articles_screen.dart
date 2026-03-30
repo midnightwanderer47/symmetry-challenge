@@ -83,6 +83,7 @@ class UserArticlesScreen extends StatelessWidget {
                           article.firestoreId != null;
                       return ArticleWidget(
                         article: article,
+                        currentUserUid: currentUid,
                         isRemovable: isOwner,
                         onRemove: isOwner
                             ? (ArticleEntity a) =>
@@ -93,9 +94,16 @@ class UserArticlesScreen extends StatelessWidget {
                                       .deleteArticle(a.firestoreId!),
                                 )
                             : null,
-                        onArticlePressed: (ArticleEntity a) =>
-                            Navigator.pushNamed(context, '/ArticleDetails',
-                                arguments: a),
+                        onArticlePressed: (ArticleEntity a) async {
+                          final result = await Navigator.pushNamed(
+                              context, '/ArticleDetails',
+                              arguments: a);
+                          if (result == true && context.mounted) {
+                            context
+                                .read<UserArticlesCubit>()
+                                .fetchUserArticles();
+                          }
+                        },
                       );
                     },
                   ),
