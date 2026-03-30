@@ -50,33 +50,33 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: tabs,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            if (index == 2) {
-              _userArticlesCubit.fetchUserArticles();
-            }
-            setState(() => _currentIndex = index);
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.newspaper),
-              label: 'Feed',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Create',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.article_outlined),
-              label: 'My Articles',
-            ),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: tabs,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          if (index == 2) {
+            _userArticlesCubit.fetchUserArticles();
+          }
+          setState(() => _currentIndex = index);
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.newspaper),
+            label: 'Feed',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Create',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.article_outlined),
+            label: 'My Articles',
+          ),
+        ],
+      ),
     );
   }
 }

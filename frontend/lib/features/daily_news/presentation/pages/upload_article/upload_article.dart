@@ -189,8 +189,7 @@ class _UploadArticleViewState extends State<UploadArticleView> {
                                 'upload_article_content_container_$_markdownResetKey'),
                             child: MarkdownEditorWidget(
                               key: const Key('upload_article_content'),
-                              onChanged: (val) =>
-                                  _contentController.text = val,
+                              onChanged: (val) => _contentController.text = val,
                               validator: (v) => v == null || v.trim().isEmpty
                                   ? 'Required'
                                   : null,
