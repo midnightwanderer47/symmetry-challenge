@@ -11,6 +11,7 @@ Coming into this project, I was comfortable with React Native and JavaScript/Typ
 **Already knew:** React Native, JavaScript/TypeScript, Clean Architecture concepts, REST APIs.
 
 **Learned during this project:**
+
 - **Flutter & Dart** — widget tree, Dart null-safety, async patterns, and project structure from scratch.
 - **Firebase Firestore & Storage** — schema design, security rules, real-time queries, image upload flows.
 - **Flutter BLoC / Cubits** — distinguishing when to use BLoC (event-driven) vs Cubit (simpler state), and how to compose them with use cases.
@@ -44,7 +45,7 @@ Adding `firestoreId` and `userId` to the local SQLite schema mid-development req
 **Professionally:** Shipping a feature end-to-end — schema → rules → backend → domain → data → presentation → tests — in one cycle was good practice for thinking holistically.
 
 **Future improvements:**
-- Add pagination to the home feed (currently loads all articles).
+
 - Replace anonymous auth with proper sign-in (Google/email) for article ownership.
 - Add offline-first support by syncing Firestore to the local Floor database.
 - Extract the `ArticleRepositoryImpl` merge logic into a dedicated `FeedAggregator` service — it's doing too much.
@@ -57,11 +58,14 @@ Adding `firestoreId` and `userId` to the local SQLite schema mid-development req
 > Screenshots and screen recordings are available upon request or can be found in the `/docs/assets/` folder if added.
 
 Key flows to demonstrate:
+
 - Home feed loading merged articles
 - Upload article with thumbnail
 - Article detail with markdown rendering
 - Search with debounced results
 - My Articles screen with delete confirmation
+- Edit article flow
+- Infinite-scroll load-more on home feed
 - Dark/light theme toggle via Settings sheet
 
 ---
@@ -70,32 +74,34 @@ Key flows to demonstrate:
 
 ### New Features Implemented
 
-| Feature | Description |
-|---|---|
-| **Merged Feed** | Home screen combines Firestore user articles + News API articles in one list, sorted by date |
-| **Debounced Search** | Search queries both sources with a 300ms debounce; no redundant API calls |
-| **Markdown Rendering** | Article content renders as formatted markdown via `flutter_markdown` |
-| **Theme Persistence** | Dark/light mode toggled from a Settings bottom sheet; preference saved via `shared_preferences` |
-| **Image Caching** | Thumbnails cached with `cached_network_image` to avoid redundant network requests |
-| **Delete Confirmation** | Custom `DeleteArticleDialog` prevents accidental deletions |
-| **Test Suite** | 9 test files covering unit, widget, cubit, and integration tests |
+| Feature                  | Description                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| **Merged Feed**          | Home screen combines Firestore user articles + News API articles in one list, sorted by date    |
+| **Debounced Search**     | Search queries both sources with a 300ms debounce; no redundant API calls                       |
+| **Markdown Rendering**   | Article content renders as formatted markdown via `flutter_markdown`                            |
+| **Theme Persistence**    | Dark/light mode toggled from a Settings bottom sheet; preference saved via `shared_preferences` |
+| **Image Caching**        | Thumbnails cached with `cached_network_image` to avoid redundant network requests               |
+| **Delete Confirmation**  | Custom `DeleteArticleDialog` prevents accidental deletions                                      |
+| **Firestore Pagination** | Cursor-based paging for user articles; home feed supports infinite-scroll load-more             |
+| **Article Editing**      | Authors can update their own articles post-publish via `EditArticleCubit` + Firestore `update`  |
+| **Markdown Editor**      | `MarkdownEditorWidget` replaces plain text field on both upload and edit screens                |
+| **Test Suite**           | 9 test files covering unit, widget, cubit, and integration tests                                |
 
 ### Prototypes Created
 
 **Firebase Security Rules** (`backend/firestore.rules`, `backend/storage.rules`):
+
 - Enforces required fields on write (title, content, author, thumbnailURL)
 - Restricts deletes to the article's owner (`userId` match)
 - Storage write limited to authenticated users, 10 MB max, image types only
 
 **DB Schema** (`backend/docs/DB_SCHEMA.md`):
+
 - Documented Firestore collection schema with field types, constraints, and index definitions
 
 ### How Could This Be Further Improved
 
-- **Pagination** — Firestore cursor-based pagination for large article collections
 - **Optimistic UI** — Show article immediately on upload before Firestore confirms
-- **Article editing** — Allow users to edit their own articles post-publish
-- **Rich text editor** — Replace plain text content field with a markdown editor widget
 - **Notifications** — Firebase Cloud Messaging for new article alerts
 
 ---
