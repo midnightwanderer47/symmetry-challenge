@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/user/user_articles_cubit.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 
@@ -47,12 +46,10 @@ class _MainScreenState extends State<MainScreen> {
         authStateStream: widget.authStateStream,
         onSuccess: _onUploadSuccess,
       ),
-      const UserArticlesScreen(),
+      UserArticlesScreen(cubit: _userArticlesCubit),
     ];
 
-    return BlocProvider.value(
-      value: _userArticlesCubit,
-      child: Scaffold(
+    return Scaffold(
         body: IndexedStack(
           index: _currentIndex,
           children: tabs,
@@ -80,7 +77,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }

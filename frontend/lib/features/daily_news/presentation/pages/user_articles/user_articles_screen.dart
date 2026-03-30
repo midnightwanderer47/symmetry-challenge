@@ -11,125 +11,152 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/wid
 import 'package:news_app_clean_architecture/features/daily_news/presentation/widgets/delete_article_dialog.dart';
 import 'package:news_app_clean_architecture/injection_container.dart';
 
-class UserArticlesScreen extends StatelessWidget {
-  const UserArticlesScreen({Key? key}) : super(key: key);
+class UserArticlesScreen extends StatefulWidget {
+  final UserArticlesCubit? cubit;
+
+  const UserArticlesScreen({Key? key, this.cubit}) : super(key: key);
+
+  @override
+  State<UserArticlesScreen> createState() => _UserArticlesScreenState();
+}
+
+class _UserArticlesScreenState extends State<UserArticlesScreen> {
+  UserArticlesCubit? _ownedCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.cubit == null) {
+      _ownedCubit = sl<UserArticlesCubit>()..fetchUserArticles();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ownedCubit?.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<DeleteArticleCubit>(),
-      child: BlocListener<DeleteArticleCubit, DeleteArticleState>(
-        listener: (context, state) {
-          if (state is DeleteArticleSuccess) {
-            context.read<UserArticlesCubit>().fetchUserArticles();
-          } else if (state is DeleteArticleFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('My Articles'),
-          ),
-          body: BlocBuilder<UserArticlesCubit, UserArticlesState>(
-            builder: (context, state) {
-              if (state is UserArticlesLoading) {
-                return const Center(child: CupertinoActivityIndicator());
-              }
-              if (state is UserArticlesError) {
-                final onSurface = Theme.of(context).colorScheme.onSurface;
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 48, color: onSurface),
-                        const SizedBox(height: 16),
-                        Text(
-                          state.message,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: onSurface),
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: () => context
-                              .read<UserArticlesCubit>()
-                              .fetchUserArticles(),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Try again'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              if (state is UserArticlesLoaded) {
-                if (state.articles.isEmpty) {
+    final effectiveCubit = widget.cubit ?? _ownedCubit!;
+    return BlocProvider.value(
+      value: effectiveCubit,
+      child: BlocProvider(
+        create: (_) => sl<DeleteArticleCubit>(),
+        child: BlocListener<DeleteArticleCubit, DeleteArticleState>(
+          listener: (context, state) {
+            if (state is DeleteArticleSuccess) {
+              context.read<UserArticlesCubit>().fetchUserArticles();
+            } else if (state is DeleteArticleFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('My Articles'),
+            ),
+            body: BlocBuilder<UserArticlesCubit, UserArticlesState>(
+              builder: (context, state) {
+                if (state is UserArticlesLoading) {
+                  return const Center(child: CupertinoActivityIndicator());
+                }
+                if (state is UserArticlesError) {
                   final onSurface = Theme.of(context).colorScheme.onSurface;
-                  final mutedColor =
-                      onSurface.withValues(alpha: onSurface.a * 0.4);
                   return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.article_outlined,
-                            size: 64, color: mutedColor),
-                        const SizedBox(height: 16),
-                        Text('No articles yet',
-                            style: TextStyle(color: mutedColor)),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline, size: 48, color: onSurface),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: onSurface),
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton.icon(
+                            onPressed: () => context
+                                .read<UserArticlesCubit>()
+                                .fetchUserArticles(),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Try again'),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
-                String? currentUid;
-                try {
-                  currentUid = FirebaseAuth.instance.currentUser?.uid;
-                } catch (_) {
-                  currentUid = null;
+                if (state is UserArticlesLoaded) {
+                  if (state.articles.isEmpty) {
+                    final onSurface = Theme.of(context).colorScheme.onSurface;
+                    final mutedColor =
+                        onSurface.withValues(alpha: onSurface.a * 0.4);
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.article_outlined,
+                              size: 64, color: mutedColor),
+                          const SizedBox(height: 16),
+                          Text('No articles yet',
+                              style: TextStyle(color: mutedColor)),
+                        ],
+                      ),
+                    );
+                  }
+                  String? currentUid;
+                  try {
+                    currentUid = FirebaseAuth.instance.currentUser?.uid;
+                  } catch (_) {
+                    currentUid = null;
+                  }
+                  return RefreshIndicator(
+                    onRefresh:
+                        context.read<UserArticlesCubit>().fetchUserArticles,
+                    child: ListView.builder(
+                      itemCount: state.articles.length,
+                      itemBuilder: (_, i) {
+                        final article = state.articles[i];
+                        final isOwner = currentUid != null &&
+                            article.userId == currentUid &&
+                            article.firestoreId != null;
+                        return ArticleWidget(
+                          article: article,
+                          currentUserUid: currentUid,
+                          isRemovable: isOwner,
+                          showYouBadge: false,
+                          onRemove: isOwner
+                              ? (ArticleEntity a) =>
+                                  showDeleteArticleConfirmation(
+                                    context,
+                                    () => context
+                                        .read<DeleteArticleCubit>()
+                                        .deleteArticle(a.firestoreId!),
+                                  )
+                              : null,
+                          onArticlePressed: (ArticleEntity a) async {
+                            final result = await Navigator.pushNamed(
+                                context, '/ArticleDetails',
+                                arguments: a);
+                            if (result == true && context.mounted) {
+                              context
+                                  .read<UserArticlesCubit>()
+                                  .fetchUserArticles();
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  );
                 }
-                return RefreshIndicator(
-                  onRefresh:
-                      context.read<UserArticlesCubit>().fetchUserArticles,
-                  child: ListView.builder(
-                    itemCount: state.articles.length,
-                    itemBuilder: (_, i) {
-                      final article = state.articles[i];
-                      final isOwner = currentUid != null &&
-                          article.userId == currentUid &&
-                          article.firestoreId != null;
-                      return ArticleWidget(
-                        article: article,
-                        currentUserUid: currentUid,
-                        isRemovable: isOwner,
-                        showYouBadge: false,
-                        onRemove: isOwner
-                            ? (ArticleEntity a) =>
-                                showDeleteArticleConfirmation(
-                                  context,
-                                  () => context
-                                      .read<DeleteArticleCubit>()
-                                      .deleteArticle(a.firestoreId!),
-                                )
-                            : null,
-                        onArticlePressed: (ArticleEntity a) async {
-                          final result = await Navigator.pushNamed(
-                              context, '/ArticleDetails',
-                              arguments: a);
-                          if (result == true && context.mounted) {
-                            context
-                                .read<UserArticlesCubit>()
-                                .fetchUserArticles();
-                          }
-                        },
-                      );
-                    },
-                  ),
-                );
-              }
-              return const SizedBox();
-            },
+                return const SizedBox();
+              },
+            ),
           ),
         ),
       ),
