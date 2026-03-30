@@ -72,20 +72,20 @@ Key flows to demonstrate:
 
 ### New Features Implemented
 
-| Feature                  | Description                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| **Merged Feed**          | Home screen combines Firestore user articles + News API articles in one list, sorted by date    |
-| **Debounced Search**     | Search queries both sources with a 300ms debounce; no redundant API calls                       |
-| **Markdown Rendering**   | Article content renders as formatted markdown via `flutter_markdown`                            |
-| **Theme Persistence**    | Dark/light mode toggled from a Settings bottom sheet; preference saved via `shared_preferences` |
-| **Image Caching**        | Thumbnails cached with `cached_network_image` to avoid redundant network requests               |
-| **Delete Confirmation**  | Custom `DeleteArticleDialog` prevents accidental deletions                                      |
-| **Firestore Pagination** | Cursor-based paging for user articles; home feed supports infinite-scroll load-more             |
-| **Article Editing**      | Authors can update their own articles post-publish via `EditArticleCubit` + Firestore `update`  |
-| **Markdown Editor**      | `MarkdownEditorWidget` replaces plain text field on both upload and edit screens                |
-| **Test Suite**           | 9 test files covering unit, widget, cubit, and integration tests                                |
-| **GitHub Actions CI**    | PRs and pushes to `main` run `just ci` (tests, analyze, format check) via `.github/workflows/flutter-ci.yml` |
-| **Sign-in (Google/email)** | Replaces anonymous auth so article ownership ties to real accounts |
+| Feature                    | Description                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Merged Feed**            | Home screen combines Firestore user articles + News API articles in one list, sorted by date                 |
+| **Debounced Search**       | Search queries both sources with a 300ms debounce; no redundant API calls                                    |
+| **Markdown Rendering**     | Article content renders as formatted markdown via `flutter_markdown`                                         |
+| **Theme Persistence**      | Dark/light mode toggled from a Settings bottom sheet; preference saved via `shared_preferences`              |
+| **Image Caching**          | Thumbnails cached with `cached_network_image` to avoid redundant network requests                            |
+| **Delete Confirmation**    | Custom `DeleteArticleDialog` prevents accidental deletions                                                   |
+| **Firestore Pagination**   | Cursor-based paging for user articles; home feed supports infinite-scroll load-more                          |
+| **Article Editing**        | Authors can update their own articles post-publish via `EditArticleCubit` + Firestore `update`               |
+| **Markdown Editor**        | `MarkdownEditorWidget` replaces plain text field on both upload and edit screens                             |
+| **Test Suite**             | 9 test files covering unit, widget, cubit, and integration tests                                             |
+| **GitHub Actions CI**      | PRs and pushes to `main` run `just ci` (tests, analyze, format check) via `.github/workflows/flutter-ci.yml` |
+| **Sign-in (Google/email)** | Replaces anonymous auth so article ownership ties to real accounts                                           |
 
 ### Prototypes Created
 
@@ -175,5 +175,24 @@ This section explains how to run the Flutter frontend on **iOS Simulator** and *
 ### Troubleshooting
 
 - **`flutter doctor`** — fix any red items (licenses: `flutter doctor --android-licenses`).
-- **No devices** — boot the simulator or emulator *before* `flutter run`; only one command is needed if exactly one device is online.
+- **No devices** — boot the simulator or emulator _before_ `flutter run`; only one command is needed if exactly one device is online.
 - **Firebase errors at startup** — ensure the three Firebase files above exist and match your Firebase project (`flutterfire configure` from `frontend/`).
+
+---
+
+## 9. AI-Assisted Development
+
+AI tooling was used extensively throughout this project as a learning accelerator and delivery aid on a stack I was picking up for the first time (Flutter/Dart).
+
+**Tools and how they were used:**
+
+- **Cursor** — primary IDE for day-to-day coding: exploring the existing repo structure, implementing features and tests, refactoring to match Clean Architecture patterns, and applying small fixes with inline AI assistance.
+- **Claude Code** — agent-mode sessions for larger, multi-step or cross-file work (e.g. wiring a new feature end-to-end through data → domain → presentation, bulk edits, and test scaffolding). Every output was reviewed against project conventions before committing.
+- **Task Master CLI** — structured the entire development workflow into scoped tasks (`list`, `next`, `show`, status tracking).
+
+**Why AI made sense here:**
+
+- Speed on an unfamiliar stack — Flutter idioms, Dart syntax, and package APIs were new; AI reduced the feedback loop from "read docs → try → fail → re-read" to "generate → understand → adjust."
+- Context continuity — Task Master and Claude Code together preserved context across sessions, preventing scope drift on a feature-rich deliverable.
+
+All generated code was reviewed, tested (`flutter test`, `flutter analyze`), and manually verified on iOS Simulator and Android Emulator before inclusion.
