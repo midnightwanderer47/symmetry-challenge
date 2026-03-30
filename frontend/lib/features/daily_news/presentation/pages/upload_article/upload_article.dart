@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,15 @@ class _UploadArticleViewState extends State<UploadArticleView> {
   void initState() {
     super.initState();
     _imageFile = widget.initialThumbnail;
+    _prefillAuthorFromCurrentUser();
+  }
+
+  void _prefillAuthorFromCurrentUser() {
+    if (Firebase.apps.isEmpty) return;
+    final name = FirebaseAuth.instance.currentUser?.displayName?.trim() ?? '';
+    if (name.isNotEmpty) {
+      _authorController.text = name;
+    }
   }
 
   @override
