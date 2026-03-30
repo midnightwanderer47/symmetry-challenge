@@ -53,7 +53,7 @@ Adding `firestoreId` and `userId` to the local SQLite schema mid-development req
 
 ## 5. Proof of the Project
 
-> Screenshots and screen recordings are available upon request or can be found in the `/docs/assets/` folder if added.
+> A [screen recording](https://drive.google.com/file/d/1h8nXDJVWfGTPRjJaxyneXyUF0Sysy-EY/view?usp=drive_link) is available on Google Drive.
 
 Key flows to demonstrate:
 
@@ -63,7 +63,6 @@ Key flows to demonstrate:
 - Search with debounced results
 - My Articles screen with delete confirmation
 - Edit article flow
-- Infinite-scroll load-more on home feed
 - Dark/light theme toggle via Settings sheet
 
 ---
