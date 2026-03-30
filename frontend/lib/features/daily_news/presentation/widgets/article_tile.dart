@@ -164,9 +164,8 @@ class ArticleWidget extends StatelessWidget {
                             height: 1.2,
                             letterSpacing: 0.2,
                             fontWeight: FontWeight.w500,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
