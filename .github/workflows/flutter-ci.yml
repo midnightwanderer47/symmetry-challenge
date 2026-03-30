@@ -24,5 +24,15 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Generate Firebase config
+        working-directory: frontend
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          dart pub global activate flutterfire_cli
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          flutterfire configure --project=symmetry-challenge --platforms=android,ios --yes
+
       - run: just get
       - run: just ci
